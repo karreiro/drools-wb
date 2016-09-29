@@ -26,6 +26,7 @@ import org.drools.workbench.screens.guided.dtable.client.resources.GuidedDecisio
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.type.GuidedDTableResourceType;
 import org.drools.workbench.screens.guided.dtable.client.wizard.NewGuidedDecisionTableWizardHelper;
+import org.drools.workbench.screens.guided.dtable.client.wizard.table.NewGuidedDecisionTableWizard;
 import org.drools.workbench.screens.guided.dtable.service.GuidedDecisionTableEditorService;
 import org.guvnor.common.services.project.model.Package;
 import org.jboss.errai.common.client.api.Caller;
