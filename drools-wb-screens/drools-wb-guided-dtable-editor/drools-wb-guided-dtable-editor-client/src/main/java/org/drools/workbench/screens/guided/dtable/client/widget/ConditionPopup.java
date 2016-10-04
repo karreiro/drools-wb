@@ -66,6 +66,7 @@ import org.gwtbootstrap3.client.ui.TextBox;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.kie.workbench.common.widgets.client.resources.HumanReadable;
 import org.uberfire.client.callbacks.Callback;
+import org.uberfire.ext.widgets.common.client.common.FormStyleLayout;
 import org.uberfire.ext.widgets.common.client.common.ImageButton;
 import org.uberfire.ext.widgets.common.client.common.InfoPopup;
 import org.uberfire.ext.widgets.common.client.common.SmallLabel;
@@ -1109,4 +1110,7 @@ public class ConditionPopup extends FormStylePopup {
         footer.enableCancelButton( enabled );
     }
 
+    public ModalFooterOKCancelButtons getFooter() {
+        return footer;
+    }
 }

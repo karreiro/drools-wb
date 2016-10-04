@@ -63,6 +63,7 @@ public abstract class AbstractBRLColumnViewImpl<T, C extends BaseColumn> extends
         RuleModelEditor,
         TemplateVariablesChangedEvent.Handler {
 
+    private final Widget widget;
     protected int MIN_WIDTH = 500;
 
     @UiField(provided = true)
@@ -136,7 +137,8 @@ public abstract class AbstractBRLColumnViewImpl<T, C extends BaseColumn> extends
                                               isReadOnly );
 
         setWidth( getPopupWidth() + "px" );
-        setBody( uiBinder.createAndBindUi( this ) );
+        widget = uiBinder.createAndBindUi( this );
+        setBody( widget );
         add( footer );
 
         presenter.getPackageParentRuleNames( new ParameterizedCommand<Collection<String>>() {
@@ -152,6 +154,10 @@ public abstract class AbstractBRLColumnViewImpl<T, C extends BaseColumn> extends
         this.txtColumnHeader.setEnabled( !isReadOnly );
         this.chkHideColumn.setValue( editingCol.isHideColumn() );
         this.footer.enableOkButton( !isReadOnly );
+    }
+
+    public Widget getWidget() {
+        return uiBinder.createAndBindUi( this );
     }
 
     @Override

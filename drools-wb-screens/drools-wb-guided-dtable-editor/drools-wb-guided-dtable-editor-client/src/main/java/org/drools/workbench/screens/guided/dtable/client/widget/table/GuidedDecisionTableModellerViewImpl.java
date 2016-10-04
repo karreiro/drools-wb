@@ -29,6 +29,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -49,17 +50,22 @@ import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.GuidedDecisionTableResources;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.resources.images.GuidedDecisionTableImageResources508;
+import org.drools.workbench.screens.guided.dtable.client.widget.BRLConditionColumnViewImpl;
+import org.drools.workbench.screens.guided.dtable.client.widget.ConditionPopup;
 import org.drools.workbench.screens.guided.dtable.client.widget.DefaultValueWidgetFactory;
+import org.drools.workbench.screens.guided.dtable.client.widget.LimitedEntryBRLConditionColumnViewImpl;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.rule.client.editor.RuleAttributeWidget;
 import org.gwtbootstrap3.client.ui.Button;
 import org.gwtbootstrap3.client.ui.CheckBox;
+import org.gwtbootstrap3.client.ui.ModalBody;
 import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.kie.workbench.common.widgets.client.ruleselector.RuleSelector;
 import org.uberfire.ext.widgets.common.client.common.DecoratedDisclosurePanel;
 import org.uberfire.ext.widgets.common.client.common.ImageButton;
 import org.uberfire.ext.widgets.common.client.common.PrettyFormLayout;
 import org.uberfire.ext.widgets.common.client.common.SmallLabel;
-import org.uberfire.ext.widgets.common.client.common.popups.FormStylePopup;
+import org.uberfire.ext.widgets.common.client.common.popups.BaseModal;
 import org.uberfire.ext.widgets.common.client.common.popups.footers.ModalFooterOKCancelButtons;
 import org.uberfire.ext.wires.core.grids.client.model.Bounds;
 import org.uberfire.ext.wires.core.grids.client.model.GridColumn;
@@ -75,6 +81,8 @@ import org.uberfire.mvp.ParameterizedCommand;
 public class GuidedDecisionTableModellerViewImpl extends Composite implements GuidedDecisionTableModellerView {
 
     private static final double VP_SCALE = 1.0;
+
+    private NewGuidedDecisionTableColumnWizard newGuidedDecisionTableColumnWizard;
 
     interface GuidedDecisionTableModellerViewImplUiBinder extends UiBinder<Widget, GuidedDecisionTableModellerViewImpl> {
 
@@ -199,6 +207,7 @@ public class GuidedDecisionTableModellerViewImpl extends Composite implements Gu
     @Override
     public void init( final GuidedDecisionTableModellerView.Presenter presenter ) {
         this.presenter = presenter;
+        this.newGuidedDecisionTableColumnWizard = presenter.getNewGuidedDecisionTableColumnWizard();
     }
 
     @PostConstruct
@@ -357,15 +366,20 @@ public class GuidedDecisionTableModellerViewImpl extends Composite implements Gu
     private Widget newColumn() {
         addButton.addClickHandler( new ClickHandler() {
             public void onClick( ClickEvent w ) {
-                doNewColumn();
+                FlowPanel popup = doNewColumn();
+
+                newGuidedDecisionTableColumnWizard.addPopUp( popup );
+                newGuidedDecisionTableColumnWizard.start();
+
             }
         } );
 
         return addButton;
     }
 
-    private void doNewColumn() {
-        final FormStylePopup pop = new FormStylePopup( GuidedDecisionTableConstants.INSTANCE.AddNewColumn() );
+    private FlowPanel doNewColumn() {
+//        final FormStylePopup pop = new FormStylePopup( GuidedDecisionTableConstants.INSTANCE.AddNewColumn() );
+        final FlowPanel pop = new FlowPanel();
 
         //List of basic column types
         final ListBox choice = new ListBox();
@@ -453,13 +467,38 @@ public class GuidedDecisionTableModellerViewImpl extends Composite implements Gu
             public void execute() {
                 String s = choice.getValue( choice.getSelectedIndex() );
                 if ( s.equals( NewColumnTypes.METADATA_ATTRIBUTE.name() ) ) {
-                    presenter.getActiveDecisionTable().newAttributeOrMetaDataColumn();
+                    final GuidedDecisionTableAttributeSelectorPopup popup = ( (GuidedDecisionTablePresenter) presenter.getActiveDecisionTable() ).getGuidedDecisionTableAttributeSelectorPopup();
+
+                    newGuidedDecisionTableColumnWizard.addPopUp( popup );
 
                 } else if ( s.equals( NewColumnTypes.CONDITION_SIMPLE.name() ) ) {
-                    presenter.getActiveDecisionTable().newConditionColumn();
+                    final ConditionPopup popup = ( (GuidedDecisionTablePresenter) presenter.getActiveDecisionTable() ).getConditionPopup();
+
+                    newGuidedDecisionTableColumnWizard.addPopUp( popup );
 
                 } else if ( s.equals( NewColumnTypes.CONDITION_BRL_FRAGMENT.name() ) ) {
-                    presenter.getActiveDecisionTable().newConditionBRLFragment();
+
+                    final GuidedDecisionTablePresenter activeDecisionTable = (GuidedDecisionTablePresenter) presenter.getActiveDecisionTable();
+                    final BaseModal popup = activeDecisionTable.getConditionBRLFragment();
+                    final ModalBody body = new ModalBody();
+
+                        if ( !activeDecisionTable.isReadOnly() ) {
+                            switch ( activeDecisionTable.getModel().getTableFormat() ) {
+                                case EXTENDED_ENTRY:
+                                    BRLConditionColumnViewImpl brlConditionColumnView = ( (GuidedDecisionTableViewImpl) activeDecisionTable.getView() ).getBRLConditionColumnView();
+
+                                    body.add( brlConditionColumnView.getWidget() );
+                                case LIMITED_ENTRY:
+                                    LimitedEntryBRLConditionColumnViewImpl limitedEntryBRLConditionColumnView = ( (GuidedDecisionTableViewImpl) activeDecisionTable.getView() ).getLimitedEntryBRLConditionColumnView();
+
+                                    body.add( limitedEntryBRLConditionColumnView.getWidget() );
+                            }
+                        }
+
+                    body.add( ((BRLConditionColumnViewImpl)popup).getWidget() );
+
+                    newGuidedDecisionTableColumnWizard.addPopUp( body );
+
 
                 } else if ( s.equals( NewColumnTypes.ACTION_INSERT_FACT_FIELD.name() ) ) {
                     presenter.getActiveDecisionTable().newActionInsertColumn();
@@ -483,13 +522,13 @@ public class GuidedDecisionTableModellerViewImpl extends Composite implements Gu
                     presenter.getActiveDecisionTable().newActionBRLFragment();
 
                 }
-                pop.hide();
+//                pop.hide();
             }
 
         }, new Command() {
             @Override
             public void execute() {
-                pop.hide();
+//                pop.hide();
             }
         } );
 
@@ -507,12 +546,11 @@ public class GuidedDecisionTableModellerViewImpl extends Composite implements Gu
         } );
 
         pop.setTitle( GuidedDecisionTableConstants.INSTANCE.AddNewColumn() );
-        pop.addAttribute( GuidedDecisionTableConstants.INSTANCE.TypeOfColumn(),
-                          choice );
-        pop.addAttribute( "",
-                          chkIncludeAdvancedOptions );
+        pop.add( choice );
+        pop.add( chkIncludeAdvancedOptions );
         pop.add( footer );
-        pop.show();
+
+        return pop;
     }
 
     @Override

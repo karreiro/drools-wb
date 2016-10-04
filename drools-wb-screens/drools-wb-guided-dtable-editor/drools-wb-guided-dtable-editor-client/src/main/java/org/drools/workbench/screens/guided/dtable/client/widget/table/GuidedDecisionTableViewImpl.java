@@ -208,8 +208,12 @@ public class GuidedDecisionTableViewImpl extends BaseGridWidget implements Guide
 
     @Override
     public void newAttributeOrMetaDataColumn() {
-        new GuidedDecisionTableAttributeSelectorPopup( presenter.getExistingAttributeNames().toArray( new String[ 0 ] ),
-                                                       presenter ).show();
+        getGuidedDecisionTableAttributeSelectorPopup().show();
+    }
+
+    public GuidedDecisionTableAttributeSelectorPopup getGuidedDecisionTableAttributeSelectorPopup() {
+        return new GuidedDecisionTableAttributeSelectorPopup( presenter.getExistingAttributeNames().toArray( new String[ 0 ] ),
+                                                              presenter );
     }
 
     @Override
@@ -225,46 +229,55 @@ public class GuidedDecisionTableViewImpl extends BaseGridWidget implements Guide
     }
 
     private void doNewConditionColumn( final ConditionCol52 column ) {
-        final ConditionPopup popup = new ConditionPopup( model,
-                                                         oracle,
-                                                         presenter,
-                                                         new ConditionColumnCommand() {
+        getConditionPopup( column ).show();
+    }
+
+    public ConditionPopup getConditionPopup( final ConditionCol52 column ) {
+        return new ConditionPopup( model,
+                                   oracle,
+                                   presenter,
+                                   new ConditionColumnCommand() {
                                                              public void execute( final Pattern52 pattern,
                                                                                   final ConditionCol52 column ) {
                                                                  presenter.appendColumn( pattern,
                                                                                          column );
                                                              }
                                                          },
-                                                         column,
-                                                         true,
-                                                         !access.isEditable() );
-        popup.show();
+                                   column,
+                                   true,
+                                   !access.isEditable() );
     }
 
     @Override
     public void newExtendedEntryConditionBRLFragment() {
-        final BRLConditionColumn column = new BRLConditionColumn();
-        final BRLConditionColumnViewImpl popup = new BRLConditionColumnViewImpl( model,
-                                                                                 oracle,
-                                                                                 presenter,
-                                                                                 eventBus,
-                                                                                 column,
-                                                                                 true,
-                                                                                 !access.isEditable() );
+        final BRLConditionColumnViewImpl popup = getBRLConditionColumnView();
         popup.show();
+    }
+
+    public BRLConditionColumnViewImpl getBRLConditionColumnView() {
+        return new BRLConditionColumnViewImpl( model,
+                                               oracle,
+                                               presenter,
+                                               eventBus,
+                                               new BRLConditionColumn(),
+                                               true,
+                                               !access.isEditable() );
     }
 
     @Override
     public void newLimitedEntryConditionBRLFragment() {
-        final LimitedEntryBRLConditionColumn column = new LimitedEntryBRLConditionColumn();
-        final LimitedEntryBRLConditionColumnViewImpl popup = new LimitedEntryBRLConditionColumnViewImpl( model,
-                                                                                                         oracle,
-                                                                                                         presenter,
-                                                                                                         eventBus,
-                                                                                                         column,
-                                                                                                         true,
-                                                                                                         !access.isEditable() );
+        final LimitedEntryBRLConditionColumnViewImpl popup = getLimitedEntryBRLConditionColumnView();
         popup.show();
+    }
+
+    public LimitedEntryBRLConditionColumnViewImpl getLimitedEntryBRLConditionColumnView() {
+        return new LimitedEntryBRLConditionColumnViewImpl( model,
+                                                           oracle,
+                                                           presenter,
+                                                           eventBus,
+                                                           new LimitedEntryBRLConditionColumn(),
+                                                           true,
+                                                           !access.isEditable() );
     }
 
     @Override

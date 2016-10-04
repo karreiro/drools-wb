@@ -67,6 +67,10 @@ public abstract class AbstractLimitedEntryBRLColumnViewImpl<T, C extends BaseCol
     @UiField
     ScrollPanel brlEditorContainer;
 
+    public Widget getWidget() {
+        return uiBinder.createAndBindUi( this );
+    }
+
     @SuppressWarnings("rawtypes")
     interface AbstractLimitedEntryBRLColumnEditorBinder
             extends
@@ -126,9 +130,9 @@ public abstract class AbstractLimitedEntryBRLColumnViewImpl<T, C extends BaseCol
                                               eventBus,
                                               isReadOnly );
 
-        setWidth( getPopupWidth() + "px" );
-        setBody( uiBinder.createAndBindUi( this ) );
-        add( footer );
+//        setBody( getWidget() );
+//        setWidth( getPopupWidth() + "px" );
+//        add( footer );
 
         presenter.getPackageParentRuleNames( new ParameterizedCommand<Collection<String>>() {
             @Override
@@ -137,8 +141,8 @@ public abstract class AbstractLimitedEntryBRLColumnViewImpl<T, C extends BaseCol
             }
         } );
 
-        this.brlEditorContainer.setHeight( "100%" );
-        this.brlEditorContainer.setWidth( "100%" );
+//        this.brlEditorContainer.setHeight( "100%" );
+//        this.brlEditorContainer.setWidth( "100%" );
         this.txtColumnHeader.setText( editingCol.getHeader() );
         this.chkHideColumn.setValue( editingCol.isHideColumn() );
         this.footer.enableOkButton( !isReadOnly );

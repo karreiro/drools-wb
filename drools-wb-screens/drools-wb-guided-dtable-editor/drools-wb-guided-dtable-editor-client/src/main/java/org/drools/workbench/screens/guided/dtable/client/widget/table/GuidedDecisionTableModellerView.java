@@ -38,6 +38,7 @@ import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi
 import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi.RefreshAttributesPanelEvent;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi.RefreshConditionsPanelEvent;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi.RefreshMetaDataPanelEvent;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.model.GuidedDecisionTableEditorContent;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.client.mvp.UberView;
@@ -136,6 +137,7 @@ public interface GuidedDecisionTableModellerView extends UberView<GuidedDecision
 
         void updateLinks();
 
+        NewGuidedDecisionTableColumnWizard getNewGuidedDecisionTableColumnWizard();
     }
 
 }

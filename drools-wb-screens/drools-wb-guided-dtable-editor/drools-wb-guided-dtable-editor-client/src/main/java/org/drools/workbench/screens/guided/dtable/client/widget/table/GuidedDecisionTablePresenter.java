@@ -62,6 +62,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.DescriptionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryBRLActionColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryBRLConditionColumn;
+import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.MetadataCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.models.guided.dtable.shared.model.RowNumberCol52;
@@ -69,6 +70,10 @@ import org.drools.workbench.screens.guided.dtable.client.GuidedDecisionTable;
 import org.drools.workbench.screens.guided.dtable.client.editor.clipboard.Clipboard;
 import org.drools.workbench.screens.guided.dtable.client.editor.clipboard.impl.DefaultClipboard;
 import org.drools.workbench.screens.guided.dtable.client.type.GuidedDTableResourceType;
+import org.drools.workbench.screens.guided.dtable.client.widget.AbstractBRLColumnViewImpl;
+import org.drools.workbench.screens.guided.dtable.client.widget.AbstractLimitedEntryBRLColumnViewImpl;
+import org.drools.workbench.screens.guided.dtable.client.widget.ConditionPopup;
+import org.drools.workbench.screens.guided.dtable.client.widget.LimitedEntryBRLConditionColumnViewImpl;
 import org.drools.workbench.screens.guided.dtable.client.widget.analysis.DecisionTableAnalyzerProvider;
 import org.drools.workbench.screens.guided.dtable.client.widget.analysis.controller.AnalyzerController;
 import org.drools.workbench.screens.guided.dtable.client.widget.auditlog.AuditLog;
@@ -97,6 +102,7 @@ import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.
 import org.drools.workbench.screens.guided.dtable.model.GuidedDecisionTableEditorContent;
 import org.drools.workbench.screens.guided.rule.client.util.GWTDateConverter;
 import org.guvnor.common.services.shared.metadata.model.Overview;
+import org.gwtbootstrap3.client.ui.Modal;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
@@ -111,6 +117,7 @@ import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.LockTarget;
 import org.uberfire.client.mvp.UpdatedLockStatusEvent;
+import org.uberfire.ext.widgets.common.client.common.popups.BaseModal;
 import org.uberfire.ext.wires.core.grids.client.model.GridColumn;
 import org.uberfire.ext.wires.core.grids.client.model.GridData;
 import org.uberfire.ext.wires.core.grids.client.model.GridRow;
@@ -739,6 +746,14 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
         view.newAttributeOrMetaDataColumn();
     }
 
+    public GuidedDecisionTableAttributeSelectorPopup getGuidedDecisionTableAttributeSelectorPopup() {
+        if ( isReadOnly() ) {
+            return null;
+        }
+
+        return ( (GuidedDecisionTableViewImpl) view ).getGuidedDecisionTableAttributeSelectorPopup( );
+    }
+
     @Override
     public Set<String> getExistingAttributeNames() {
         final Set<String> existingAttributeNames = new HashSet<String>();
@@ -773,6 +788,19 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
         }
     }
 
+    public ConditionPopup getConditionPopup() {
+        if ( isReadOnly() ) {
+            return null;
+        }
+        switch ( model.getTableFormat() ) {
+            case EXTENDED_ENTRY:
+                return ( (GuidedDecisionTableViewImpl) view ).getConditionPopup( new ConditionCol52() );
+            case LIMITED_ENTRY:
+                return ( (GuidedDecisionTableViewImpl) view ).getConditionPopup( new LimitedEntryConditionCol52() );
+        }
+        return null;
+    }
+
     @Override
     public void newConditionBRLFragment() {
         if ( isReadOnly() ) {
@@ -786,6 +814,19 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
                 view.newLimitedEntryConditionBRLFragment();
                 break;
         }
+    }
+
+    public BaseModal getConditionBRLFragment() {
+        if ( isReadOnly() ) {
+            return null;
+        }
+        switch ( model.getTableFormat() ) {
+            case EXTENDED_ENTRY:
+                return ( (GuidedDecisionTableViewImpl) view ).getBRLConditionColumnView();
+            case LIMITED_ENTRY:
+                return ( (GuidedDecisionTableViewImpl) view ).getLimitedEntryBRLConditionColumnView();
+        }
+        return null;
     }
 
     @Override
