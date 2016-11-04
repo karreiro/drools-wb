@@ -39,6 +39,7 @@ import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi
 import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi.RefreshMetaDataPanelEvent;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.popovers.ColumnHeaderPopOver;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.popovers.ColumnHeaderPopOverHandler;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.GuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.model.GuidedDecisionTableEditorContent;
 import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.uberfire.backend.vfs.ObservablePath;
@@ -66,6 +67,7 @@ public class GuidedDecisionTableModellerPresenter implements GuidedDecisionTable
     private final Event<RadarMenuBuilder.UpdateRadarEvent> updateRadarEvent;
     private final Event<DecisionTablePinnedEvent> pinnedEvent;
     private final ColumnHeaderPopOver columnHeaderPopOver;
+    private final GuidedDecisionTableColumnWizard guidedDecisionTableColumnWizard;
 
     private GuidedDecisionTableView.Presenter activeDecisionTable = null;
     private Set<GuidedDecisionTableView.Presenter> availableDecisionTables = new HashSet<GuidedDecisionTableView.Presenter>();
@@ -77,12 +79,14 @@ public class GuidedDecisionTableModellerPresenter implements GuidedDecisionTable
                                                  final GuidedDecisionTableModellerContextMenuSupport contextMenuSupport,
                                                  final Event<RadarMenuBuilder.UpdateRadarEvent> updateRadarEvent,
                                                  final Event<DecisionTablePinnedEvent> pinnedEvent,
-                                                 final ColumnHeaderPopOver columnHeaderPopOver ) {
+                                                 final ColumnHeaderPopOver columnHeaderPopOver,
+                                                 final GuidedDecisionTableColumnWizard guidedDecisionTableColumnWizard ) {
         this.view = view;
         this.dtPresenterProvider = dtPresenterProvider;
         this.updateRadarEvent = updateRadarEvent;
         this.pinnedEvent = pinnedEvent;
         this.columnHeaderPopOver = columnHeaderPopOver;
+        this.guidedDecisionTableColumnWizard = guidedDecisionTableColumnWizard;
 
         this.view.init( this );
 
@@ -340,6 +344,12 @@ public class GuidedDecisionTableModellerPresenter implements GuidedDecisionTable
             return;
         }
         doDecisionTableSelected( dtPresenter );
+    }
+
+    @Override
+    public void openNewGuidedDecisionTableColumnWizard() {
+        guidedDecisionTableColumnWizard.init( activeDecisionTable );
+        guidedDecisionTableColumnWizard.start();
     }
 
     private void doDecisionTableSelected( final GuidedDecisionTableView.Presenter dtPresenter ) {
