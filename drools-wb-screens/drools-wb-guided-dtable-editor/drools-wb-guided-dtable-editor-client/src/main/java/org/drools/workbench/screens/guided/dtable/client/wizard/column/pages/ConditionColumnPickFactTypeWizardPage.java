@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.drools.workbench.screens.guided.dtable.client.widget;
+
+package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,10 +33,12 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.models.datamodel.oracle.DataType;
 import org.drools.workbench.models.datamodel.oracle.FieldAccessorsAndMutators;
 import org.drools.workbench.models.datamodel.oracle.ModelField;
@@ -46,15 +49,19 @@ import org.drools.workbench.models.guided.dtable.shared.model.CompositeColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
-import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52.TableFormat;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryCol;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.resources.images.GuidedDecisionTableImageResources508;
+import org.drools.workbench.screens.guided.dtable.client.widget.ConditionColumnCommand;
+import org.drools.workbench.screens.guided.dtable.client.widget.DTCellValueWidgetFactory;
+import org.drools.workbench.screens.guided.dtable.client.widget.ModalFooterChangePattern;
+import org.drools.workbench.screens.guided.dtable.client.widget.Validator;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.CellUtilities;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.ColumnUtilities;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.GuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.rule.client.editor.BindingTextBox;
 import org.drools.workbench.screens.guided.rule.client.editor.CEPOperatorsDropdown;
 import org.drools.workbench.screens.guided.rule.client.editor.CEPWindowOperatorsDropdown;
@@ -66,16 +73,16 @@ import org.gwtbootstrap3.client.ui.TextBox;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.kie.workbench.common.widgets.client.resources.HumanReadable;
 import org.uberfire.client.callbacks.Callback;
+import org.uberfire.ext.widgets.common.client.common.FormStyleItem;
+import org.uberfire.ext.widgets.common.client.common.FormStyleLayout;
 import org.uberfire.ext.widgets.common.client.common.ImageButton;
 import org.uberfire.ext.widgets.common.client.common.InfoPopup;
 import org.uberfire.ext.widgets.common.client.common.SmallLabel;
 import org.uberfire.ext.widgets.common.client.common.popups.FormStylePopup;
 import org.uberfire.ext.widgets.common.client.common.popups.footers.ModalFooterOKCancelButtons;
+import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
-/**
- * This is a configuration editor for a column in a the guided decision table.
- */
-public class ConditionPopup extends FormStylePopup {
+public class ConditionColumnPickFactTypeWizardPage extends AbstractDecisionTableColumnPage {
 
     private SmallLabel patternLabel = new SmallLabel();
     private TextBox fieldLabel = getFieldLabel();
@@ -86,406 +93,174 @@ public class ConditionPopup extends FormStylePopup {
     private TextBox valueListWidget = null;
     private SimplePanel defaultValueWidgetContainer = new SimplePanel();
     private int defaultValueWidgetContainerIndex = -1;
+
     private ImageButton editField;
     private ImageButton editOp;
 
-    private InlineRadio literal = new InlineRadio( "constraintValueType",
-                                                   GuidedDecisionTableConstants.INSTANCE.LiteralValue() );
-    private InlineRadio formula = new InlineRadio( "constraintValueType",
-                                                   GuidedDecisionTableConstants.INSTANCE.Formula() );
-    private InlineRadio predicate = new InlineRadio( "constraintValueType",
-                                                     GuidedDecisionTableConstants.INSTANCE.Predicate() );
+    private InlineRadio literal = new InlineRadio( "constraintValueType", GuidedDecisionTableConstants.INSTANCE.LiteralValue() );
+    private InlineRadio formula = new InlineRadio( "constraintValueType", GuidedDecisionTableConstants.INSTANCE.Formula() );
+    private InlineRadio predicate = new InlineRadio( "constraintValueType", GuidedDecisionTableConstants.INSTANCE.Predicate() );
 
     private CEPWindowOperatorsDropdown cwo;
+
     private TextBox entryPointName;
     private int cepWindowRowIndex;
 
-    private final AsyncPackageDataModelOracle oracle;
-    private final GuidedDecisionTableView.Presenter presenter;
-    private final DTCellValueWidgetFactory factory;
-    private final Validator validator;
-    private final BRLRuleModel rm;
-    private final CellUtilities cellUtilities;
-    private final ColumnUtilities columnUtilities;
+    private AsyncPackageDataModelOracle oracle;
+    private GuidedDecisionTableView.Presenter presenter;
+    private DTCellValueWidgetFactory factory;
+    private Validator validator;
+    private BRLRuleModel rm;
+    private CellUtilities cellUtilities;
+    private ColumnUtilities columnUtilities;
 
-    //TODO {manstis} Popups need to MVP'ed
-    private final GuidedDecisionTable52 model;
+    private GuidedDecisionTable52 model;
 
     private Pattern52 editingPattern;
+
     private ConditionCol52 editingCol;
-    private final ConditionColumnCommand refreshGrid;
-    private final ConditionCol52 originalCol;
-    private final boolean isNew;
-    private final boolean isReadOnly;
+    private ConditionColumnCommand refreshGrid;
+    private ConditionCol52 originalCol;
+
+    private boolean isNew;
+    private boolean isReadOnly;
 
     private InfoPopup fieldLabelInterpolationInfo = getPredicateHint();
+
+    private FormStyleLayout form = new FormStyleLayout();
+    private FlowPanel panel = new FlowPanel();
 
     private final Command cmdOK = new Command() {
         @Override
         public void execute() {
-            applyChanges();
+//            applyChanges();
         }
     };
+
     private final Command cmdCancel = new Command() {
         @Override
         public void execute() {
-            hide();
+//            hide();
         }
     };
-    private final ModalFooterOKCancelButtons footer = new ModalFooterOKCancelButtons( cmdOK,
-                                                                                      cmdCancel );
 
-    public  ConditionPopup( final GuidedDecisionTable52 model,
-                           final AsyncPackageDataModelOracle oracle,
-                           final GuidedDecisionTableView.Presenter presenter,
-                           final ConditionColumnCommand refreshGrid,
-                           final ConditionCol52 col,
-                           final boolean isNew,
-                           final boolean isReadOnly ) {
-        this( model,
-              oracle,
-              presenter,
-              refreshGrid,
-              new Pattern52(),
-              col,
-              isNew,
-              isReadOnly );
-    }
+    public ConditionColumnPickFactTypeWizardPage( final GuidedDecisionTableColumnWizard wizard,
+                                                  final GuidedDecisionTableView.Presenter presenter ) {
+        ConditionCol52 column = null;
+        Pattern52 pattern = new Pattern52();
+        ConditionColumnCommand refreshGrid = null;
 
-    public ConditionPopup( final GuidedDecisionTable52 model,
-                           final AsyncPackageDataModelOracle oracle,
-                           final GuidedDecisionTableView.Presenter presenter,
-                           final ConditionColumnCommand refreshGrid,
-                           final Pattern52 pattern,
-                           final ConditionCol52 column,
-                           final boolean isNew,
-                           final boolean isReadOnly ) {
+        boolean isNew = true;
+        boolean isReadOnly = presenter.getAccess().isReadOnly();
 
-        super( GuidedDecisionTableConstants.INSTANCE.ConditionColumnConfiguration() );
-        this.rm = new BRLRuleModel( model );
+        switch ( presenter.getModel().getTableFormat() ) {
+            case EXTENDED_ENTRY:
+                column = new ConditionCol52();
+                break;
+            case LIMITED_ENTRY:
+                column = new LimitedEntryConditionCol52();
+                break;
+        }
+
+        this.rm = new BRLRuleModel( presenter.getModel() );
         this.editingPattern = pattern != null ? pattern.clonePattern() : null;
         this.editingCol = cloneConditionColumn( column );
-        this.model = model;
-        this.oracle = oracle;
+        this.model = presenter.getModel();
+        this.oracle = presenter.getDataModelOracle();
         this.presenter = presenter;
         this.refreshGrid = refreshGrid;
         this.originalCol = column;
         this.isNew = isNew;
         this.isReadOnly = isReadOnly;
-        this.validator = new Validator( model.getConditions() );
+        this.validator = new Validator( presenter.getModel().getConditions() );
         this.cellUtilities = new CellUtilities();
-        this.columnUtilities = new ColumnUtilities( model,
-                                                    oracle );
-
-        //Set-up a factory for value editors
-        factory = DTCellValueWidgetFactory.getInstance( model,
-                                                        oracle,
-                                                        isReadOnly,
-                                                        allowEmptyValues() );
-
-        HorizontalPanel patternWidget = new HorizontalPanel();
-        patternWidget.add( patternLabel );
-        doPatternLabel();
-
-        //Pattern selector
-        ImageButton changePattern = new ImageButton( GuidedDecisionTableImageResources508.INSTANCE.Edit(),
-                                                     GuidedDecisionTableImageResources508.INSTANCE.EditDisabled(),
-                                                     GuidedDecisionTableConstants.INSTANCE.ChooseAnExistingPatternThatThisColumnAddsTo(),
-                                                     new ClickHandler() {
-                                                         public void onClick( ClickEvent w ) {
-                                                             showChangePattern( w );
-                                                         }
-                                                     } );
-        changePattern.setEnabled( !isReadOnly );
-        patternWidget.add( changePattern );
-
-        addAttribute( GuidedDecisionTableConstants.INSTANCE.Pattern(),
-                      patternWidget );
-
-        //Radio buttons for Calculation Type
-        switch ( model.getTableFormat() ) {
-            case EXTENDED_ENTRY:
-                HorizontalPanel valueTypes = new HorizontalPanel();
-                valueTypes.add( literal );
-                valueTypes.add( formula );
-                valueTypes.add( predicate );
-                addAttribute( new StringBuilder( GuidedDecisionTableConstants.INSTANCE.CalculationType() ).append( GuidedDecisionTableConstants.COLON ).toString(),
-                              valueTypes );
-
-                switch ( editingCol.getConstraintValueType() ) {
-                    case BaseSingleFieldConstraint.TYPE_LITERAL:
-                        literal.setValue( true );
-                        break;
-                    case BaseSingleFieldConstraint.TYPE_RET_VALUE:
-                        formula.setValue( true );
-                        break;
-                    case BaseSingleFieldConstraint.TYPE_PREDICATE:
-                        predicate.setValue( true );
-                }
-
-                if ( !isReadOnly ) {
-                    literal.addClickHandler( new ClickHandler() {
-                        public void onClick( ClickEvent w ) {
-                            editingCol.setFactField( null );
-                            applyConsTypeChange( BaseSingleFieldConstraint.TYPE_LITERAL );
-                        }
-                    } );
-                }
-
-                if ( !isReadOnly ) {
-                    formula.addClickHandler( new ClickHandler() {
-                        public void onClick( ClickEvent w ) {
-                            editingCol.setFactField( null );
-                            applyConsTypeChange( BaseSingleFieldConstraint.TYPE_RET_VALUE );
-                        }
-                    } );
-                }
-
-                if ( !isReadOnly ) {
-                    predicate.addClickHandler( new ClickHandler() {
-                        public void onClick( ClickEvent w ) {
-                            editingCol.setFactField( null );
-                            applyConsTypeChange( BaseSingleFieldConstraint.TYPE_PREDICATE );
-                        }
-                    } );
-                }
-
-                break;
-
-            case LIMITED_ENTRY:
-                binding.setEnabled( !isReadOnly );
-        }
-
-        //Fact field
-        HorizontalPanel field = new HorizontalPanel();
-        fieldLabel.setEnabled( !isReadOnly );
-        field.add( fieldLabel );
-        field.add( fieldLabelInterpolationInfo );
-        this.editField = new ImageButton( GuidedDecisionTableImageResources508.INSTANCE.Edit(),
-                                          GuidedDecisionTableImageResources508.INSTANCE.EditDisabled(),
-                                          GuidedDecisionTableConstants.INSTANCE.EditTheFieldThatThisColumnOperatesOn(),
-                                          new ClickHandler() {
-                                              public void onClick( ClickEvent w ) {
-                                                  showFieldChange();
-                                              }
-                                          } );
-        editField.setEnabled( !isReadOnly );
-        field.add( editField );
-        addAttribute( new StringBuilder( GuidedDecisionTableConstants.INSTANCE.Field() ).append( GuidedDecisionTableConstants.COLON ).toString(),
-                      field );
-        doFieldLabel();
-
-        //Operator
-        HorizontalPanel operator = new HorizontalPanel();
-        operator.add( operatorLabel );
-        this.editOp = new ImageButton( GuidedDecisionTableImageResources508.INSTANCE.Edit(),
-                                       GuidedDecisionTableImageResources508.INSTANCE.EditDisabled(),
-                                       GuidedDecisionTableConstants.INSTANCE.EditTheOperatorThatIsUsedToCompareDataWithThisField(),
-                                       new ClickHandler() {
-                                           public void onClick( ClickEvent w ) {
-                                               showOperatorChange();
-                                           }
-                                       } );
-        editOp.setEnabled( !isReadOnly );
-        operator.add( editOp );
-        addAttribute( GuidedDecisionTableConstants.INSTANCE.Operator(),
-                      operator );
-        doOperatorLabel();
-        doImageButtons();
-
-        //Add CEP fields for patterns containing Facts declared as Events
-        cepWindowRowIndex = addAttribute( GuidedDecisionTableConstants.INSTANCE.DTLabelOverCEPWindow(),
-                                          createCEPWindowWidget( editingPattern ) ).getIndex();
-        displayCEPOperators();
-
-        //Entry point
-        entryPointName = new TextBox();
-        entryPointName.setText( editingPattern.getEntryPointName() );
-        entryPointName.setEnabled( !isReadOnly );
-        if ( !isReadOnly ) {
-            entryPointName.addChangeHandler( new ChangeHandler() {
-                public void onChange( ChangeEvent event ) {
-                    editingPattern.setEntryPointName( entryPointName.getText() );
-                }
-            } );
-        }
-        addAttribute( new StringBuilder( GuidedDecisionTableConstants.INSTANCE.DTLabelFromEntryPoint() ).append( GuidedDecisionTableConstants.COLON ).toString(),
-                      entryPointName );
-
-        //Column header
-        final TextBox header = new TextBox();
-        header.setText( column.getHeader() );
-        header.setEnabled( !isReadOnly );
-        if ( !isReadOnly ) {
-            header.addChangeHandler( new ChangeHandler() {
-                public void onChange( ChangeEvent event ) {
-                    editingCol.setHeader( header.getText() );
-                }
-            } );
-        }
-        addAttribute( GuidedDecisionTableConstants.INSTANCE.ColumnHeaderDescription(),
-                      header );
-
-        //Optional value list
-        if ( model.getTableFormat() == TableFormat.EXTENDED_ENTRY ) {
-            valueListWidget = new TextBox();
-            valueListWidget.setText( editingCol.getValueList() );
-            valueListWidget.setEnabled( !isReadOnly );
-            if ( !isReadOnly ) {
-
-                //Copy value back to model
-                valueListWidget.addChangeHandler( new ChangeHandler() {
-                    public void onChange( ChangeEvent event ) {
-                        editingCol.setValueList( valueListWidget.getText() );
-                    }
-                } );
-
-                //Update Default Value widget if necessary
-                valueListWidget.addBlurHandler( new BlurHandler() {
-                    public void onBlur( BlurEvent event ) {
-                        assertDefaultValue();
-                        makeDefaultValueWidget();
-                    }
-
-                    private void assertDefaultValue() {
-                        final List<String> valueList = Arrays.asList( columnUtilities.getValueList( editingCol ) );
-                        if ( valueList.size() > 0 ) {
-                            final String defaultValue = cellUtilities.asString( editingCol.getDefaultValue() );
-                            if ( !valueList.contains( defaultValue ) ) {
-                                editingCol.getDefaultValue().clearValues();
-                            }
-                        } else {
-                            //Ensure the Default Value has been updated to represent the column's data-type.
-                            final DTCellValue52 defaultValue = editingCol.getDefaultValue();
-                            final DataType.DataTypes dataType = columnUtilities.getDataType( editingPattern,
-                                                                                             editingCol );
-                            cellUtilities.convertDTCellValueType( dataType,
-                                                                  defaultValue );
-                        }
-                    }
-
-                } );
-
-            }
-            HorizontalPanel vl = new HorizontalPanel();
-            vl.add( valueListWidget );
-            vl.add( new InfoPopup( GuidedDecisionTableConstants.INSTANCE.ValueList(),
-                                   GuidedDecisionTableConstants.INSTANCE.ValueListsExplanation() ) );
-            addAttribute( GuidedDecisionTableConstants.INSTANCE.optionalValueList(),
-                          vl );
-        }
-
-        //Default value
-        if ( model.getTableFormat() == TableFormat.EXTENDED_ENTRY ) {
-            defaultValueWidgetContainerIndex = addAttribute( new StringBuilder( GuidedDecisionTableConstants.INSTANCE.DefaultValue() ).append( GuidedDecisionTableConstants.COLON ).toString(),
-                                                             defaultValueWidgetContainer ).getIndex();
-            makeDefaultValueWidget();
-        }
-
-        //Limited entry value widget
-        if ( model.getTableFormat() == TableFormat.LIMITED_ENTRY ) {
-            limitedEntryValueAttributeIndex = addAttribute( GuidedDecisionTableConstants.INSTANCE.LimitedEntryValue(),
-                                                            limitedEntryValueWidgetContainer ).getIndex();
-            makeLimitedValueWidget();
-        }
-
-        //Field Binding
-        binding.setText( column.getBinding() );
-        if ( !isReadOnly ) {
-            binding.addChangeHandler( new ChangeHandler() {
-                public void onChange( ChangeEvent event ) {
-                    editingCol.setBinding( binding.getText() );
-                }
-            } );
-        }
-        addAttribute( new StringBuilder( GuidedDecisionTableConstants.INSTANCE.Binding() ).append( GuidedDecisionTableConstants.COLON ).toString(),
-                      binding );
-
-        //Hide column tick-box
-        addAttribute( new StringBuilder( GuidedDecisionTableConstants.INSTANCE.HideThisColumn() ).append( GuidedDecisionTableConstants.COLON ).toString(),
-                      DTCellValueWidgetFactory.getHideColumnIndicator( editingCol ) );
-
-        //Initialise view
-        doValueList();
-        doCalculationType();
-        initialiseViewForConstraintValueType( editingCol.getConstraintValueType() );
-
-        //Apply button
-        footer.enableOkButton( !isReadOnly );
-        add( footer );
+        this.columnUtilities = new ColumnUtilities( presenter.getModel(), presenter.getDataModelOracle() );
     }
 
-    private void applyChanges() {
-        if ( null == editingCol.getHeader() || "".equals( editingCol.getHeader() ) ) {
-            Window.alert( GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnHeaderValueDescription() );
-            return;
-        }
-        if ( editingCol.getConstraintValueType() != BaseSingleFieldConstraint.TYPE_PREDICATE ) {
+    // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
+    // -----------------------------------------------------------------------------
 
-            //Field mandatory for Literals and Formulae
-            if ( null == editingCol.getFactField() || "".equals( editingCol.getFactField() ) ) {
-                Window.alert( GuidedDecisionTableConstants.INSTANCE.PleaseSelectOrEnterField() );
-                return;
-            }
+//    private void applyChanges() {
+//        if ( null == editingCol.getHeader() || "".equals( editingCol.getHeader() ) ) {
+//            Window.alert( GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnHeaderValueDescription() );
+//            return;
+//        }
+//        if ( editingCol.getConstraintValueType() != BaseSingleFieldConstraint.TYPE_PREDICATE ) {
+//
+//            //Field mandatory for Literals and Formulae
+//            if ( null == editingCol.getFactField() || "".equals( editingCol.getFactField() ) ) {
+//                Window.alert( GuidedDecisionTableConstants.INSTANCE.PleaseSelectOrEnterField() );
+//                return;
+//            }
+//
+//            //Operator optional for Literals and Formulae
+//            if ( editingCol.getOperator() == null ) {
+//                Window.alert( GuidedDecisionTableConstants.INSTANCE.NotifyNoSelectedOperator() );
+//                return;
+//            }
+//
+//        } else {
+//
+//            //Clear operator for predicates, but leave field intact for interpolation of $param values
+//            editingCol.setOperator( null );
+//        }
+//
+//        //Check for unique binding
+//        if ( isNew ) {
+//            if ( editingCol.isBound() && !isBindingUnique( editingCol.getBinding() ) ) {
+//                Window.alert( GuidedDecisionTableConstants.INSTANCE.PleaseEnterANameThatIsNotAlreadyUsedByAnotherPattern() );
+//                return;
+//            }
+//        } else {
+//            if ( originalCol.isBound() && editingCol.isBound() ) {
+//                if ( !originalCol.getBinding().equals( editingCol.getBinding() ) ) {
+//                    if ( editingCol.isBound() && !isBindingUnique( editingCol.getBinding() ) ) {
+//                        Window.alert( GuidedDecisionTableConstants.INSTANCE.PleaseEnterANameThatIsNotAlreadyUsedByAnotherPattern() );
+//                        return;
+//                    }
+//                }
+//            }
+//        }
+//
+//        //Check column header is unique
+//        if ( isNew ) {
+//            if ( !unique( editingCol.getHeader() ) ) {
+//                Window.alert( GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother() );
+//                return;
+//            }
+//        } else {
+//            if ( !originalCol.getHeader().equals( editingCol.getHeader() ) ) {
+//                if ( !unique( editingCol.getHeader() ) ) {
+//                    Window.alert( GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother() );
+//                    return;
+//                }
+//            }
+//        }
+//
+//        //Clear binding if column is not a literal
+//        if ( editingCol.getConstraintValueType() != BaseSingleFieldConstraint.TYPE_LITERAL ) {
+//            editingCol.setBinding( null );
+//        }
+//
+//        // Pass new\modified column back for handling
+//        refreshGrid.execute( editingPattern,
+//                             editingCol );
+////        hide();
 
-            //Operator optional for Literals and Formulae
-            if ( editingCol.getOperator() == null ) {
-                Window.alert( GuidedDecisionTableConstants.INSTANCE.NotifyNoSelectedOperator() );
-                return;
-            }
-
-        } else {
-
-            //Clear operator for predicates, but leave field intact for interpolation of $param values
-            editingCol.setOperator( null );
-        }
-
-        //Check for unique binding
-        if ( isNew ) {
-            if ( editingCol.isBound() && !isBindingUnique( editingCol.getBinding() ) ) {
-                Window.alert( GuidedDecisionTableConstants.INSTANCE.PleaseEnterANameThatIsNotAlreadyUsedByAnotherPattern() );
-                return;
-            }
-        } else {
-            if ( originalCol.isBound() && editingCol.isBound() ) {
-                if ( !originalCol.getBinding().equals( editingCol.getBinding() ) ) {
-                    if ( editingCol.isBound() && !isBindingUnique( editingCol.getBinding() ) ) {
-                        Window.alert( GuidedDecisionTableConstants.INSTANCE.PleaseEnterANameThatIsNotAlreadyUsedByAnotherPattern() );
-                        return;
-                    }
-                }
-            }
-        }
-
-        //Check column header is unique
-        if ( isNew ) {
-            if ( !unique( editingCol.getHeader() ) ) {
-                Window.alert( GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother() );
-                return;
-            }
-        } else {
-            if ( !originalCol.getHeader().equals( editingCol.getHeader() ) ) {
-                if ( !unique( editingCol.getHeader() ) ) {
-                    Window.alert( GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother() );
-                    return;
-                }
-            }
-        }
-
-        //Clear binding if column is not a literal
-        if ( editingCol.getConstraintValueType() != BaseSingleFieldConstraint.TYPE_LITERAL ) {
-            editingCol.setBinding( null );
-        }
-
-        // Pass new\modified column back for handling
-        refreshGrid.execute( editingPattern,
-                             editingCol );
-        hide();
-
-    }
+//    }
 
     private boolean allowEmptyValues() {
-        return this.model.getTableFormat() == TableFormat.EXTENDED_ENTRY;
+        return this.model.getTableFormat() == GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY;
     }
 
     private ConditionCol52 cloneConditionColumn( ConditionCol52 col ) {
@@ -543,7 +318,7 @@ public class ConditionPopup extends FormStylePopup {
     }
 
     private void makeDefaultValueWidget() {
-        if ( model.getTableFormat() == TableFormat.LIMITED_ENTRY ) {
+        if ( model.getTableFormat() == GuidedDecisionTable52.TableFormat.LIMITED_ENTRY ) {
             return;
         }
         if ( nil( editingCol.getFactField() ) ) {
@@ -566,8 +341,8 @@ public class ConditionPopup extends FormStylePopup {
                                                               editingCol ) );
         }
 
-        //Ensure the Default Value has been updated to represent the column's 
-        //data-type. Legacy Default Values are all String-based and need to be 
+        //Ensure the Default Value has been updated to represent the column's
+        //data-type. Legacy Default Values are all String-based and need to be
         //coerced to the correct type
         final DTCellValue52 defaultValue = editingCol.getDefaultValue();
         final DataType.DataTypes dataType = columnUtilities.getDataType( editingPattern,
@@ -583,6 +358,11 @@ public class ConditionPopup extends FormStylePopup {
         defaultValueWidgetContainer.setWidget( factory.getWidget( editingPattern,
                                                                   editingCol,
                                                                   defaultValue ) );
+    }
+
+    public void setAttributeVisibility( final int index,
+                                        final boolean b ) {
+        form.setAttributeVisibility( index, b );
     }
 
     private void applyConsTypeChange( int newConstraintValueType ) {
@@ -607,7 +387,7 @@ public class ConditionPopup extends FormStylePopup {
         this.editOp.setEnabled( enableOp );
     }
 
-    private boolean isBindingUnique( String binding ) {
+    public boolean isBindingUnique( String binding ) {
         return !rm.isVariableNameUsed( binding );
     }
 
@@ -678,7 +458,7 @@ public class ConditionPopup extends FormStylePopup {
     }
 
     private void doValueList() {
-        if ( model.getTableFormat() == TableFormat.LIMITED_ENTRY ) {
+        if ( model.getTableFormat() == GuidedDecisionTable52.TableFormat.LIMITED_ENTRY ) {
             return;
         }
 
@@ -706,7 +486,7 @@ public class ConditionPopup extends FormStylePopup {
     }
 
     private void doCalculationType() {
-        if ( model.getTableFormat() == TableFormat.LIMITED_ENTRY ) {
+        if ( model.getTableFormat() == GuidedDecisionTable52.TableFormat.LIMITED_ENTRY ) {
             return;
         }
 
@@ -758,7 +538,7 @@ public class ConditionPopup extends FormStylePopup {
     }
 
     private void selectListBoxItem( final ListBox listBox,
-                            final int index ) {
+                                    final int index ) {
         listBox.setSelectedIndex( index );
     }
 
@@ -832,7 +612,7 @@ public class ConditionPopup extends FormStylePopup {
         pop.show();
     }
 
-    private boolean unique( String header ) {
+    public boolean unique( String header ) {
         for ( CompositeColumn<?> cc : model.getConditions() ) {
             for ( int iChild = 0; iChild < cc.getChildColumns().size(); iChild++ ) {
                 if ( cc.getChildColumns().get( iChild ).getHeader().equals( header ) ) {
@@ -1110,4 +890,301 @@ public class ConditionPopup extends FormStylePopup {
         footer.enableCancelButton( enabled );
     }
 
+    private final ModalFooterOKCancelButtons footer = new ModalFooterOKCancelButtons( cmdOK, cmdCancel );
+
+    private final FlowPanel content = new FlowPanel();
+
+    @Override
+    public String getTitle() {
+        return GuidedDecisionTableConstants.INSTANCE.CreateANewFactPattern();
+    }
+
+    @Override
+    public void isComplete( final Callback<Boolean> callback ) {
+        callback.callback( true );
+    }
+
+    @Override
+    public void initialise() {
+        //Set-up a factory for value editors
+        factory = DTCellValueWidgetFactory.getInstance( presenter.getModel(),
+                                                        presenter.getDataModelOracle(),
+                                                        isReadOnly,
+                                                        allowEmptyValues() );
+
+        HorizontalPanel patternWidget = new HorizontalPanel();
+        patternWidget.add( patternLabel );
+        doPatternLabel();
+
+        //Pattern selector
+        ImageButton changePattern = new ImageButton( GuidedDecisionTableImageResources508.INSTANCE.Edit(),
+                                                     GuidedDecisionTableImageResources508.INSTANCE.EditDisabled(),
+                                                     GuidedDecisionTableConstants.INSTANCE.ChooseAnExistingPatternThatThisColumnAddsTo(),
+                                                     new ClickHandler() {
+                                                         public void onClick( ClickEvent w ) {
+                                                             showChangePattern( w );
+                                                         }
+                                                     } );
+        changePattern.setEnabled( !isReadOnly );
+        patternWidget.add( changePattern );
+
+        addAttribute( GuidedDecisionTableConstants.INSTANCE.Pattern(),
+                      patternWidget );
+
+        //Radio buttons for Calculation Type
+        switch ( this.model.getTableFormat() ) {
+            case EXTENDED_ENTRY:
+                HorizontalPanel valueTypes = new HorizontalPanel();
+                valueTypes.add( literal );
+                valueTypes.add( formula );
+                valueTypes.add( predicate );
+                addAttribute( new StringBuilder( GuidedDecisionTableConstants.INSTANCE.CalculationType() ).append( GuidedDecisionTableConstants.COLON ).toString(),
+                              valueTypes );
+
+                switch ( editingCol.getConstraintValueType() ) {
+                    case BaseSingleFieldConstraint.TYPE_LITERAL:
+                        literal.setValue( true );
+                        break;
+                    case BaseSingleFieldConstraint.TYPE_RET_VALUE:
+                        formula.setValue( true );
+                        break;
+                    case BaseSingleFieldConstraint.TYPE_PREDICATE:
+                        predicate.setValue( true );
+                }
+
+                if ( !isReadOnly ) {
+                    literal.addClickHandler( new ClickHandler() {
+                        public void onClick( ClickEvent w ) {
+                            editingCol.setFactField( null );
+                            applyConsTypeChange( BaseSingleFieldConstraint.TYPE_LITERAL );
+                        }
+                    } );
+                }
+
+                if ( !isReadOnly ) {
+                    formula.addClickHandler( new ClickHandler() {
+                        public void onClick( ClickEvent w ) {
+                            editingCol.setFactField( null );
+                            applyConsTypeChange( BaseSingleFieldConstraint.TYPE_RET_VALUE );
+                        }
+                    } );
+                }
+
+                if ( !isReadOnly ) {
+                    predicate.addClickHandler( new ClickHandler() {
+                        public void onClick( ClickEvent w ) {
+                            editingCol.setFactField( null );
+                            applyConsTypeChange( BaseSingleFieldConstraint.TYPE_PREDICATE );
+                        }
+                    } );
+                }
+
+                break;
+
+            case LIMITED_ENTRY:
+                binding.setEnabled( !isReadOnly );
+        }
+
+        //Fact field
+        HorizontalPanel field = new HorizontalPanel();
+        fieldLabel.setEnabled( !isReadOnly );
+        field.add( fieldLabel );
+        field.add( fieldLabelInterpolationInfo );
+        this.editField = new ImageButton( GuidedDecisionTableImageResources508.INSTANCE.Edit(),
+                                          GuidedDecisionTableImageResources508.INSTANCE.EditDisabled(),
+                                          GuidedDecisionTableConstants.INSTANCE.EditTheFieldThatThisColumnOperatesOn(),
+                                          new ClickHandler() {
+                                              public void onClick( ClickEvent w ) {
+                                                  showFieldChange();
+                                              }
+                                          } );
+        editField.setEnabled( !isReadOnly );
+        field.add( editField );
+        addAttribute( new StringBuilder( GuidedDecisionTableConstants.INSTANCE.Field() ).append( GuidedDecisionTableConstants.COLON ).toString(),
+                      field );
+        doFieldLabel();
+
+        //Operator
+        HorizontalPanel operator = new HorizontalPanel();
+        operator.add( operatorLabel );
+        this.editOp = new ImageButton( GuidedDecisionTableImageResources508.INSTANCE.Edit(),
+                                       GuidedDecisionTableImageResources508.INSTANCE.EditDisabled(),
+                                       GuidedDecisionTableConstants.INSTANCE.EditTheOperatorThatIsUsedToCompareDataWithThisField(),
+                                       new ClickHandler() {
+                                           public void onClick( ClickEvent w ) {
+                                               showOperatorChange();
+                                           }
+                                       } );
+        editOp.setEnabled( !isReadOnly );
+        operator.add( editOp );
+        addAttribute( GuidedDecisionTableConstants.INSTANCE.Operator(),
+                      operator );
+        doOperatorLabel();
+        doImageButtons();
+
+        //Add CEP fields for patterns containing Facts declared as Events
+        cepWindowRowIndex = addAttribute( GuidedDecisionTableConstants.INSTANCE.DTLabelOverCEPWindow(),
+                                          createCEPWindowWidget( editingPattern ) ).getIndex();
+        displayCEPOperators();
+
+        //Entry point
+        entryPointName = new TextBox();
+        entryPointName.setText( editingPattern.getEntryPointName() );
+        entryPointName.setEnabled( !isReadOnly );
+        if ( !isReadOnly ) {
+            entryPointName.addChangeHandler( new ChangeHandler() {
+                public void onChange( ChangeEvent event ) {
+                    editingPattern.setEntryPointName( entryPointName.getText() );
+                }
+            } );
+        }
+        addAttribute( new StringBuilder( GuidedDecisionTableConstants.INSTANCE.DTLabelFromEntryPoint() ).append( GuidedDecisionTableConstants.COLON ).toString(),
+                      entryPointName );
+
+        //Column header
+        final TextBox header = new TextBox();
+        header.setText( originalCol.getHeader() );
+        header.setEnabled( !isReadOnly );
+        if ( !isReadOnly ) {
+            header.addChangeHandler( new ChangeHandler() {
+                public void onChange( ChangeEvent event ) {
+                    editingCol.setHeader( header.getText() );
+                }
+            } );
+        }
+        addAttribute( GuidedDecisionTableConstants.INSTANCE.ColumnHeaderDescription(),
+                      header );
+
+        //Optional value list
+        if ( this.model.getTableFormat() == GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY ) {
+            valueListWidget = new TextBox();
+            valueListWidget.setText( editingCol.getValueList() );
+            valueListWidget.setEnabled( !isReadOnly );
+            if ( !isReadOnly ) {
+
+                //Copy value back to model
+                valueListWidget.addChangeHandler( new ChangeHandler() {
+                    public void onChange( ChangeEvent event ) {
+                        editingCol.setValueList( valueListWidget.getText() );
+                    }
+                } );
+
+                //Update Default Value widget if necessary
+                valueListWidget.addBlurHandler( new BlurHandler() {
+                    public void onBlur( BlurEvent event ) {
+                        assertDefaultValue();
+                        makeDefaultValueWidget();
+                    }
+
+                    private void assertDefaultValue() {
+                        final List<String> valueList = Arrays.asList( columnUtilities.getValueList( editingCol ) );
+                        if ( valueList.size() > 0 ) {
+                            final String defaultValue = cellUtilities.asString( editingCol.getDefaultValue() );
+                            if ( !valueList.contains( defaultValue ) ) {
+                                editingCol.getDefaultValue().clearValues();
+                            }
+                        } else {
+                            //Ensure the Default Value has been updated to represent the column's data-type.
+                            final DTCellValue52 defaultValue = editingCol.getDefaultValue();
+                            final DataType.DataTypes dataType = columnUtilities.getDataType( editingPattern,
+                                                                                             editingCol );
+                            cellUtilities.convertDTCellValueType( dataType,
+                                                                  defaultValue );
+                        }
+                    }
+
+                } );
+
+            }
+            HorizontalPanel vl = new HorizontalPanel();
+            vl.add( valueListWidget );
+            vl.add( new InfoPopup( GuidedDecisionTableConstants.INSTANCE.ValueList(),
+                                   GuidedDecisionTableConstants.INSTANCE.ValueListsExplanation() ) );
+            addAttribute( GuidedDecisionTableConstants.INSTANCE.optionalValueList(),
+                          vl );
+        }
+
+        //Default value
+        if ( this.model.getTableFormat() == GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY ) {
+            defaultValueWidgetContainerIndex = addAttribute( new StringBuilder( GuidedDecisionTableConstants.INSTANCE.DefaultValue() ).append( GuidedDecisionTableConstants.COLON ).toString(),
+                                                             defaultValueWidgetContainer ).getIndex();
+            makeDefaultValueWidget();
+        }
+
+        //Limited entry value widget
+        if ( this.model.getTableFormat() == GuidedDecisionTable52.TableFormat.LIMITED_ENTRY ) {
+            limitedEntryValueAttributeIndex = addAttribute( GuidedDecisionTableConstants.INSTANCE.LimitedEntryValue(),
+                                                            limitedEntryValueWidgetContainer ).getIndex();
+            makeLimitedValueWidget();
+        }
+
+        //Field Binding
+        binding.setText( originalCol.getBinding() );
+        if ( !isReadOnly ) {
+            binding.addChangeHandler( new ChangeHandler() {
+                public void onChange( ChangeEvent event ) {
+                    editingCol.setBinding( binding.getText() );
+                }
+            } );
+        }
+        addAttribute( new StringBuilder( GuidedDecisionTableConstants.INSTANCE.Binding() ).append( GuidedDecisionTableConstants.COLON ).toString(),
+                      binding );
+
+        //Hide column tick-box
+        addAttribute( new StringBuilder( GuidedDecisionTableConstants.INSTANCE.HideThisColumn() ).append( GuidedDecisionTableConstants.COLON ).toString(),
+                      DTCellValueWidgetFactory.getHideColumnIndicator( editingCol ) );
+
+        //Initialise view
+        doValueList();
+        doCalculationType();
+        initialiseViewForConstraintValueType( editingCol.getConstraintValueType() );
+
+        //Apply button
+        footer.enableOkButton( !isReadOnly );
+
+//        panel.add( footer );
+        content.add( form );
+        content.add( panel );
+//        content.add( footer );
+    }
+
+    private FormStyleItem addAttribute( final String label,
+                                        final IsWidget wid ) {
+        return form.addAttribute( label, wid );
+    }
+
+    @Override
+    public void prepareView() {
+
+    }
+
+    @Override
+    public Widget asWidget() {
+        return content;
+    }
+
+    public FlowPanel getContent() {
+        return content;
+    }
+
+    public ConditionCol52 getEditingCol() {
+        return editingCol;
+    }
+
+    public boolean isNew() {
+        return isNew;
+    }
+
+    public ConditionCol52 getOriginalCol() {
+        return originalCol;
+    }
+
+    public void refreshGrid() {
+        presenter.appendColumn( editingPattern, editingCol );
+    }
+
+    public Pattern52 getEditingPattern() {
+        return editingPattern;
+    }
 }
+

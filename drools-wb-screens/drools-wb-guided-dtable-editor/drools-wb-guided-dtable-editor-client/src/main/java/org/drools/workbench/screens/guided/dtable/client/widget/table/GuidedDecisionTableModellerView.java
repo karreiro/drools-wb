@@ -145,6 +145,7 @@ public interface GuidedDecisionTableModellerView extends UberView<GuidedDecision
 
         void updateLinks();
 
+        void openNewGuidedDecisionTableColumnWizard();
     }
 
 }
