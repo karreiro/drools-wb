@@ -85,7 +85,6 @@ public class GuidedDecisionTableModellerPresenter implements GuidedDecisionTable
                                                  final Event<RadarMenuBuilder.UpdateRadarEvent> updateRadarEvent,
                                                  final Event<DecisionTablePinnedEvent> pinnedEvent,
                                                  final ColumnHeaderPopOver columnHeaderPopOver,
-                                                 final GuidedDecisionTableColumnWizard guidedDecisionTableColumnWizard,
                                                  final SyncBeanManager iocManager ) {
         this.view = view;
         this.dtPresenterProvider = dtPresenterProvider;

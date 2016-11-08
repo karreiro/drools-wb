@@ -16,6 +16,7 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
+import com.google.gwt.user.client.ui.SimplePanel;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.GuidedDecisionTableColumnWizard;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
@@ -32,4 +33,11 @@ public abstract class AbstractDecisionTableColumnPage implements WizardPage {
 
         initialise();
     }
+
+    @Override
+    public void initialise() {
+        content = new SimplePanel();
+        content.setWidget( view );
+    }
+
 }

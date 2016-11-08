@@ -51,6 +51,7 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.GuidedDec
 import org.drools.workbench.screens.guided.dtable.model.GuidedDecisionTableEditorContent;
 import org.guvnor.common.services.shared.metadata.model.Overview;
 import org.jboss.errai.ioc.client.api.ManagedInstance;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -76,7 +77,7 @@ public class GuidedDecisionTableModellerPresenterTest {
     private GuidedDecisionTableModellerView view;
 
     @Mock
-    private GuidedDecisionTableColumnWizard guidedDecisionTableColumnWizard;
+    private SyncBeanManager iocManager;
 
     @Mock
     private GridLayer gridLayer;
@@ -133,7 +134,7 @@ public class GuidedDecisionTableModellerPresenterTest {
                                                                                                        updateRadarEvent,
                                                                                                        pinnedEvent,
                                                                                                        columnHeaderPopOver,
-                                                                                                       guidedDecisionTableColumnWizard );
+                                                                                                       iocManager );
         presenter = spy( wrapped );
 
         when( dtablePresenterProvider.get() ).thenReturn( dtablePresenter );

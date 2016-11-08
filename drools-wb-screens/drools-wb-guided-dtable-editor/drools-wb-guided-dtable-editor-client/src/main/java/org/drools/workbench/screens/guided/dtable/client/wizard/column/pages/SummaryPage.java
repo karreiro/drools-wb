@@ -16,25 +16,18 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.GuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.AbstractDecisionTableColumnPlugin;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.AttributeColumnWizardPlugin;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.MetaDataColumnWizardPlugin;
 import org.uberfire.client.callbacks.Callback;
-import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
+import org.uberfire.client.mvp.UberView;
 
 /**
  * A summary page for the guided Decision Table Wizard
@@ -42,34 +35,15 @@ import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 @Dependent
 public class SummaryPage extends AbstractDecisionTableColumnPage {
 
-    private static String SECTION_SEPARATOR = "...............................................";
-
-    @Inject
-    private MetaDataColumnWizardPlugin metaDataColumnWizardPlugin;
-
-    @Inject
-    private AttributeColumnWizardPlugin attributeColumnWizardPlugin;
-
-    private enum NewColumnTypes {
-        METADATA_COLUMN,
-        ATTRIBUTE_COLUMN,
-        CONDITION_SIMPLE,
-        CONDITION_BRL_FRAGMENT,
-        ACTION_UPDATE_FACT_FIELD,
-        ACTION_INSERT_FACT_FIELD,
-        ACTION_RETRACT_FACT,
-        ACTION_WORKITEM,
-        ACTION_WORKITEM_UPDATE_FACT_FIELD,
-        ACTION_WORKITEM_INSERT_FACT_FIELD,
-        ACTION_BRL_FRAGMENT;
+    public interface View extends UberView<SummaryPage> {
 
     }
 
-    private FlowPanel content = new FlowPanel();
+    @Inject
+    private Instance<AbstractDecisionTableColumnPlugin> plugins;
 
-    private ListBox columnTypeSelector;
-
-    private CheckBox checkBox;
+    @Inject
+    private View view;
 
     @Override
     public String getTitle() {
@@ -87,99 +61,8 @@ public class SummaryPage extends AbstractDecisionTableColumnPage {
     }
 
     @Override
-    public void initialise() {
-        columnTypeSelector = getColumnTypeSelector();
-        checkBox = getCheckBox();
-
-        content = new FlowPanel() {{
-            add( columnTypeSelector );
-            add( checkBox );
-        }};
-    }
-
-    @Override
     public void prepareView() {
-    }
-
-    private CheckBox getCheckBox() {
-        return new CheckBox( SafeHtmlUtils.fromString( GuidedDecisionTableConstants.INSTANCE.IncludeAdvancedOptions() ) ) {{
-            setValue( false );
-
-            addClickHandler( event -> {
-                if ( getValue() ) {
-                    addExtraItens();
-                } else {
-                    removeExtraItens();
-                }
-            } );
-        }};
-    }
-
-    private ListBox getColumnTypeSelector() {
-        return new ListBox() {{
-            setVisibleItemCount( NewColumnTypes.values().length );
-            setWidth( "100%" );
-
-            addItem( GuidedDecisionTableConstants.INSTANCE.AddNewMetadata(), NewColumnTypes.METADATA_COLUMN.name() );
-            addItem( GuidedDecisionTableConstants.INSTANCE.AddNewAttributeColumn(), NewColumnTypes.ATTRIBUTE_COLUMN.name() );
-            addItem( SECTION_SEPARATOR );
-            addItem( GuidedDecisionTableConstants.INSTANCE.AddNewConditionSimpleColumn(), NewColumnTypes.CONDITION_SIMPLE.name() );
-            addItem( SECTION_SEPARATOR );
-            addItem( GuidedDecisionTableConstants.INSTANCE.SetTheValueOfAField(), NewColumnTypes.ACTION_UPDATE_FACT_FIELD.name() );
-            addItem( GuidedDecisionTableConstants.INSTANCE.SetTheValueOfAFieldOnANewFact(), NewColumnTypes.ACTION_INSERT_FACT_FIELD.name() );
-            addItem( GuidedDecisionTableConstants.INSTANCE.DeleteAnExistingFact(), NewColumnTypes.ACTION_RETRACT_FACT.name() );
-
-            addChangeHandler( changeEvent -> openPage( getValue( getSelectedIndex() ) ) );
-        }};
-    }
-
-    private void openPage( final String type ) {
-        final AbstractDecisionTableColumnPlugin plugin;
-
-        if ( type.equals( NewColumnTypes.METADATA_COLUMN.name() ) ) {
-            plugin = metaDataColumnWizardPlugin;
-        } else if ( type.equals( NewColumnTypes.ATTRIBUTE_COLUMN.name() ) ) {
-            plugin = attributeColumnWizardPlugin;
-        } else if ( type.equals( NewColumnTypes.CONDITION_SIMPLE.name() ) ) {
-            plugin = null;
-//            pages.addAll( new ConditionColumnWizardPlugin( wizard, presenter ).getPages() );
-        } else if ( type.equals( NewColumnTypes.ACTION_UPDATE_FACT_FIELD.name() ) ) {
-            plugin = null;
-//            pages.addAll( new ActionUpdateFactPlugin( wizard, presenter ).getPages() );
-        } else if ( type.equals( NewColumnTypes.ACTION_INSERT_FACT_FIELD.name() ) ) {
-            plugin = null;
-//            pages.addAll( new ActionInsertFactPlugin( wizard, presenter ).getPages() );
-        } else if ( type.equals( NewColumnTypes.ACTION_RETRACT_FACT.name() ) ) {
-            plugin = null;
-//            pages.addAll( new ActionRetractFactPlugin( wizard, presenter ).getPages() );
-        } else {
-            plugin = null;
-        }
-
-        plugin.init( wizard );
-
-        wizard.start( new ArrayList<WizardPage>() {{
-            addAll( wizard.defaultPages() );
-            addAll( plugin.getPages() );
-        }} );
-
-        wizard.goTo( 1 );
-    }
-
-    private void removeExtraItens() {
-        removeItem( NewColumnTypes.CONDITION_BRL_FRAGMENT.name() );
-        removeItem( NewColumnTypes.ACTION_WORKITEM.name() );
-        removeItem( NewColumnTypes.ACTION_WORKITEM_UPDATE_FACT_FIELD.name() );
-        removeItem( NewColumnTypes.ACTION_WORKITEM_INSERT_FACT_FIELD.name() );
-        removeItem( NewColumnTypes.ACTION_BRL_FRAGMENT.name() );
-    }
-
-    private void addExtraItens() {
-        addItem( 3, GuidedDecisionTableConstants.INSTANCE.AddNewConditionBRLFragment(), NewColumnTypes.CONDITION_BRL_FRAGMENT.name() );
-        addItem( GuidedDecisionTableConstants.INSTANCE.WorkItemAction(), NewColumnTypes.ACTION_WORKITEM.name() );
-        addItem( GuidedDecisionTableConstants.INSTANCE.WorkItemActionSetField(), NewColumnTypes.ACTION_WORKITEM_UPDATE_FACT_FIELD.name() );
-        addItem( GuidedDecisionTableConstants.INSTANCE.WorkItemActionInsertFact(), NewColumnTypes.ACTION_WORKITEM_INSERT_FACT_FIELD.name() );
-        addItem( GuidedDecisionTableConstants.INSTANCE.AddNewActionBRLFragment(), NewColumnTypes.ACTION_BRL_FRAGMENT.name() );
+        view.init( this );
     }
 
     @Override
@@ -187,42 +70,26 @@ public class SummaryPage extends AbstractDecisionTableColumnPage {
         return content;
     }
 
-    private void addItem( final int index,
-                          final String item,
-                          final String value ) {
+    void openPage( final String selectedItemText ) {
+        final AbstractDecisionTableColumnPlugin plugin = findPluginByIdentifier( selectedItemText );
 
-        if ( columnTypeSelectorContainsValue( value ) ) {
-            return;
-        }
+        plugin.init( wizard );
 
-        columnTypeSelector.insertItem( item, value, index );
+        wizard.start( plugin.getPages() );
+        wizard.goTo( 1 );
     }
 
-    private void addItem( final String item,
-                          final String value ) {
-
-        if ( columnTypeSelectorContainsValue( value ) ) {
-            return;
-        }
-
-        columnTypeSelector.addItem( item, value );
-    }
-
-    private void removeItem( String value ) {
-        for ( int itemIndex = 0; itemIndex < columnTypeSelector.getItemCount(); itemIndex++ ) {
-            if ( columnTypeSelector.getValue( itemIndex ).equals( value ) ) {
-                columnTypeSelector.removeItem( itemIndex );
-                break;
+    private AbstractDecisionTableColumnPlugin findPluginByIdentifier( final String selectedItemText ) {
+        for ( AbstractDecisionTableColumnPlugin plugin : this.plugins ) {
+            if ( plugin.getIdentifier().equals( selectedItemText ) ) {
+                return plugin;
             }
         }
+
+        throw new UnsupportedOperationException( "The plugin " + selectedItemText + " does not have an implementation." );
     }
 
-    private boolean columnTypeSelectorContainsValue( final String value ) {
-        for ( int itemIndex = 0; itemIndex < columnTypeSelector.getItemCount(); itemIndex++ ) {
-            if ( columnTypeSelector.getValue( itemIndex ).equals( value ) ) {
-                return true;
-            }
-        }
-        return false;
+    public Instance<AbstractDecisionTableColumnPlugin> getPlugins() {
+        return plugins;
     }
 }
