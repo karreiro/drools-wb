@@ -35,4 +35,8 @@ public abstract class AbstractDecisionTableColumnPlugin implements DecisionTable
     private void setupFinishCommand() {
         wizard.setFinishCommand( this::generateColumn );
     }
+
+    public String getIdentifier() {
+        return getClass().getSimpleName();
+    }
 }

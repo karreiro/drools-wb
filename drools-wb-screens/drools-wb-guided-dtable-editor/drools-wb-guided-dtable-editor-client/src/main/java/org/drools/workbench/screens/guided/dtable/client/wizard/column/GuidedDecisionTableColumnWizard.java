@@ -37,7 +37,7 @@ import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 @Dependent
 public class GuidedDecisionTableColumnWizard extends AbstractWizard {
 
-    private List<WizardPage> pages = new ArrayList<WizardPage>();
+    private List<WizardPage> pages = new ArrayList<>();
 
     private Supplier<Boolean> finishCommand;
 
@@ -77,7 +77,7 @@ public class GuidedDecisionTableColumnWizard extends AbstractWizard {
 
     @Override
     public int getPreferredWidth() {
-        return 1150;
+        return 900;
     }
 
     @Override
@@ -87,7 +87,7 @@ public class GuidedDecisionTableColumnWizard extends AbstractWizard {
 
     @Override
     public void start() {
-        start( defaultPages() );
+        start( new ArrayList<>() );
     }
 
     @Override
@@ -98,19 +98,16 @@ public class GuidedDecisionTableColumnWizard extends AbstractWizard {
     }
 
     public void start( List<WizardPage> pages ) {
-        this.pages = pages;
+        this.pages = new ArrayList<WizardPage>() {{
+            add( summaryPage );
+            addAll( pages );
+        }};
 
         for ( WizardPage page : this.pages ) {
             ( (AbstractDecisionTableColumnPage) page ).init( this );
         }
 
         super.start();
-    }
-
-    public ArrayList<WizardPage> defaultPages() {
-        return new ArrayList<WizardPage>() {{
-            add( summaryPage );
-        }};
     }
 
     public void goTo( final int index ) {
