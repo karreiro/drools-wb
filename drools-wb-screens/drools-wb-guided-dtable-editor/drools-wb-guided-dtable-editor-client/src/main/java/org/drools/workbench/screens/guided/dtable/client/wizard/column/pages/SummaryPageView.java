@@ -19,7 +19,6 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
@@ -47,17 +46,28 @@ public class SummaryPageView extends Composite implements SummaryPage.View {
 
     @EventHandler("pluginsList")
     public void onPluginSelected( ChangeEvent event ) {
-        page.openPage( pluginsList.getSelectedValue() );
+        openSelectedPlugin();
     }
 
     private void setupPlugins() {
+        loadPluginList();
+        setupPluginList();
+    }
+
+    private void openSelectedPlugin() {
+        page.openPage( pluginsList.getSelectedValue() );
+    }
+
+    private void loadPluginList() {
         pluginsList.clear();
 
         for ( AbstractDecisionTableColumnPlugin plugin : page.getPlugins() ) {
             pluginsList.addItem( plugin.getTitle(), plugin.getIdentifier() );
         }
+    }
 
+    private void setupPluginList() {
         pluginsList.setVisibleItemCount( pluginsList.getItemCount() );
-        pluginsList.setSelectedIndex( 0 );
+        pluginsList.setSelectedIndex( -1 );
     }
 }

@@ -34,10 +34,10 @@ public abstract class AbstractDecisionTableColumnPage implements WizardPage {
         initialise();
     }
 
-    @Override
-    public void initialise() {
-        content = new SimplePanel();
-        content.setWidget( view );
-    }
+//    @Override
+//    public void initialise() {
+//        content = new SimplePanel();
+//        content.setWidget( view );
+//    }
 
 }
