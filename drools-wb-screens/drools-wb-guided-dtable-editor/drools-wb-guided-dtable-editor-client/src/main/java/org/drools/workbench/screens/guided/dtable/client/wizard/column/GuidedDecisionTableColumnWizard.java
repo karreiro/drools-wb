@@ -30,6 +30,7 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.Sum
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.core.client.wizards.AbstractWizard;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
+import org.uberfire.ext.widgets.core.client.wizards.WizardView;
 
 /**
  * Wizard for creating a Guided Decision Table
@@ -124,5 +125,9 @@ public class GuidedDecisionTableColumnWizard extends AbstractWizard {
 
     public GuidedDecisionTableView.Presenter getPresenter() {
         return presenter;
+    }
+
+    public WizardView getView() {
+        return view;
     }
 }

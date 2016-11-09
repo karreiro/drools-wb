@@ -45,6 +45,8 @@ public class SummaryPage extends AbstractDecisionTableColumnPage {
     @Inject
     private View view;
 
+    SimplePanel content;
+
     @Override
     public String getTitle() {
         return GuidedDecisionTableConstants.INSTANCE.AddNewColumn();
@@ -66,6 +68,12 @@ public class SummaryPage extends AbstractDecisionTableColumnPage {
     }
 
     @Override
+    public void initialise() {
+        content = new SimplePanel();
+        content.setWidget( view );
+    }
+
+    @Override
     public Widget asWidget() {
         return content;
     }
@@ -76,7 +84,6 @@ public class SummaryPage extends AbstractDecisionTableColumnPage {
         plugin.init( wizard );
 
         wizard.start( plugin.getPages() );
-        wizard.goTo( 1 );
     }
 
     private AbstractDecisionTableColumnPlugin findPluginByIdentifier( final String selectedItemText ) {
