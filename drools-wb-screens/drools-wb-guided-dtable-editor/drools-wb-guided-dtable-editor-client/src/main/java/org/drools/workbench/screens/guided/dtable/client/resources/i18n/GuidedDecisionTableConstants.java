@@ -537,4 +537,6 @@ public interface GuidedDecisionTableConstants
     String NewAttribute();
 
     String NewMetadata();
+
+    String NewConditionColumn();
 }

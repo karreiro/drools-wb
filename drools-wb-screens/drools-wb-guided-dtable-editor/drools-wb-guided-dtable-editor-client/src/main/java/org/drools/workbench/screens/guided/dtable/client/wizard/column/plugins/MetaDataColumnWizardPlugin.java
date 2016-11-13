@@ -23,7 +23,7 @@ import javax.inject.Inject;
 
 import org.drools.workbench.models.guided.dtable.shared.model.MetadataCol52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.MetaDataColumnWizardPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.metadata.MetaDataColumnWizardPage;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 @Dependent

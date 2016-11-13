@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
+package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common;
 
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.uberfire.client.callbacks.Callback;
-import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 /**
  * A summary page for the guided Decision Table Wizard

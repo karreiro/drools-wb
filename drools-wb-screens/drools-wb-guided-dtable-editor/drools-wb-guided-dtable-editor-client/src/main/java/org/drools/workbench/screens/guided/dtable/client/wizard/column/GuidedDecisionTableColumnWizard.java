@@ -25,8 +25,9 @@ import javax.inject.Inject;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AbstractDecisionTableColumnPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.AbstractDecisionTableColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.SummaryPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.AbstractDecisionTableColumnPlugin;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.core.client.wizards.AbstractWizard;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
@@ -91,13 +92,6 @@ public class GuidedDecisionTableColumnWizard extends AbstractWizard {
         start( new ArrayList<>() );
     }
 
-    @Override
-    public void complete() {
-        if ( finishCommand.get() ) {
-            super.complete();
-        }
-    }
-
     public void start( List<WizardPage> pages ) {
         this.pages = new ArrayList<WizardPage>() {{
             add( summaryPage );
@@ -109,6 +103,38 @@ public class GuidedDecisionTableColumnWizard extends AbstractWizard {
         }
 
         super.start();
+    }
+
+    public void start( final AbstractDecisionTableColumnPlugin plugin ) {
+//        this.pages = new ArrayList<WizardPage>() {{
+//            add( summaryPage );
+//            addAll( plugin.getPages() );
+//        }};
+//
+//        plugin.init( this );
+//
+//        super.start();
+
+        this.pages = new ArrayList<WizardPage>() {{
+            add( summaryPage );
+            addAll( plugin.getPages() );
+        }};
+
+        for ( WizardPage page : this.pages ) {
+            ( (AbstractDecisionTableColumnPage) page ).init( this );
+            ( (AbstractDecisionTableColumnPage) page ).init( plugin );
+        }
+
+        plugin.init( this );
+
+        super.start();
+    }
+
+    @Override
+    public void complete() {
+        if ( finishCommand.get() ) {
+            super.complete();
+        }
     }
 
     public void goTo( final int index ) {

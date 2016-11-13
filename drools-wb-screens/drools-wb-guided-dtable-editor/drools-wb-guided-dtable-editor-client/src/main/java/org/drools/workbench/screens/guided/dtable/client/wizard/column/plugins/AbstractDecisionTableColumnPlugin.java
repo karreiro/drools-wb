@@ -18,6 +18,8 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.GuidedDecisionTableColumnWizard;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.AbstractDecisionTableColumnPage;
+import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 public abstract class AbstractDecisionTableColumnPlugin implements DecisionTableColumnGeneratorWizardPlugin {
 
@@ -28,6 +30,13 @@ public abstract class AbstractDecisionTableColumnPlugin implements DecisionTable
     public void init( final GuidedDecisionTableColumnWizard wizard ) {
         this.wizard = wizard;
         this.presenter = wizard.getPresenter();
+
+//        for ( WizardPage wizardPage : getPages() ) {
+//            final AbstractDecisionTableColumnPage page = (AbstractDecisionTableColumnPage) wizardPage;
+//
+//            page.init( this );
+//            page.init( wizard );
+//        }
 
         setupFinishCommand();
     }

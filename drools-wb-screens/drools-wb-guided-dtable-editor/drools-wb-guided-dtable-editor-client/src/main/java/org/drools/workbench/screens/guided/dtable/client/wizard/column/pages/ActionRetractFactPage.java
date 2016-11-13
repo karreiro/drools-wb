@@ -35,11 +35,11 @@ import org.drools.workbench.screens.guided.dtable.client.widget.ActionColumnComm
 import org.drools.workbench.screens.guided.dtable.client.widget.DTCellValueWidgetFactory;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.GuidedDecisionTableColumnWizard;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.AbstractDecisionTableColumnPage;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.common.client.common.FormStyleLayout;
-import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 public class ActionRetractFactPage extends AbstractDecisionTableColumnPage {
 

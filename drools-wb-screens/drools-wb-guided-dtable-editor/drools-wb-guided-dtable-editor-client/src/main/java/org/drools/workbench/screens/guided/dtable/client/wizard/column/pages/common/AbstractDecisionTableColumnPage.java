@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
+package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common;
 
-import com.google.gwt.user.client.ui.SimplePanel;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.GuidedDecisionTableColumnWizard;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.AbstractDecisionTableColumnPlugin;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 public abstract class AbstractDecisionTableColumnPage implements WizardPage {
@@ -27,11 +27,19 @@ public abstract class AbstractDecisionTableColumnPage implements WizardPage {
 
     protected GuidedDecisionTableView.Presenter presenter;
 
+    protected AbstractDecisionTableColumnPlugin plugin;
+
+    @Deprecated
     public void init( final GuidedDecisionTableColumnWizard wizard ) {
         this.wizard = wizard;
         this.presenter = wizard.getPresenter();
 
         initialise();
+    }
+
+    @Deprecated
+    public void init( final AbstractDecisionTableColumnPlugin plugin ) {
+        this.plugin = plugin;
     }
 
 //    @Override
