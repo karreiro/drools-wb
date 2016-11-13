@@ -21,10 +21,9 @@ import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.core.client.GWT;
 import org.drools.workbench.models.guided.dtable.shared.model.AttributeCol52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AttributeColumnWizardPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.attribute.AttributeColumnWizardPage;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 @Dependent

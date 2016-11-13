@@ -20,11 +20,11 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.GuidedDecisionTableColumnWizard;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.AbstractDecisionTableColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.AbstractDecisionTableColumnPlugin;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.UberView;
@@ -35,17 +35,13 @@ import org.uberfire.client.mvp.UberView;
 @Dependent
 public class SummaryPage extends AbstractDecisionTableColumnPage {
 
-    public interface View extends UberView<SummaryPage> {
-
-    }
+    SimplePanel content;
 
     @Inject
     private Instance<AbstractDecisionTableColumnPlugin> plugins;
 
     @Inject
     private View view;
-
-    SimplePanel content;
 
     @Override
     public String getTitle() {
@@ -81,9 +77,7 @@ public class SummaryPage extends AbstractDecisionTableColumnPage {
     void openPage( final String selectedItemText ) {
         final AbstractDecisionTableColumnPlugin plugin = findPluginByIdentifier( selectedItemText );
 
-        plugin.init( wizard );
-
-        wizard.start( plugin.getPages() );
+        wizard.start( plugin );
     }
 
     private AbstractDecisionTableColumnPlugin findPluginByIdentifier( final String selectedItemText ) {
@@ -98,5 +92,9 @@ public class SummaryPage extends AbstractDecisionTableColumnPage {
 
     public Instance<AbstractDecisionTableColumnPlugin> getPlugins() {
         return plugins;
+    }
+
+    public interface View extends UberView<SummaryPage> {
+
     }
 }

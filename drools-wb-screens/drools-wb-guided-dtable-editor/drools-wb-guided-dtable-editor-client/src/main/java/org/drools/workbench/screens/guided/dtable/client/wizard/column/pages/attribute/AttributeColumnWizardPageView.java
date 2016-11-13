@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
+package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.attribute;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;

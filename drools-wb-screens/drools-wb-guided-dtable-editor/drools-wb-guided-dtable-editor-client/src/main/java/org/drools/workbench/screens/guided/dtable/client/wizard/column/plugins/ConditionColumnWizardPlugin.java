@@ -18,120 +18,85 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
-import com.google.gwt.user.client.Window;
-import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
-import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.GuidedDecisionTableColumnWizard;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.ConditionColumnPickFactTypeWizardPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.condition.AdditionalInfoWizardPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.condition.CalculationTypeWizardPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.condition.ConditionColumnWizardPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.condition.FactFieldWizardPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.condition.OperatorWizardPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.condition.PatternWizardPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.condition.ValueOptionsWizardPage;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
-public class ConditionColumnWizardPlugin implements DecisionTableColumnGeneratorWizardPlugin {
+@Dependent
+public class ConditionColumnWizardPlugin extends AbstractDecisionTableColumnPlugin {
 
-    //These pages contain the Widgets to define the column
-    private ConditionColumnPickFactTypeWizardPage factTypePage;
-//    private WizardPage fieldPage;
-//    private WizardPage operatorPage;
+    @Inject
+    private ConditionColumnWizardPage conditionColumnWizardPage;
 
-    public ConditionColumnWizardPlugin( final GuidedDecisionTableColumnWizard wizard,
-                                        final GuidedDecisionTableView.Presenter presenter ) {
-        wizard.setFinishCommand( this::generateColumn );
+    @Inject
+    private PatternWizardPage patternWizardPage;
 
-        factTypePage = new ConditionColumnPickFactTypeWizardPage( wizard, presenter ) {{
-            initialise();
-        }};
-//        fieldPage = new ConditionColumnPickFieldWizardPage();
-//        operatorPage = new ConditionColumnPickOperatorWizardPage();
-    }
+    @Inject
+    private CalculationTypeWizardPage calculationTypeWizardPage;
+
+    @Inject
+    private FactFieldWizardPage factFieldWizardPage;
+
+    @Inject
+    private OperatorWizardPage operatorWizardPage;
+
+    @Inject
+    private AdditionalInfoWizardPage additionalInfoWizardPage;
+
+    @Inject
+    private ValueOptionsWizardPage valueOptionsWizardPage;
+
+    private Pattern52 editingPattern;
+
+    private ConditionCol52 editingCol;
 
     @Override
     public String getTitle() {
-        return "Add new Condition column";
+        return GuidedDecisionTableConstants.INSTANCE.NewConditionColumn();
     }
 
     @Override
     public List<WizardPage> getPages() {
         return new ArrayList<WizardPage>() {{
-            add( factTypePage );
-//            add( fieldPage );
-//            add( operatorPage );
+            add( conditionColumnWizardPage );
+            add( patternWizardPage );
+            add( calculationTypeWizardPage );
+            add( factFieldWizardPage );
+            add( operatorWizardPage );
+            add( valueOptionsWizardPage );
+            add( additionalInfoWizardPage );
         }};
     }
 
     @Override
     public Boolean generateColumn() {
-        final ConditionCol52 editingCol = factTypePage.getEditingCol();
-        final ConditionCol52 originalCol = factTypePage.getOriginalCol();
-
-        if ( null == editingCol.getHeader() || "".equals( editingCol.getHeader() ) ) {
-            Window.alert( GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnHeaderValueDescription() );
-            return false;
-        }
-        if ( editingCol.getConstraintValueType() != BaseSingleFieldConstraint.TYPE_PREDICATE ) {
-
-            //Field mandatory for Literals and Formulae
-            if ( null == editingCol.getFactField() || "".equals( editingCol.getFactField() ) ) {
-                Window.alert( GuidedDecisionTableConstants.INSTANCE.PleaseSelectOrEnterField() );
-                return false;
-            }
-
-            //Operator optional for Literals and Formulae
-            if ( editingCol.getOperator() == null ) {
-                Window.alert( GuidedDecisionTableConstants.INSTANCE.NotifyNoSelectedOperator() );
-                return false;
-            }
-
-        } else {
-
-            //Clear operator for predicates, but leave field intact for interpolation of $param values
-            editingCol.setOperator( null );
-        }
-
-        //Check for unique binding
-        if ( factTypePage.isNew() ) {
-            if ( editingCol.isBound() && !factTypePage.isBindingUnique( editingCol.getBinding() ) ) {
-                Window.alert( GuidedDecisionTableConstants.INSTANCE.PleaseEnterANameThatIsNotAlreadyUsedByAnotherPattern() );
-                return false;
-            }
-        } else {
-            if ( originalCol.isBound() && editingCol.isBound() ) {
-                if ( !originalCol.getBinding().equals( editingCol.getBinding() ) ) {
-                    if ( editingCol.isBound() && !factTypePage.isBindingUnique( editingCol.getBinding() ) ) {
-                        Window.alert( GuidedDecisionTableConstants.INSTANCE.PleaseEnterANameThatIsNotAlreadyUsedByAnotherPattern() );
-                        return false;
-                    }
-                }
-            }
-        }
-
-        //Check column header is unique
-        if ( factTypePage.isNew() ) {
-            if ( !factTypePage.unique( editingCol.getHeader() ) ) {
-                Window.alert( GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother() );
-                return false;
-            }
-        } else {
-            if ( !originalCol.getHeader().equals( editingCol.getHeader() ) ) {
-                if ( !factTypePage.unique( editingCol.getHeader() ) ) {
-                    Window.alert( GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother() );
-                    return false;
-                }
-            }
-        }
-
-        //Clear binding if column is not a literal
-        if ( editingCol.getConstraintValueType() != BaseSingleFieldConstraint.TYPE_LITERAL ) {
-            editingCol.setBinding( null );
-        }
-
-        // Pass new\modified column back for handling
-        factTypePage.refreshGrid();
         return true;
+    }
 
+    public Pattern52 getEditingPattern() {
+        return editingPattern;
+    }
 
-//        hide();
+    public void setEditingPattern( final Pattern52 editingPattern ) {
+        this.editingPattern = editingPattern;
+    }
 
+    public ConditionCol52 getEditingCol() {
+        return editingCol;
+    }
+
+    public void setEditingCol( final ConditionCol52 editingCol ) {
+        this.editingCol = editingCol;
     }
 }
