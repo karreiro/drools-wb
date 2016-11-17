@@ -21,13 +21,13 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.GuidedDec
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.AbstractDecisionTableColumnPlugin;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
-public abstract class AbstractDecisionTableColumnPage implements WizardPage {
+public abstract class AbstractDecisionTableColumnPage<T extends AbstractDecisionTableColumnPlugin> implements WizardPage {
 
     protected GuidedDecisionTableColumnWizard wizard;
 
     protected GuidedDecisionTableView.Presenter presenter;
 
-    protected AbstractDecisionTableColumnPlugin plugin;
+    protected T plugin;
 
     @Deprecated
     public void init( final GuidedDecisionTableColumnWizard wizard ) {
@@ -38,8 +38,12 @@ public abstract class AbstractDecisionTableColumnPage implements WizardPage {
     }
 
     @Deprecated
-    public void init( final AbstractDecisionTableColumnPlugin plugin ) {
+    public void init( final T plugin ) {
         this.plugin = plugin;
+    }
+
+    protected T plugin() {
+        return plugin;
     }
 
 //    @Override

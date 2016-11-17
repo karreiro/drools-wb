@@ -20,22 +20,28 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.AbstractDecisionTableColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.UberView;
+import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
 
 @Dependent
-public class PatternWizardPage extends AbstractDecisionTableColumnPage {
+public class PatternWizardPage extends AbstractDecisionTableColumnPage<ConditionColumnWizardPlugin> {
 
     @Inject
     private View view;
+
+    @Inject
+    private Event<WizardPageStatusChangeEvent> wizardPageStatusChangeEvent;
 
     private SimplePanel content = new SimplePanel();
 
@@ -51,7 +57,7 @@ public class PatternWizardPage extends AbstractDecisionTableColumnPage {
 
     @Override
     public void isComplete( final Callback<Boolean> callback ) {
-        callback.callback( true );
+        callback.callback( plugin().getEditingPattern() != null );
     }
 
     @Override
@@ -69,8 +75,8 @@ public class PatternWizardPage extends AbstractDecisionTableColumnPage {
 
         presenter.getModel().getPatterns().forEach( pattern52 -> {
             if ( !addedBounds.contains( pattern52.getBoundName() ) ) {
-                final String item = patternName( pattern52 );
-                final String value = patternValue( pattern52 );
+                final String item = patternToName( pattern52 );
+                final String value = patternToValue( pattern52 );
 
                 biConsumer.accept( item, value );
 
@@ -79,21 +85,42 @@ public class PatternWizardPage extends AbstractDecisionTableColumnPage {
         } );
     }
 
-    private String patternValue( final Pattern52 pattern52 ) {
+    void clearEditingCol() {
+        final ConditionCol52 editingCol = plugin().getEditingCol();
+
+        if ( editingCol == null ) {
+            return;
+        }
+
+        editingCol.setFactField( null );
+        editingCol.setOperator( null );
+    }
+
+    Pattern52 getEditingPattern() {
+        return plugin().getEditingPattern();
+    }
+
+    void setEditingPattern( final String selectedValue ) {
+        final String boundName = selectedValue.split( "\\s" )[ 1 ];
+
+        plugin().setEditingPattern( presenter.getModel().getConditionPattern( boundName ) );
+
+        stateChanged();
+    }
+
+    String patternToValue( final Pattern52 pattern52 ) {
         return pattern52.getFactType() + " " + pattern52.getBoundName() + " " + pattern52.isNegated();
     }
 
-    private String patternName( final Pattern52 pattern52 ) {
+    private String patternToName( final Pattern52 pattern52 ) {
         final String prefix = pattern52.isNegated() ? GuidedDecisionTableConstants.INSTANCE.negatedPattern() + " " : "";
 
         return prefix + pattern52.getFactType() + " [" + pattern52.getBoundName() + "]";
     }
 
-    public void setEditingPattern( final String selectedValue ) {
-        final ConditionColumnWizardPlugin conditionColumnWizardPlugin = (ConditionColumnWizardPlugin) plugin;
-        final String boundName = selectedValue.split( "\\s" )[ 1 ];
-
-        conditionColumnWizardPlugin.setEditingPattern( presenter.getModel().getConditionPattern( boundName ) );
+    private void stateChanged() {
+        final WizardPageStatusChangeEvent event = new WizardPageStatusChangeEvent( this );
+        wizardPageStatusChangeEvent.fire( event );
     }
 
     public interface View extends UberView<PatternWizardPage> {

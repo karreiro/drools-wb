@@ -38,7 +38,7 @@ import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.UberView;
 
 @Dependent
-public class FactFieldWizardPage extends AbstractDecisionTableColumnPage {
+public class FactFieldWizardPage extends AbstractDecisionTableColumnPage<ConditionColumnWizardPlugin> {
 
     @Inject
     private View view;
@@ -73,9 +73,13 @@ public class FactFieldWizardPage extends AbstractDecisionTableColumnPage {
     }
 
     List<String> factFields() {
-        final ConditionColumnWizardPlugin conditionColumnWizardPlugin = (ConditionColumnWizardPlugin) plugin;
         final List<String> fields = new ArrayList<>();
-        final Pattern52 pattern52 = conditionColumnWizardPlugin.getEditingPattern();
+        final Pattern52 pattern52 = plugin().getEditingPattern();
+
+        if ( pattern52 != null ) {
+            return fields;
+        }
+
         final String factType = pattern52.getFactType();
         final AsyncPackageDataModelOracle oracle = presenter.getDataModelOracle();
 

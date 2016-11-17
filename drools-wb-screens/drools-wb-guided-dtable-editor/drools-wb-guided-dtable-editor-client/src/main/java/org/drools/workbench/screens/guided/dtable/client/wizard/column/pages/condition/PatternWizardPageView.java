@@ -22,6 +22,7 @@ import javax.inject.Inject;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
+import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -46,6 +47,7 @@ public class PatternWizardPageView extends Composite implements PatternWizardPag
     @EventHandler("patternsList")
     public void onPluginSelected( ChangeEvent event ) {
         page.setEditingPattern( patternsList.getSelectedValue() );
+        page.clearEditingCol();
     }
 
     private void setupPatternList( final PatternWizardPage page ) {
@@ -53,5 +55,25 @@ public class PatternWizardPageView extends Composite implements PatternWizardPag
         patternsList.addItem( "-- Select a pattern --", "" );
 
         page.forEachPattern( ( item, value ) -> patternsList.addItem( item, value ) );
+
+        patternsList.setSelectedIndex( getCurrentPatternIndex() );
+    }
+
+    private int getCurrentPatternIndex() {
+        for ( int index = 0; index < patternsList.getItemCount(); index++ ) {
+            final String value = patternsList.getValue( index );
+
+            if ( value.equals( currentPatternValue() ) ) {
+                return index;
+            }
+        }
+
+        return -1;
+    }
+
+    private String currentPatternValue() {
+        final Pattern52 currentPattern = page.getEditingPattern();
+
+        return currentPattern == null ? "" : page.patternToValue( currentPattern );
     }
 }
