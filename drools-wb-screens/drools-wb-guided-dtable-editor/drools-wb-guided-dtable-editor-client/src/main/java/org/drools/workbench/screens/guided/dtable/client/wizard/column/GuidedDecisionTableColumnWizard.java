@@ -84,7 +84,16 @@ public class GuidedDecisionTableColumnWizard extends AbstractWizard {
 
     @Override
     public void isComplete( final Callback<Boolean> callback ) {
+        //Assume complete
         callback.callback( true );
+
+        for ( WizardPage page : this.pages ) {
+            page.isComplete( result -> {
+                if ( Boolean.FALSE.equals( result ) ) {
+                    callback.callback( false );
+                }
+            } );
+        }
     }
 
     @Override

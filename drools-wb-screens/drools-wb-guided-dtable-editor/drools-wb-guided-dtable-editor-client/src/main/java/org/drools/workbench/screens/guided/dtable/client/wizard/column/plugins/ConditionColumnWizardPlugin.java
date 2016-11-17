@@ -61,6 +61,8 @@ public class ConditionColumnWizardPlugin extends AbstractDecisionTableColumnPlug
 
     private ConditionCol52 editingCol;
 
+    private int constraintValue;
+
     @Override
     public String getTitle() {
         return GuidedDecisionTableConstants.INSTANCE.NewConditionColumn();
@@ -98,5 +100,13 @@ public class ConditionColumnWizardPlugin extends AbstractDecisionTableColumnPlug
 
     public void setEditingCol( final ConditionCol52 editingCol ) {
         this.editingCol = editingCol;
+    }
+
+    public int getConstraintValue() {
+        return constraintValue;
+    }
+
+    public void setConstraintValue( final int constraintValue ) {
+        this.constraintValue = constraintValue;
     }
 }

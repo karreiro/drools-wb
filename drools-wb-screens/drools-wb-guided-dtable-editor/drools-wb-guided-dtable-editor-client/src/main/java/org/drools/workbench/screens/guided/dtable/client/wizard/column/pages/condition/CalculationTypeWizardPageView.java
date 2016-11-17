@@ -19,11 +19,10 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.co
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.user.client.ui.Composite;
-import org.gwtbootstrap3.client.ui.Radio;
+import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
+import org.jboss.errai.common.client.dom.Input;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -32,22 +31,55 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 @Templated
 public class CalculationTypeWizardPageView extends Composite implements CalculationTypeWizardPage.View {
 
-//    @Inject
-//    @DataField("constraintValueTypeLiteral")
-//    Radio constraintValueTypeLiteral;
-//
-//    @Inject
-//    @DataField("constraintValueTypeRetValue")
-//    Radio constraintValueTypeRetValue;
-//
-//    @Inject
-//    @DataField("constraintValueTypePredicate")
-//    Radio constraintValueTypePredicate;
+    @Inject
+    @DataField("isConstraintValueTypeLiteral")
+    Input isConstraintValueTypeLiteral;
+
+    @Inject
+    @DataField("isConstraintValueTypeRetValue")
+    Input isConstraintValueTypeRetValue;
+
+    @Inject
+    @DataField("isConstraintValueTypePredicate")
+    Input isConstraintValueTypePredicate;
 
     private CalculationTypeWizardPage page;
+
+    @EventHandler({ "isConstraintValueTypeLiteral", "isConstraintValueTypeRetValue", "isConstraintValueTypePredicate" })
+    public void onPluginSelected( ChangeEvent event ) {
+        page.setConstraintValue( constraintValue() );
+    }
 
     @Override
     public void init( final CalculationTypeWizardPage page ) {
         this.page = page;
+
+        selectConstraintValue();
     }
+
+    private void selectConstraintValue() {
+        switch ( page.getConstraintValue() ) {
+            case BaseSingleFieldConstraint.TYPE_LITERAL:
+                isConstraintValueTypeLiteral.setChecked( true );
+                break;
+            case BaseSingleFieldConstraint.TYPE_RET_VALUE:
+                isConstraintValueTypeRetValue.setChecked( true );
+                break;
+            case BaseSingleFieldConstraint.TYPE_PREDICATE:
+                isConstraintValueTypePredicate.setChecked( true );
+                break;
+        }
+    }
+
+    private int constraintValue() {
+        if ( isConstraintValueTypeLiteral.getChecked() ) {
+            return BaseSingleFieldConstraint.TYPE_LITERAL;
+        } else if ( isConstraintValueTypeRetValue.getChecked() ) {
+            return BaseSingleFieldConstraint.TYPE_RET_VALUE;
+        } else if ( isConstraintValueTypePredicate.getChecked() ) {
+            return BaseSingleFieldConstraint.TYPE_PREDICATE;
+        }
+        return BaseSingleFieldConstraint.TYPE_UNDEFINED;
+    }
+
 }

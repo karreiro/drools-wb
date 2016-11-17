@@ -52,7 +52,7 @@ public class ValueOptionsWizardPage extends AbstractDecisionTableColumnPage {
 
     @Override
     public String getTitle() {
-        return "Additional info";
+        return "Value options";
     }
 
     @Override

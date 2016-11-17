@@ -17,20 +17,27 @@
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.condition;
 
 import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.AbstractDecisionTableColumnPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.UberView;
+import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
 
 @Dependent
-public class CalculationTypeWizardPage extends AbstractDecisionTableColumnPage {
+public class CalculationTypeWizardPage extends AbstractDecisionTableColumnPage<ConditionColumnWizardPlugin> {
 
     @Inject
     private View view;
+
+    @Inject
+    private Event<WizardPageStatusChangeEvent> wizardPageStatusChangeEvent;
 
     private SimplePanel content = new SimplePanel();
 
@@ -46,7 +53,7 @@ public class CalculationTypeWizardPage extends AbstractDecisionTableColumnPage {
 
     @Override
     public void isComplete( final Callback<Boolean> callback ) {
-        callback.callback( true );
+        callback.callback( plugin().getConstraintValue() != BaseSingleFieldConstraint.TYPE_UNDEFINED );
     }
 
     @Override
@@ -57,6 +64,20 @@ public class CalculationTypeWizardPage extends AbstractDecisionTableColumnPage {
     @Override
     public Widget asWidget() {
         return content;
+    }
+
+    int getConstraintValue() {
+        return plugin().getConstraintValue();
+    }
+
+    void setConstraintValue( final int constraintValue ) {
+        plugin().setConstraintValue( constraintValue );
+        stateChanged();
+    }
+
+    private void stateChanged() {
+        final WizardPageStatusChangeEvent event = new WizardPageStatusChangeEvent( this );
+        wizardPageStatusChangeEvent.fire( event );
     }
 
     public interface View extends UberView<CalculationTypeWizardPage> {

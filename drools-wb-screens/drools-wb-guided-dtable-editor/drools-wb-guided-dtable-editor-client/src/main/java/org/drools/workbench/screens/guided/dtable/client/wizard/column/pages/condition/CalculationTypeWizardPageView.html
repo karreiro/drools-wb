@@ -16,21 +16,28 @@
 
 <div>
     <div>
-        <label class="col-sm-3 form-control-label" data-i18n-key="Metadata">Calculation type:</label>
+        <div class="form-group">
+            <h5 class="label label-default">Select the Calculation type</h5>
+            <hr/>
+        </div>
 
-        <div class="col-sm-9">
-            <label class="radio-inline">
-                <input type="radio" data-field="constraintValueTypeLiteral" name="constraintValueType" />
-                <span>Literal value</span>
-            </label>
-            <label class="radio-inline">
-                <input type="radio" data-field="constraintValueTypeRetValue" name="constraintValueType" />
-                <span>Formula</span>
-            </label>
-            <label class="radio-inline">
-                <input type="radio" data-field="constraintValueTypePredicate" name="constraintValueType" />
-                <span>Predicate</span>
-            </label>
+        <div class="form-group">
+            <label class="col-sm-3 form-control-label" data-i18n-key="Metadata">Calculation type:</label>
+
+            <div class="col-sm-9">
+                <label class="radio-inline">
+                    <input type="radio" data-field="isConstraintValueTypeLiteral" name="constraintValueType"/>
+                    <span>Literal value</span>
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" data-field="isConstraintValueTypeRetValue" name="constraintValueType"/>
+                    <span>Formula</span>
+                </label>
+                <label class="radio-inline">
+                    <input type="radio" data-field="isConstraintValueTypePredicate" name="constraintValueType"/>
+                    <span>Predicate</span>
+                </label>
+            </div>
         </div>
     </div>
 </div>
