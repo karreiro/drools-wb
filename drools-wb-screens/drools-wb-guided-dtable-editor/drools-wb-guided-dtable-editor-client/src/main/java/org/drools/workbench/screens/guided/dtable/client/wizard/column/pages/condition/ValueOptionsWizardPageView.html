@@ -1,0 +1,72 @@
+<!--
+  ~ Copyright 2016 Red Hat, Inc. and/or its affiliates.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div>
+    <div class="form-group">
+        <h5 class="label label-default">Insert some information about the value</h5>
+        <hr />
+    </div>
+
+    <div class="form-horizontal">
+        <div class="form-group">
+            <label class="col-sm-3 control-label" data-i18n-key="Metadata">Value list (optional):</label>
+
+            <div class="col-sm-9">
+                <input type="text" data-field="valueList"/>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div data-field="cepWindowOperatorsLabel" class="col-sm-3 control-label" data-i18n-key="Metadata">
+                Over sliding window:
+            </div>
+
+            <div class="col-sm-9">
+                <div data-field="cepWindowOperatorsContainer"></div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div data-field="defaultValueLabel" class="col-sm-3 control-label" data-i18n-key="Metadata">
+                Default value:
+            </div>
+
+            <div class="col-sm-9">
+                <div type="text" data-field="defaultValueContainer"></div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div data-field="limitedValueLabel" class="col-sm-3 control-label" data-i18n-key="Metadata">
+                Constraint value:
+            </div>
+
+            <div class="col-sm-9">
+                <div type="text" data-field="limitedValueContainer"></div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div data-field="bindingLabel" class="col-sm-3 control-label" data-i18n-key="Metadata">
+                Binding:
+            </div>
+
+            <div class="col-sm-9">
+                <div type="text" data-field="bindingContainer"></div>
+            </div>
+        </div>
+    </div>
+</div>
