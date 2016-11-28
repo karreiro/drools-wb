@@ -47,9 +47,11 @@ import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi
 import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi.RefreshConditionsPanelEvent;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi.RefreshMetaDataPanelEvent;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.popovers.ColumnHeaderPopOver;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.GuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.model.GuidedDecisionTableEditorContent;
 import org.guvnor.common.services.shared.metadata.model.Overview;
 import org.jboss.errai.ioc.client.api.ManagedInstance;
+import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,6 +75,9 @@ public class GuidedDecisionTableModellerPresenterTest {
 
     @Mock
     private GuidedDecisionTableModellerView view;
+
+    @Mock
+    private SyncBeanManager iocManager;
 
     @Mock
     private GridLayer gridLayer;
@@ -128,7 +133,8 @@ public class GuidedDecisionTableModellerPresenterTest {
                                                                                                        contextMenuSupport,
                                                                                                        updateRadarEvent,
                                                                                                        pinnedEvent,
-                                                                                                       columnHeaderPopOver );
+                                                                                                       columnHeaderPopOver,
+                                                                                                       iocManager );
         presenter = spy( wrapped );
 
         when( dtablePresenterProvider.get() ).thenReturn( dtablePresenter );
