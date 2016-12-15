@@ -16,10 +16,10 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.condition;
 
+import java.util.function.Supplier;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.ait.tooling.common.api.java.util.function.Supplier;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Label;

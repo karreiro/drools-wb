@@ -57,7 +57,7 @@ public class ValueOptionsWizardPage extends AbstractDecisionTableColumnPage<Cond
 
     @Override
     public void isComplete( final Callback<Boolean> callback ) {
-        callback.callback( true );
+        callback.callback( false );
     }
 
     @Override

@@ -71,7 +71,7 @@ public class ConditionColumnWizardPlugin extends AbstractDecisionTableColumnPlug
     @Override
     public List<WizardPage> getPages() {
         return new ArrayList<WizardPage>() {{
-            add( conditionColumnWizardPage );
+//            add( conditionColumnWizardPage );
             add( patternWizardPage );
             add( calculationTypeWizardPage );
             add( factFieldWizardPage );
