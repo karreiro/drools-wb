@@ -58,7 +58,7 @@ public class AdditionalInfoWizardPage extends AbstractDecisionTableColumnPage {
 
     @Override
     public void isComplete( final Callback<Boolean> callback ) {
-        callback.callback( true );
+        callback.callback( false );
     }
 
     @Override
