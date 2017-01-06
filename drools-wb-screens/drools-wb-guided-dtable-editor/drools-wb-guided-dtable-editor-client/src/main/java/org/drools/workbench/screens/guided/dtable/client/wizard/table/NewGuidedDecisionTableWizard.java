@@ -44,6 +44,7 @@ import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.core.client.wizards.AbstractWizard;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
+import org.uberfire.ext.widgets.core.client.wizards.WizardView;
 
 /**
  * Wizard for creating a Guided Decision Table
@@ -215,6 +216,14 @@ public class NewGuidedDecisionTableWizard extends AbstractWizard {
         handler.save( contextPath,
                       baseFileName,
                       model );
+    }
+
+    @Inject
+    private WizardView view;
+
+    @Override
+    protected WizardView getView() {
+        return view;
     }
 
     @Override

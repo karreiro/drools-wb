@@ -82,21 +82,6 @@ public class GuidedDecisionTableModellerViewImpl extends Composite implements Gu
 
     private static GuidedDecisionTableModellerViewImplUiBinder uiBinder = GWT.create( GuidedDecisionTableModellerViewImplUiBinder.class );
 
-    private static String SECTION_SEPARATOR = "..................";
-
-    private enum NewColumnTypes {
-        METADATA_ATTRIBUTE,
-        CONDITION_SIMPLE,
-        CONDITION_BRL_FRAGMENT,
-        ACTION_UPDATE_FACT_FIELD,
-        ACTION_INSERT_FACT_FIELD,
-        ACTION_RETRACT_FACT,
-        ACTION_WORKITEM,
-        ACTION_WORKITEM_UPDATE_FACT_FIELD,
-        ACTION_WORKITEM_INSERT_FACT_FIELD,
-        ACTION_BRL_FRAGMENT
-    }
-
     private TransformMediator defaultTransformMediator;
     private GuidedDecisionTableModellerView.Presenter presenter;
 
@@ -356,164 +341,13 @@ public class GuidedDecisionTableModellerViewImpl extends Composite implements Gu
     }
 
     private Widget newColumn() {
-        addButton.addClickHandler( new ClickHandler() {
-            public void onClick( ClickEvent w ) {
-                doNewColumn();
-            }
-        } );
+        addButton.addClickHandler( w -> doNewColumn() );
 
         return addButton;
     }
 
     private void doNewColumn() {
-        final FormStylePopup pop = new FormStylePopup( GuidedDecisionTableConstants.INSTANCE.AddNewColumn() );
-
-        //List of basic column types
-        final ListBox choice = new ListBox();
-        choice.setVisibleItemCount( NewColumnTypes.values().length );
-        choice.setWidth( "100%" );
-
-        choice.addItem( GuidedDecisionTableConstants.INSTANCE.AddNewMetadataOrAttributeColumn(),
-                        NewColumnTypes.METADATA_ATTRIBUTE.name() );
-        choice.addItem( SECTION_SEPARATOR );
-        choice.addItem( GuidedDecisionTableConstants.INSTANCE.AddNewConditionSimpleColumn(),
-                        NewColumnTypes.CONDITION_SIMPLE.name() );
-        choice.addItem( SECTION_SEPARATOR );
-        choice.addItem( GuidedDecisionTableConstants.INSTANCE.SetTheValueOfAField(),
-                        NewColumnTypes.ACTION_UPDATE_FACT_FIELD.name() );
-        choice.addItem( GuidedDecisionTableConstants.INSTANCE.SetTheValueOfAFieldOnANewFact(),
-                        NewColumnTypes.ACTION_INSERT_FACT_FIELD.name() );
-        choice.addItem( GuidedDecisionTableConstants.INSTANCE.DeleteAnExistingFact(),
-                        NewColumnTypes.ACTION_RETRACT_FACT.name() );
-
-        //Checkbox to include Advanced Action types
-        final CheckBox chkIncludeAdvancedOptions = new CheckBox( SafeHtmlUtils.fromString( GuidedDecisionTableConstants.INSTANCE.IncludeAdvancedOptions() ) );
-        chkIncludeAdvancedOptions.setValue( false );
-        chkIncludeAdvancedOptions.addClickHandler( new ClickHandler() {
-
-            public void onClick( ClickEvent event ) {
-                if ( chkIncludeAdvancedOptions.getValue() ) {
-                    addItem( 3,
-                             GuidedDecisionTableConstants.INSTANCE.AddNewConditionBRLFragment(),
-                             NewColumnTypes.CONDITION_BRL_FRAGMENT.name() );
-                    addItem( GuidedDecisionTableConstants.INSTANCE.WorkItemAction(),
-                             NewColumnTypes.ACTION_WORKITEM.name() );
-                    addItem( GuidedDecisionTableConstants.INSTANCE.WorkItemActionSetField(),
-                             NewColumnTypes.ACTION_WORKITEM_UPDATE_FACT_FIELD.name() );
-                    addItem( GuidedDecisionTableConstants.INSTANCE.WorkItemActionInsertFact(),
-                             NewColumnTypes.ACTION_WORKITEM_INSERT_FACT_FIELD.name() );
-                    addItem( GuidedDecisionTableConstants.INSTANCE.AddNewActionBRLFragment(),
-                             NewColumnTypes.ACTION_BRL_FRAGMENT.name() );
-                } else {
-                    removeItem( NewColumnTypes.CONDITION_BRL_FRAGMENT.name() );
-                    removeItem( NewColumnTypes.ACTION_WORKITEM.name() );
-                    removeItem( NewColumnTypes.ACTION_WORKITEM_UPDATE_FACT_FIELD.name() );
-                    removeItem( NewColumnTypes.ACTION_WORKITEM_INSERT_FACT_FIELD.name() );
-                    removeItem( NewColumnTypes.ACTION_BRL_FRAGMENT.name() );
-                }
-            }
-
-            private void addItem( int index,
-                                  String item,
-                                  String value ) {
-                for ( int itemIndex = 0; itemIndex < choice.getItemCount(); itemIndex++ ) {
-                    if ( choice.getValue( itemIndex ).equals( value ) ) {
-                        return;
-                    }
-                }
-                choice.insertItem( item,
-                                   value,
-                                   index );
-            }
-
-            private void addItem( String item,
-                                  String value ) {
-                for ( int itemIndex = 0; itemIndex < choice.getItemCount(); itemIndex++ ) {
-                    if ( choice.getValue( itemIndex ).equals( value ) ) {
-                        return;
-                    }
-                }
-                choice.addItem( item,
-                                value );
-            }
-
-            private void removeItem( String value ) {
-                for ( int itemIndex = 0; itemIndex < choice.getItemCount(); itemIndex++ ) {
-                    if ( choice.getValue( itemIndex ).equals( value ) ) {
-                        choice.removeItem( itemIndex );
-                        break;
-                    }
-                }
-            }
-
-        } );
-
-        //OK button to create column
-        final ModalFooterOKCancelButtons footer = new ModalFooterOKCancelButtons( new Command() {
-            @Override
-            public void execute() {
-                String s = choice.getValue( choice.getSelectedIndex() );
-                if ( s.equals( NewColumnTypes.METADATA_ATTRIBUTE.name() ) ) {
-                    presenter.getActiveDecisionTable().newAttributeOrMetaDataColumn();
-
-                } else if ( s.equals( NewColumnTypes.CONDITION_SIMPLE.name() ) ) {
-                    presenter.getActiveDecisionTable().newConditionColumn();
-
-                } else if ( s.equals( NewColumnTypes.CONDITION_BRL_FRAGMENT.name() ) ) {
-                    presenter.getActiveDecisionTable().newConditionBRLFragment();
-
-                } else if ( s.equals( NewColumnTypes.ACTION_INSERT_FACT_FIELD.name() ) ) {
-                    presenter.getActiveDecisionTable().newActionInsertColumn();
-
-                } else if ( s.equals( NewColumnTypes.ACTION_UPDATE_FACT_FIELD.name() ) ) {
-                    presenter.getActiveDecisionTable().newActionSetColumn();
-
-                } else if ( s.equals( NewColumnTypes.ACTION_RETRACT_FACT.name() ) ) {
-                    presenter.getActiveDecisionTable().newActionRetractFact();
-
-                } else if ( s.equals( NewColumnTypes.ACTION_WORKITEM.name() ) ) {
-                    presenter.getActiveDecisionTable().newActionWorkItem();
-
-                } else if ( s.equals( NewColumnTypes.ACTION_WORKITEM_UPDATE_FACT_FIELD.name() ) ) {
-                    presenter.getActiveDecisionTable().newActionWorkItemSetField();
-
-                } else if ( s.equals( NewColumnTypes.ACTION_WORKITEM_INSERT_FACT_FIELD.name() ) ) {
-                    presenter.getActiveDecisionTable().newActionWorkItemInsertFact();
-
-                } else if ( s.equals( NewColumnTypes.ACTION_BRL_FRAGMENT.name() ) ) {
-                    presenter.getActiveDecisionTable().newActionBRLFragment();
-
-                }
-                pop.hide();
-            }
-
-        }, new Command() {
-            @Override
-            public void execute() {
-                pop.hide();
-            }
-        } );
-
-        //If a separator is clicked disable OK button
-        choice.addClickHandler( new ClickHandler() {
-
-            public void onClick( ClickEvent event ) {
-                int itemIndex = choice.getSelectedIndex();
-                if ( itemIndex < 0 ) {
-                    return;
-                }
-                footer.enableOkButton( !choice.getValue( itemIndex ).equals( SECTION_SEPARATOR ) );
-            }
-
-        } );
-
-        pop.setTitle( GuidedDecisionTableConstants.INSTANCE.AddNewColumn() );
-        pop.addAttribute( GuidedDecisionTableConstants.INSTANCE.TypeOfColumn(),
-                          choice );
-        pop.addAttribute( "",
-                          chkIncludeAdvancedOptions );
-        pop.add( footer );
-        pop.show();
+        presenter.openNewGuidedDecisionTableColumnWizard();
     }
 
     @Override

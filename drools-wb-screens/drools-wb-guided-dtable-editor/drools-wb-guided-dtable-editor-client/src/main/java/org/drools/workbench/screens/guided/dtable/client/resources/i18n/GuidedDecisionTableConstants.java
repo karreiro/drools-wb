@@ -238,6 +238,10 @@ public interface GuidedDecisionTableConstants
 
     String AddNewMetadataOrAttributeColumn();
 
+    String AddNewAttributeColumn();
+
+    String AddNewMetadata();
+
     String AddNewConditionSimpleColumn();
 
     String SetTheValueOfAField();
@@ -529,5 +533,4 @@ public interface GuidedDecisionTableConstants
     String DataCutToClipboardMessage();
 
     String DataCopiedToClipboardMessage();
-
 }

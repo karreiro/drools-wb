@@ -1,11 +1,11 @@
 /*
- * Copyright 2016 JBoss by Red Hat.
+ * Copyright 2016 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.drools.workbench.screens.guided.dtable.client.wizard.pages;
+package org.drools.workbench.screens.guided.dtable.client.wizard.table.pages;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.drools.workbench.models.datamodel.oracle.DataType;
@@ -25,7 +25,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.widget.Validator;
-import org.drools.workbench.screens.guided.dtable.client.wizard.pages.events.ConditionsDefinedEvent;
+import org.drools.workbench.screens.guided.dtable.client.wizard.table.pages.events.ConditionsDefinedEvent;
 import org.jboss.errai.common.client.api.Caller;
 import org.junit.Before;
 import org.junit.Test;
@@ -88,7 +88,7 @@ public class FactPatternConstraintsPageTest {
     @Mock
     private Validator validator;
 
-    private Event<ConditionsDefinedEvent> conditionsDefinedEvent = mock(EventSourceMock.class);
+    private Event<ConditionsDefinedEvent> conditionsDefinedEvent = mock( EventSourceMock.class );
 
     @Captor
     private ArgumentCaptor<ConditionsDefinedEvent> conditionsDefinedEventCaptor;
@@ -119,29 +119,29 @@ public class FactPatternConstraintsPageTest {
         when( model.getPatterns() ).thenReturn( Arrays.asList( pattern, secondPattern ) );
 
         modelFields = new ModelField[]{
-                            new ModelField( "this", "org.Address",
-                                    ModelField.FIELD_CLASS_TYPE.REGULAR_CLASS,
-                                    ModelField.FIELD_ORIGIN.SELF,
-                                    FieldAccessorsAndMutators.ACCESSOR,
-                                    DataType.TYPE_THIS ),
-                            new ModelField( "street",
-                                    String.class.getName(),
-                                    ModelField.FIELD_CLASS_TYPE.REGULAR_CLASS,
-                                    ModelField.FIELD_ORIGIN.DECLARED,
-                                    FieldAccessorsAndMutators.BOTH,
-                                    DataType.TYPE_STRING ),
-                            new ModelField( "homeAddress",
-                                    Boolean.class.getName(),
-                                    ModelField.FIELD_CLASS_TYPE.REGULAR_CLASS,
-                                    ModelField.FIELD_ORIGIN.DECLARED,
-                                    FieldAccessorsAndMutators.BOTH,
-                                    DataType.TYPE_BOOLEAN ),
-                            new ModelField( "number",
-                                    Integer.class.getName(),
-                                    ModelField.FIELD_CLASS_TYPE.REGULAR_CLASS,
-                                    ModelField.FIELD_ORIGIN.DECLARED,
-                                    FieldAccessorsAndMutators.BOTH,
-                                    DataType.TYPE_NUMERIC_INTEGER ) };
+                new ModelField( "this", "org.Address",
+                                ModelField.FIELD_CLASS_TYPE.REGULAR_CLASS,
+                                ModelField.FIELD_ORIGIN.SELF,
+                                FieldAccessorsAndMutators.ACCESSOR,
+                                DataType.TYPE_THIS ),
+                new ModelField( "street",
+                                String.class.getName(),
+                                ModelField.FIELD_CLASS_TYPE.REGULAR_CLASS,
+                                ModelField.FIELD_ORIGIN.DECLARED,
+                                FieldAccessorsAndMutators.BOTH,
+                                DataType.TYPE_STRING ),
+                new ModelField( "homeAddress",
+                                Boolean.class.getName(),
+                                ModelField.FIELD_CLASS_TYPE.REGULAR_CLASS,
+                                ModelField.FIELD_ORIGIN.DECLARED,
+                                FieldAccessorsAndMutators.BOTH,
+                                DataType.TYPE_BOOLEAN ),
+                new ModelField( "number",
+                                Integer.class.getName(),
+                                ModelField.FIELD_CLASS_TYPE.REGULAR_CLASS,
+                                ModelField.FIELD_ORIGIN.DECLARED,
+                                FieldAccessorsAndMutators.BOTH,
+                                DataType.TYPE_NUMERIC_INTEGER ) };
 
         Map<String, ModelField[]> fields = new HashMap<>();
         fields.put( "org.Address", modelFields );
@@ -195,17 +195,17 @@ public class FactPatternConstraintsPageTest {
         assertEquals( 4, availableFields.size() );
 
         assertTrue( availableFields.stream()
-                                   .allMatch( field ->
-                                              field.getCalculationType() == BaseSingleFieldConstraint.TYPE_LITERAL &&
-                                              ( ( field.getName().compareTo( "this" ) == 0 &&
-                                                  field.getType().compareTo( DataType.TYPE_THIS ) == 0 ) ||
-                                                ( field.getName().compareTo( "street" ) == 0 &&
-                                                  field.getType().compareTo( String.class.getSimpleName() ) == 0 ) ||
-                                                ( field.getName().compareTo( "homeAddress" ) == 0 &&
-                                                  field.getType().compareTo( Boolean.class.getSimpleName() ) == 0 ) ||
-                                                ( field.getName().compareTo( "number" ) == 0 &&
-                                                  field.getType().compareTo( Integer.class.getSimpleName() ) == 0 ) )
-                                   )
+                            .allMatch( field ->
+                                               field.getCalculationType() == BaseSingleFieldConstraint.TYPE_LITERAL &&
+                                                       ( ( field.getName().compareTo( "this" ) == 0 &&
+                                                               field.getType().compareTo( DataType.TYPE_THIS ) == 0 ) ||
+                                                               ( field.getName().compareTo( "street" ) == 0 &&
+                                                                       field.getType().compareTo( String.class.getSimpleName() ) == 0 ) ||
+                                                               ( field.getName().compareTo( "homeAddress" ) == 0 &&
+                                                                       field.getType().compareTo( Boolean.class.getSimpleName() ) == 0 ) ||
+                                                               ( field.getName().compareTo( "number" ) == 0 &&
+                                                                       field.getType().compareTo( Integer.class.getSimpleName() ) == 0 ) )
+                                     )
                   );
 
         verify( view ).setChosenConditions( conditions );
