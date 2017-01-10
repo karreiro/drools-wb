@@ -18,6 +18,7 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.
 
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionInsertFactPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionRetractFactPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
 
 public class AdditionalInfoPageInitializer {
@@ -26,6 +27,14 @@ public class AdditionalInfoPageInitializer {
 
     public AdditionalInfoPageInitializer( AdditionalInfoPage additionalInfoPage ) {
         this.additionalInfoPage = additionalInfoPage;
+    }
+
+    public AdditionalInfoPage init( ActionRetractFactPlugin plugin ) {
+        additionalInfoPage.init( plugin );
+
+        return additionalInfoPage
+                .enableHeader()
+                .enableHideColumn();
     }
 
     public AdditionalInfoPage init( ActionInsertFactPlugin plugin ) {

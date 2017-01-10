@@ -49,7 +49,7 @@ public class SummaryPage extends BaseDecisionTableColumnPage {
 
     @Override
     public String getTitle() {
-        return GuidedDecisionTableConstants.INSTANCE.AddNewColumn();
+        return GuidedDecisionTableConstants.INSTANCE.NewColumn();
     }
 
     @Override

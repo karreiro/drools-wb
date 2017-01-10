@@ -18,65 +18,86 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 import com.google.gwt.user.client.Window;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
-import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.ActionRetractFactPage;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
-public class ActionRetractFactPlugin implements DecisionTableColumnPlugin {
+@Dependent
+public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin {
+
+    @Inject
+    private AdditionalInfoPage additionalInfoPage;
+
 
     private ActionRetractFactPage page;
 
-    public ActionRetractFactPlugin( final NewGuidedDecisionTableColumnWizard wizard,
-                                    final GuidedDecisionTableView.Presenter presenter ) {
-        wizard.setFinishCommand( this::generateColumn );
+//    public ActionRetractFactPlugin( final NewGuidedDecisionTableColumnWizard wizard,
+//                                    final GuidedDecisionTableView.Presenter presenter ) {
+//        wizard.setFinishCommand( this::generateColumn );
+//
+//        page = new ActionRetractFactPage( wizard, presenter ) {{
+//            initialise();
+//        }};
+//    }
 
-        page = new ActionRetractFactPage( wizard, presenter ) {{
-            initialise();
-        }};
+    @Override
+    public void init( final NewGuidedDecisionTableColumnWizard wizard ) {
+        super.init( wizard );
     }
 
     @Override
     public String getTitle() {
-        return "Add new Meta Data column";
+        return "Delete an existing fact";
     }
 
     @Override
     public List<WizardPage> getPages() {
         return new ArrayList<WizardPage>() {{
-            add( page );
+            add( additionalInfoPage() );
         }};
+    }
+
+    private AdditionalInfoPage additionalInfoPage() {
+        return additionalInfoPageInitializer().init( this );
+    }
+
+    private AdditionalInfoPageInitializer additionalInfoPageInitializer() {
+        return new AdditionalInfoPageInitializer( additionalInfoPage );
     }
 
     @Override
     public Boolean generateColumn() {
-        if ( null == page.getEditingCol().getHeader()
-                || "".equals( page.getEditingCol().getHeader() ) ) {
-            Window.alert( GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnHeaderValueDescription() );
-            return false;
-        }
-        if ( page.isNew() ) {
-            if ( !page.unique( page.getEditingCol().getHeader() ) ) {
-                Window.alert( GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother() );
-                return false;
-            }
-
-        } else {
-            if ( !page.getOriginalCol().getHeader().equals( page.getEditingCol().getHeader() ) ) {
-                if ( !page.unique( page.getEditingCol().getHeader() ) ) {
-                    Window.alert( GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother() );
-                    return false;
-                }
-            }
-        }
-
-        // Pass new\modified column back for handling
-
-        page.refreshGrid();
+//        if ( null == page.getEditingCol().getHeader()
+//                || "".equals( page.getEditingCol().getHeader() ) ) {
+//            Window.alert( GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnHeaderValueDescription() );
+//            return false;
+//        }
+//        if ( page.isNew() ) {
+//            if ( !page.unique( page.getEditingCol().getHeader() ) ) {
+//                Window.alert( GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother() );
+//                return false;
+//            }
+//
+//        } else {
+//            if ( !page.getOriginalCol().getHeader().equals( page.getEditingCol().getHeader() ) ) {
+//                if ( !page.unique( page.getEditingCol().getHeader() ) ) {
+//                    Window.alert( GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother() );
+//                    return false;
+//                }
+//            }
+//        }
+//
+//        // Pass new\modified column back for handling
+//
+//        page.refreshGrid();
 
         return true;
 //        hide();

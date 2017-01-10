@@ -79,7 +79,7 @@ public class NewGuidedDecisionTableColumnWizard extends AbstractWizard {
 
     @Override
     public int getPreferredHeight() {
-        return 500;
+        return 600;
     }
 
     @Override
