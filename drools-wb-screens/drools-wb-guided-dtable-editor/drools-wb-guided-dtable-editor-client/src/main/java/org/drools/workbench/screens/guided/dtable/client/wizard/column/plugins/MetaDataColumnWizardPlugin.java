@@ -51,10 +51,15 @@ public class MetaDataColumnWizardPlugin extends BaseDecisionTableColumnPlugin {
             return false;
         }
 
-        final MetadataCol52 column = new MetadataCol52() {{
-            setMetadata( page.getMetadataValue() );
-            setHideColumn( true );
-        }};
+//        final MetadataCol52 column = new MetadataCol52() {{
+//            setMetadata( page.getMetadataValue() );
+//            setHideColumn( true );
+//        }};
+
+        final MetadataCol52 column = new MetadataCol52();
+
+        column.setMetadata( page.getMetadataValue() );
+        column.setHideColumn( true );
 
         presenter.appendColumn( column );
 

@@ -16,16 +16,18 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.commons;
 
+import org.drools.workbench.models.guided.dtable.shared.model.ActionInsertFactCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 
 public interface HasFieldPage {
 
     Pattern52 getEditingPattern();
 
-    ConditionCol52 getEditingCol();
+    DTColumnConfig52 getEditingCol();
 
-    void setEditingCol( final ConditionCol52 editingCol );
+    void setEditingCol( final DTColumnConfig52 editingCol );
 
     void setEditingColFactField( final String factField );
 

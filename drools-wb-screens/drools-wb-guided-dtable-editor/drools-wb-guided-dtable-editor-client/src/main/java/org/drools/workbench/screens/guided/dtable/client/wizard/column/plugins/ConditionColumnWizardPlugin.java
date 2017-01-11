@@ -22,7 +22,12 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
+import com.google.gwt.user.client.Window;
+import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
+import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
+import org.drools.workbench.models.guided.dtable.shared.model.CompositeColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
@@ -102,7 +107,67 @@ public class ConditionColumnWizardPlugin extends BaseDecisionTableColumnPlugin i
 
     @Override
     public Boolean generateColumn() {
+
+        if ( null == editingCol.getHeader() || "".equals( editingCol.getHeader() ) ) {
+            Window.alert( GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnHeaderValueDescription() );
+            return false;
+        }
+
+        if ( editingCol.getConstraintValueType() != BaseSingleFieldConstraint.TYPE_PREDICATE ) {
+
+            //Field mandatory for Literals and Formulae
+            if ( null == editingCol.getFactField() || "".equals( editingCol.getFactField() ) ) {
+                Window.alert( GuidedDecisionTableConstants.INSTANCE.PleaseSelectOrEnterField() );
+                return false;
+            }
+
+            //Operator optional for Literals and Formulae
+            if ( editingCol.getOperator() == null ) {
+                Window.alert( GuidedDecisionTableConstants.INSTANCE.NotifyNoSelectedOperator() );
+                return false;
+            }
+
+        } else {
+
+            //Clear operator for predicates, but leave field intact for interpolation of $param values
+            editingCol.setOperator( null );
+        }
+
+        if ( editingCol.isBound() && !isBindingUnique( editingCol.getBinding() ) ) {
+            Window.alert( GuidedDecisionTableConstants.INSTANCE.PleaseEnterANameThatIsNotAlreadyUsedByAnotherPattern() );
+            return false;
+        }
+
+        if ( !unique( editingCol.getHeader() ) ) {
+            Window.alert( GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother() );
+            return false;
+        }
+
+        //Clear binding if column is not a literal
+        if ( editingCol.getConstraintValueType() != BaseSingleFieldConstraint.TYPE_LITERAL ) {
+            editingCol.setBinding( null );
+        }
+
+        presenter.appendColumn( editingPattern, editingCol );
+
         return true;
+    }
+
+    private boolean unique( String header ) {
+        for ( CompositeColumn<?> cc : presenter.getModel().getConditions() ) {
+            for ( int iChild = 0; iChild < cc.getChildColumns().size(); iChild++ ) {
+                if ( cc.getChildColumns().get( iChild ).getHeader().equals( header ) ) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean isBindingUnique( String binding ) {
+        final BRLRuleModel rm = new BRLRuleModel( presenter.getModel() );
+
+        return !rm.isVariableNameUsed( binding );
     }
 
     public Pattern52 getEditingPattern() {
@@ -121,8 +186,8 @@ public class ConditionColumnWizardPlugin extends BaseDecisionTableColumnPlugin i
         return editingCol;
     }
 
-    public void setEditingCol( final ConditionCol52 editingCol ) {
-        this.editingCol = editingCol;
+    public void setEditingCol( final DTColumnConfig52 editingCol ) {
+        this.editingCol = (ConditionCol52) editingCol;
 
         fireChangeEvent( fieldPage );
         fireChangeEvent( operatorWizardPage );

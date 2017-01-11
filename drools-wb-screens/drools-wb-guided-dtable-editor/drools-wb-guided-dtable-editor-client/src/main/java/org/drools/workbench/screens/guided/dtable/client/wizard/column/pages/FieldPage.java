@@ -30,6 +30,7 @@ import org.drools.workbench.models.datamodel.oracle.ModelField;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
+import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
@@ -70,7 +71,7 @@ public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> exten
         view.init( this );
     }
 
-    public ConditionCol52 getEditingCol() {
+    public DTColumnConfig52 getEditingCol() {
         return plugin().getEditingCol();
     }
 

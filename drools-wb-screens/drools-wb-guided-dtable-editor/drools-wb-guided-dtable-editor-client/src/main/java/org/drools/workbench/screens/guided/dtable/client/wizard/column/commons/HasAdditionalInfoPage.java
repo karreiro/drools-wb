@@ -16,10 +16,9 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.commons;
 
-import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
-import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
+import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 
 public interface HasAdditionalInfoPage {
 
-    ConditionCol52 getEditingCol();
+    DTColumnConfig52 getEditingCol();
 }

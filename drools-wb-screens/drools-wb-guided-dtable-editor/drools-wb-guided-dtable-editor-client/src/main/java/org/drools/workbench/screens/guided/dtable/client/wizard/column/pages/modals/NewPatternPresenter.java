@@ -128,8 +128,8 @@ public class NewPatternPresenter {
     }
 
     private void clearEditingCol() {
-        patternPage.plugin().setEditingColFactField( null );
-        patternPage.plugin().setEditingColOperator( null );
+//        patternPage.plugin().setEditingColFactField( null );
+//        patternPage.plugin().setEditingColOperator( null );
     }
 
     private boolean isBindingUnique( String binding ) {

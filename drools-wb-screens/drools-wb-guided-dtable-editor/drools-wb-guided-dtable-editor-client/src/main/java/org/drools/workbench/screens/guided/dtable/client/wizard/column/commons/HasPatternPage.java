@@ -17,6 +17,7 @@
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.commons;
 
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 
 public interface HasPatternPage {
@@ -25,9 +26,9 @@ public interface HasPatternPage {
 
     void setEditingPattern( final Pattern52 editingPattern );
 
-    void setEditingCol( final ConditionCol52 editingCol );
+    void setEditingCol( final DTColumnConfig52 editingCol );
 
-    void setEditingColOperator( String operator );
+//    void setEditingColOperator( String operator );
 
     void setEditingColFactField( final String factField );
 }

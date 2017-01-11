@@ -21,7 +21,11 @@ import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.user.client.Window;
+import org.drools.workbench.models.guided.dtable.shared.model.ActionCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.ActionInsertFactCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
@@ -51,7 +55,7 @@ public class ActionInsertFactPlugin extends BaseDecisionTableColumnPlugin implem
 
     private Pattern52 editingPattern;
 
-    private ConditionCol52 editingCol;
+    private ActionInsertFactCol52 editingCol;
 
     private int constraintValue;
 
@@ -84,41 +88,44 @@ public class ActionInsertFactPlugin extends BaseDecisionTableColumnPlugin implem
 
     @Override
     public Boolean generateColumn() {
-        return true;
-//        if ( !page.isValidFactType() ) {
-//            Window.alert( GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnPattern() );
-//            return false;
-//        }
-//        if ( !page.isValidFactField() ) {
-//            Window.alert( GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnField() );
-//            return false;
-//        }
-//        if ( null == page.getEditingCol().getHeader() || "".equals( page.getEditingCol().getHeader() ) ) {
-//            Window.alert( GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnHeaderValueDescription() );
-//            return false;
-//        }
-//
-//        if ( page.isNew() ) {
-//            if ( !page.unique( page.getEditingCol().getHeader() ) ) {
-//                Window.alert( GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother() );
-//                return false;
-//            }
-//
-//        } else {
-//            if ( !page.getEditingCol().getHeader().equals( page.getEditingCol().getHeader() ) ) {
-//                if ( !page.unique( page.getEditingCol().getHeader() ) ) {
-//                    Window.alert( GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother() );
-//                    return false;
-//                }
-//            }
-//        }
-//
-//        page.refreshGrid();
-//        return true;
+        if ( !isValidFactType() ) {
+            Window.alert( GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnPattern() );
+            return false;
+        }
+        if ( !isValidFactField() ) {
+            Window.alert( GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnField() );
+            return false;
+        }
+        if ( null == editingCol.getHeader() || "".equals( editingCol.getHeader() ) ) {
+            Window.alert( GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnHeaderValueDescription() );
+            return false;
+        }
 
-        // Pass new\modified column back for handling
-//        refreshGrid.execute( editingCol );
-//        hide();
+        if ( !unique( editingCol.getHeader() ) ) {
+            Window.alert( GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother() );
+            return false;
+        }
+
+        presenter.appendColumn( editingCol );
+
+        return true;
+    }
+
+    private boolean unique( String header ) {
+        for ( ActionCol52 o : presenter.getModel().getActionCols() ) {
+            if ( o.getHeader().equals( header ) ) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isValidFactType() {
+        return !( editingCol.getFactType() == null || "".equals( editingCol.getFactType() ) );
+    }
+
+    private boolean isValidFactField() {
+        return !( editingCol.getFactField() == null || "".equals( editingCol.getFactField() ) );
     }
 
     @Override
@@ -132,22 +139,13 @@ public class ActionInsertFactPlugin extends BaseDecisionTableColumnPlugin implem
     }
 
     @Override
-    public ConditionCol52 getEditingCol() {
+    public DTColumnConfig52 getEditingCol() {
         return editingCol;
     }
 
     @Override
-    public void setEditingCol( final ConditionCol52 editingCol ) {
-        this.editingCol = editingCol;
-    }
-
-    @Override
-    public void setEditingColOperator( final String operator ) {
-        if ( editingCol == null ) {
-            return;
-        }
-
-        editingCol.setOperator( operator );
+    public void setEditingCol( final DTColumnConfig52 editingCol ) {
+        this.editingCol = (ActionInsertFactCol52) editingCol;
     }
 
     @Override
