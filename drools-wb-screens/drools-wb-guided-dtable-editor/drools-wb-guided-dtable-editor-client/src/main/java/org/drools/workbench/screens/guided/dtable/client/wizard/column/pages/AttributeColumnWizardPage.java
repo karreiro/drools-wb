@@ -44,7 +44,7 @@ public class AttributeColumnWizardPage extends BaseDecisionTableColumnPage {
 
     @Override
     public void isComplete( final Callback<Boolean> callback ) {
-        callback.callback( false );
+        callback.callback( true );
     }
 
     @Override

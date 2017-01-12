@@ -19,7 +19,6 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 import java.util.ArrayList;
 import java.util.List;
 import javax.enterprise.context.Dependent;
-import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.Window;
@@ -28,6 +27,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
 import org.drools.workbench.models.guided.dtable.shared.model.CompositeColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
+import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
@@ -42,8 +42,10 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.Pat
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.ValueOptionsWizardPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
-import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
+
+import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.*;
 
 @Dependent
 public class ConditionColumnWizardPlugin extends BaseDecisionTableColumnPlugin implements HasFieldPage,
@@ -76,9 +78,6 @@ public class ConditionColumnWizardPlugin extends BaseDecisionTableColumnPlugin i
     private ConditionCol52 editingCol;
 
     private int constraintValue;
-
-    @Inject
-    private Event<WizardPageStatusChangeEvent> changeEvent;
 
     @Override
     public String getTitle() {
@@ -177,7 +176,7 @@ public class ConditionColumnWizardPlugin extends BaseDecisionTableColumnPlugin i
     public void setEditingPattern( final Pattern52 editingPattern ) {
         this.editingPattern = editingPattern;
 
-        fireChangeEvent( this.patternPage );
+        fireChangeEvent( patternPage );
         fireChangeEvent( fieldPage );
         fireChangeEvent( operatorWizardPage );
     }
@@ -186,11 +185,41 @@ public class ConditionColumnWizardPlugin extends BaseDecisionTableColumnPlugin i
         return editingCol;
     }
 
-    public void setEditingCol( final DTColumnConfig52 editingCol ) {
-        this.editingCol = (ConditionCol52) editingCol;
+    public void setEditingCol( final String selectedValue ) {
+        editingCol = newConditionColumn( selectedValue );
 
         fireChangeEvent( fieldPage );
         fireChangeEvent( operatorWizardPage );
+    }
+
+    @Override
+    public void setEditingCol( final DTColumnConfig52 editingCol ) {
+        this.editingCol = (ConditionCol52) editingCol;
+    }
+
+    ConditionCol52 newConditionColumn( final String selectedValue ) {
+        if ( nil( selectedValue ) ) {
+            return null;
+        }
+
+        final ConditionCol52 conditionCol52 = newConditionColumn();
+        final AsyncPackageDataModelOracle oracle = presenter.getDataModelOracle();
+
+        conditionCol52.setFactField( selectedValue );
+        conditionCol52.setFieldType( oracle.getFieldType( getEditingPattern().getFactType(),
+                                                          conditionCol52.getFactField() ) );
+        return conditionCol52;
+    }
+
+    private ConditionCol52 newConditionColumn() {
+        switch ( presenter.getModel().getTableFormat() ) {
+            case EXTENDED_ENTRY:
+                return new ConditionCol52();
+            case LIMITED_ENTRY:
+                return new LimitedEntryConditionCol52();
+            default:
+                throw new UnsupportedOperationException( "Unsupported table format: " + presenter.getModel().getTableFormat() );
+        }
     }
 
     public void setEditingColOperator( String operator ) {
@@ -227,7 +256,8 @@ public class ConditionColumnWizardPlugin extends BaseDecisionTableColumnPlugin i
         fireChangeEvent( calculationTypeWizardPage );
     }
 
-    private void fireChangeEvent( final WizardPage wizardPage ) {
-        changeEvent.fire( new WizardPageStatusChangeEvent( wizardPage ) );
+    @Override
+    public String getFactField() {
+        return editingCol == null ? "" : editingCol.getFactField();
     }
 }

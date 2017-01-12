@@ -222,11 +222,6 @@ public class NewGuidedDecisionTableWizard extends AbstractWizard {
     private WizardView view;
 
     @Override
-    protected WizardView getView() {
-        return view;
-    }
-
-    @Override
     public void close() {
         super.close();
         handler.destroyWizard();

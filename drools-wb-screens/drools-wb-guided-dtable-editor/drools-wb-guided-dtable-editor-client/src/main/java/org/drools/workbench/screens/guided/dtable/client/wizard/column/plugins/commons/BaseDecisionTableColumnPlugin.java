@@ -16,14 +16,22 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons;
 
+import javax.enterprise.event.Event;
+import javax.inject.Inject;
+
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
+import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
+import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
 
 public abstract class BaseDecisionTableColumnPlugin implements DecisionTableColumnPlugin {
 
     protected NewGuidedDecisionTableColumnWizard wizard;
 
     protected GuidedDecisionTableView.Presenter presenter;
+
+    @Inject
+    private Event<WizardPageStatusChangeEvent> changeEvent;
 
     public void init( final NewGuidedDecisionTableColumnWizard wizard ) {
         this.wizard = wizard;
@@ -45,5 +53,9 @@ public abstract class BaseDecisionTableColumnPlugin implements DecisionTableColu
 
     public String getIdentifier() {
         return getClass().getSimpleName();
+    }
+
+    protected void fireChangeEvent( final WizardPage wizardPage ) {
+        changeEvent.fire( new WizardPageStatusChangeEvent( wizardPage ) );
     }
 }

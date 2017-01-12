@@ -27,9 +27,11 @@ public interface HasFieldPage {
 
     DTColumnConfig52 getEditingCol();
 
-    void setEditingCol( final DTColumnConfig52 editingCol );
+    void setEditingCol( final String selectedValue );
 
     void setEditingColFactField( final String factField );
 
     int getConstraintValue();
+
+    String getFactField();
 }

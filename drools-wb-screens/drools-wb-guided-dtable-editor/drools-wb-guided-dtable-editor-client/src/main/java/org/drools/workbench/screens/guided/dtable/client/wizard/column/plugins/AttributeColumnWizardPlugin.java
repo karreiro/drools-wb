@@ -47,12 +47,16 @@ public class AttributeColumnWizardPlugin extends BaseDecisionTableColumnPlugin {
 
     @Override
     public Boolean generateColumn() {
-        final AttributeCol52 column = new AttributeCol52() {{
-            setAttribute( page.getAttributeName() );
-        }};
-
-        presenter.appendColumn( column );
+        presenter.appendColumn( getAttributeCol52() );
 
         return true;
+    }
+
+    private AttributeCol52 getAttributeCol52() {
+        final AttributeCol52 column = new AttributeCol52();
+
+        column.setAttribute( page.getAttributeName() );
+
+        return column;
     }
 }

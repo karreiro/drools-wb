@@ -96,6 +96,13 @@ public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> exten
         return fields;
     }
 
+    private List<String> mapName( final ModelField[] modelFields ) {
+        return Stream
+                .of( modelFields )
+                .map( ModelField::getName )
+                .collect( Collectors.toList() );
+    }
+
     boolean hasEditingPattern() {
         return plugin().getEditingPattern() != null;
     }
@@ -105,49 +112,11 @@ public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> exten
     }
 
     void setEditingCol( final String selectedValue ) {
-        final ConditionCol52 conditionCol52 = newConditionColumn( selectedValue );
-
-        plugin().setEditingCol( conditionCol52 );
+        plugin().setEditingCol( selectedValue );
     }
 
-    ConditionCol52 newConditionColumn( final String selectedValue ) {
-        if ( nil( selectedValue ) ) {
-            return null;
-        }
-
-        final ConditionCol52 conditionCol52 = newConditionColumn();
-        final AsyncPackageDataModelOracle oracle = presenter.getDataModelOracle();
-
-        conditionCol52.setFactField( selectedValue );
-        conditionCol52.setFieldType( oracle.getFieldType( plugin().getEditingPattern().getFactType(),
-                                                          conditionCol52.getFactField() ) );
-        return conditionCol52;
-    }
-
-    private List<String> mapName( final ModelField[] modelFields ) {
-        return Stream
-                .of( modelFields )
-                .map( ModelField::getName )
-                .collect( Collectors.toList() );
-    }
-
-    private ConditionCol52 newConditionColumn() {
-        switch ( presenter.getModel().getTableFormat() ) {
-            case EXTENDED_ENTRY:
-                return new ConditionCol52();
-            case LIMITED_ENTRY:
-                return new LimitedEntryConditionCol52();
-            default:
-                throw new UnsupportedOperationException( "Unsupported table format: " + presenter.getModel().getTableFormat() );
-        }
-    }
-
-    private DTCellValue52 cloneDTCellValue( DTCellValue52 dtCellValue52 ) {
-        if ( dtCellValue52 == null ) {
-            return null;
-        }
-
-        return new DTCellValue52( dtCellValue52 );
+    public String getFactField() {
+        return plugin().getFactField();
     }
 
     public interface View extends UberView<FieldPage> {

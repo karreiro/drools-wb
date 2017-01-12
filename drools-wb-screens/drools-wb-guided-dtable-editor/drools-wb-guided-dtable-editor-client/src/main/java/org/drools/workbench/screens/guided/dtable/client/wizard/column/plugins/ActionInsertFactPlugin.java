@@ -26,6 +26,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.ActionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionInsertFactCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
+import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryActionInsertFactCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
@@ -37,7 +38,10 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.Fie
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.PatternPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
+
+import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
 @Dependent
 public class ActionInsertFactPlugin extends BaseDecisionTableColumnPlugin implements HasFieldPage,
@@ -136,11 +140,46 @@ public class ActionInsertFactPlugin extends BaseDecisionTableColumnPlugin implem
     @Override
     public void setEditingPattern( final Pattern52 editingPattern ) {
         this.editingPattern = editingPattern;
+
+        fireChangeEvent( patternPage );
+        fireChangeEvent( fieldPage );
     }
 
     @Override
     public DTColumnConfig52 getEditingCol() {
         return editingCol;
+    }
+
+    @Override
+    public void setEditingCol( final String selectedValue ) {
+        editingCol = newActionInsertColumn( selectedValue );
+
+        fireChangeEvent( fieldPage );
+    }
+
+    private ActionInsertFactCol52 newActionInsertColumn( String selectedValue ) {
+        if ( nil( selectedValue ) ) {
+            return null;
+        }
+
+        final ActionInsertFactCol52 insertFactCol52 = newActionInsertFact();
+        final AsyncPackageDataModelOracle oracle = presenter.getDataModelOracle();
+
+        insertFactCol52.setFactField( selectedValue );
+        insertFactCol52.setType( oracle.getFieldType( getEditingPattern().getFactType(),
+                                                     insertFactCol52.getFactField() ) );
+        return insertFactCol52;
+    }
+
+    private ActionInsertFactCol52 newActionInsertFact() {
+        switch ( presenter.getModel().getTableFormat() ) {
+            case EXTENDED_ENTRY:
+                return new ActionInsertFactCol52();
+            case LIMITED_ENTRY:
+                return new LimitedEntryActionInsertFactCol52();
+            default:
+                throw new UnsupportedOperationException( "Unsupported table format: " + presenter.getModel().getTableFormat() );
+        }
     }
 
     @Override
@@ -160,5 +199,10 @@ public class ActionInsertFactPlugin extends BaseDecisionTableColumnPlugin implem
     @Override
     public int getConstraintValue() {
         return constraintValue;
+    }
+
+    @Override
+    public String getFactField() {
+        return editingCol == null ? "" : editingCol.getFactField();
     }
 }

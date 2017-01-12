@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2017 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,49 +19,26 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 import java.util.ArrayList;
 import java.util.List;
 import javax.enterprise.context.Dependent;
-import javax.inject.Inject;
 
-import org.drools.workbench.models.guided.dtable.shared.model.MetadataCol52;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.MetaDataColumnWizardPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 @Dependent
-public class MetaDataColumnWizardPlugin extends BaseDecisionTableColumnPlugin {
-
-    @Inject
-    private MetaDataColumnWizardPage page;
+public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin {
 
     @Override
     public String getTitle() {
-        return GuidedDecisionTableConstants.INSTANCE.AddNewMetadata();
+        return "Execute a Work Item";
     }
 
     @Override
     public List<WizardPage> getPages() {
         return new ArrayList<WizardPage>() {{
-            add( page );
         }};
     }
 
     @Override
     public Boolean generateColumn() {
-        if ( !page.isValidMetadata() ) {
-            return false;
-        }
-
-        presenter.appendColumn( metadataColumn() );
-
         return true;
-    }
-
-    private MetadataCol52 metadataColumn() {
-        final MetadataCol52 column = new MetadataCol52();
-
-        column.setMetadata( page.getMetadataValue() );
-        column.setHideColumn( true );
-
-        return column;
     }
 }

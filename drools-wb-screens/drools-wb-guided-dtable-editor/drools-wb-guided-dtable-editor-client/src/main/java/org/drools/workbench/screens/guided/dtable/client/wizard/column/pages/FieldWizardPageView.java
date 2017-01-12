@@ -84,8 +84,6 @@ public class FieldWizardPageView extends Composite implements FieldPage.View {
     }
 
     private String getCurrentValue() {
-        final ConditionCol52 editingCol = (ConditionCol52) page.getEditingCol();
-
-        return editingCol == null ? "" : editingCol.getFactField();
+        return page.getFactField();
     }
 }

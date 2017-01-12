@@ -30,7 +30,6 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.com
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.core.client.wizards.AbstractWizard;
-import org.uberfire.ext.widgets.core.client.wizards.AdvancedWizard;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 import org.uberfire.ext.widgets.core.client.wizards.WizardView;
 
@@ -45,7 +44,6 @@ public class NewGuidedDecisionTableColumnWizard extends AbstractWizard {
     private Supplier<Boolean> finishCommand;
 
     @Inject
-    @AdvancedWizard
     private WizardView view;
 
     @Inject
@@ -151,8 +149,7 @@ public class NewGuidedDecisionTableColumnWizard extends AbstractWizard {
         }
     }
 
-    @Override
-    protected WizardView getView() {
+    private WizardView getView() {
         return view;
     }
 
