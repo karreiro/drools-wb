@@ -18,8 +18,6 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -30,6 +28,7 @@ import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDe
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.UberView;
 
@@ -39,7 +38,7 @@ import org.uberfire.client.mvp.UberView;
 @Dependent
 public class SummaryPage extends BaseDecisionTableColumnPage {
 
-    SimplePanel content;
+    private SimplePanel content = new SimplePanel();
 
     @Inject
     private Instance<BaseDecisionTableColumnPlugin> plugins;
@@ -69,7 +68,6 @@ public class SummaryPage extends BaseDecisionTableColumnPage {
 
     @Override
     public void initialise() {
-        content = new SimplePanel();
         content.setWidget( view );
     }
 
@@ -79,6 +77,10 @@ public class SummaryPage extends BaseDecisionTableColumnPage {
     }
 
     void openPage( final String selectedItemText ) {
+        if ( selectedItemText.isEmpty() ) {
+            return;
+        }
+
         final BaseDecisionTableColumnPlugin plugin = findPluginByIdentifier( selectedItemText );
 
         wizard.start( plugin );

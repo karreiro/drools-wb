@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2016 Red Hat, Inc. and/or its affiliates.
+  ~ Copyright 2017 Red Hat, Inc. and/or its affiliates.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -13,9 +13,19 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
 <div>
-    <h5 class="label label-default">Select the type of column</h5>
-    <hr />
-    <select class="form-control plugin-list" data-field="pluginsList"></select>
+    <div class="form-group">
+        <h5 class="label label-default">Select a Work Item</h5>
+        <hr/>
+    </div>
+
+    <div class="form-horizontal">
+        <div class="form-group">
+            <label class="col-sm-4 form-control-label" data-i18n-key="Metadata">Work Item:</label>
+
+            <div class="col-sm-8">
+                <select class="form-control" data-field="work-items"></select>
+            </div>
+        </div>
+    </div>
 </div>

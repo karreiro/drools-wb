@@ -30,4 +30,6 @@ public interface DecisionTableColumnPlugin {
 
     //Responsible for creation of the column itself when the Wizard completes
     Boolean generateColumn();
+
+    String getIdentifier();
 }

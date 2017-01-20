@@ -632,5 +632,4 @@ public class GuidedDecisionTableViewImpl extends BaseGridWidget implements Guide
     public void hideBusyIndicator() {
         BusyPopup.close();
     }
-
 }

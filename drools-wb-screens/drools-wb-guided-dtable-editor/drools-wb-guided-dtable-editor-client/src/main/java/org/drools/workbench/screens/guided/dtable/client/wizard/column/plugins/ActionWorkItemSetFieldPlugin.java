@@ -22,15 +22,28 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
+import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasFieldPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasPatternPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.FieldPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.PatternPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.WorkItemPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 @Dependent
-public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implements HasAdditionalInfoPage {
+public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin implements HasPatternPage,
+                                                                                           HasFieldPage,
+                                                                                           HasAdditionalInfoPage {
+
+    @Inject
+    private PatternPage factPatternsPage;
+
+    @Inject
+    private FieldPage fieldPage;
 
     @Inject
     private AdditionalInfoPage additionalInfoPage;
@@ -44,13 +57,25 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
     }
 
     @Override
+    public void setEditingCol( final DTColumnConfig52 editingCol ) {
+
+    }
+
+    @Override
+    public void setEditingCol( final String selectedValue ) {
+
+    }
+
+    @Override
     public String getTitle() {
-        return "Execute a Work Item";
+        return "Set the value of a field with a Work Item parameter";
     }
 
     @Override
     public List<WizardPage> getPages() {
         return new ArrayList<WizardPage>() {{
+            add( factPatternsPage );
+            add( fieldPage );
             add( workItemPage );
             add( additionalInfoPage() );
         }};
@@ -67,5 +92,30 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
     @Override
     public Boolean generateColumn() {
         return true;
+    }
+
+    @Override
+    public Pattern52 getEditingPattern() {
+        return null;
+    }
+
+    @Override
+    public void setEditingPattern( final Pattern52 editingPattern ) {
+
+    }
+
+    @Override
+    public void setEditingColFactField( final String factField ) {
+
+    }
+
+    @Override
+    public int getConstraintValue() {
+        return 0;
+    }
+
+    @Override
+    public String getFactField() {
+        return null;
     }
 }

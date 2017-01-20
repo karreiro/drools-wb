@@ -51,6 +51,7 @@ public abstract class BaseDecisionTableColumnPlugin implements DecisionTableColu
         wizard.setFinishCommand( this::generateColumn );
     }
 
+    @Override
     public String getIdentifier() {
         return getClass().getSimpleName();
     }

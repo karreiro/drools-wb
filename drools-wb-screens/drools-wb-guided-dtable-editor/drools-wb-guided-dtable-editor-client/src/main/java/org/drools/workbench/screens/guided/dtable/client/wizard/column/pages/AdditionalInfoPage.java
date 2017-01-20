@@ -59,7 +59,7 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
 
     @Override
     public void isComplete( final Callback<Boolean> callback ) {
-        callback.callback( true ); // TODO
+        callback.callback( false ); // TODO
     }
 
     @Override

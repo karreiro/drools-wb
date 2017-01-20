@@ -21,37 +21,34 @@ import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import org.drools.workbench.models.datamodel.rule.RuleModel;
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.WorkItemPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.RuleModellerPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.drools.workbench.screens.guided.rule.client.editor.RuleModellerConfiguration;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 @Dependent
-public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implements HasAdditionalInfoPage {
+public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin implements HasAdditionalInfoPage {
+
+    @Inject
+    private RuleModellerPage ruleModellerPage;
 
     @Inject
     private AdditionalInfoPage additionalInfoPage;
 
-    @Inject
-    private WorkItemPage workItemPage;
-
-    @Override
-    public DTColumnConfig52 getEditingCol() {
-        return null;
-    }
-
     @Override
     public String getTitle() {
-        return "Execute a Work Item";
+        return "Add a Condition BRL fragment";
     }
 
     @Override
     public List<WizardPage> getPages() {
         return new ArrayList<WizardPage>() {{
-            add( workItemPage );
+            add( ruleModellerPage );
             add( additionalInfoPage() );
         }};
     }
@@ -67,5 +64,18 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
     @Override
     public Boolean generateColumn() {
         return true;
+    }
+
+    @Override
+    public DTColumnConfig52 getEditingCol() {
+        return null;
+    }
+
+    public RuleModel getRuleModel() {
+        return null;
+    }
+
+    public RuleModellerConfiguration getRuleModellerConfiguration() {
+        return null;
     }
 }

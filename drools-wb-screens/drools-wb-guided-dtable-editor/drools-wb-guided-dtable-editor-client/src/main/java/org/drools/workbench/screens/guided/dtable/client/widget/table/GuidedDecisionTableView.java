@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.event.shared.EventBus;
+import org.drools.workbench.models.datamodel.workitems.PortableWorkDefinition;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionInsertFactCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionRetractFactCol52;
@@ -132,6 +134,10 @@ public interface GuidedDecisionTableView extends GridWidget,
                                 InsertMenuBuilder.SupportsInsertRowAbove,
                                 InsertMenuBuilder.SupportsInsertRowBelow,
                                 KieDocument {
+
+        Set<PortableWorkDefinition> getWorkItemDefinitions();
+
+        EventBus getEventBus();
 
         void activate();
 

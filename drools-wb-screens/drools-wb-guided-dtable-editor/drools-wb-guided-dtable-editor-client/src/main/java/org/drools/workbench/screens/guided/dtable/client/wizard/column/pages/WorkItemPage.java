@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2017 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,23 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
+import java.util.Set;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.drools.workbench.models.datamodel.workitems.PortableWorkDefinition;
+import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
-import org.drools.workbench.screens.guided.rule.client.resources.GuidedRuleEditorResources;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.UberView;
 
 @Dependent
-public class MetaDataColumnWizardPage extends BaseDecisionTableColumnPage {
+public class WorkItemPage extends BaseDecisionTableColumnPage<ConditionColumnWizardPlugin> {
 
     @Inject
     private View view;
@@ -36,13 +40,8 @@ public class MetaDataColumnWizardPage extends BaseDecisionTableColumnPage {
     private SimplePanel content = new SimplePanel();
 
     @Override
-    public void initialise() {
-        content.setWidget( view );
-    }
-
-    @Override
     public String getTitle() {
-        return GuidedDecisionTableConstants.INSTANCE.AddNewMetadata();
+        return "Work Item";
     }
 
     @Override
@@ -50,25 +49,9 @@ public class MetaDataColumnWizardPage extends BaseDecisionTableColumnPage {
         callback.callback( false );
     }
 
-    public boolean isValidMetadata() {
-
-        final String metaData = getMetadataValue().trim();
-
-        if ( metaData.isEmpty() ) {
-            view.showError( GuidedRuleEditorResources.CONSTANTS.MetadataNameEmpty() );
-            return false;
-        }
-
-        if ( !presenter.isMetaDataUnique( metaData ) ) {
-            view.showError( GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother() );
-            return false;
-        }
-
-        return true;
-    }
-
-    public String getMetadataValue() {
-        return view.getMetadataText();
+    @Override
+    public void initialise() {
+        content.setWidget( view );
     }
 
     @Override
@@ -76,15 +59,29 @@ public class MetaDataColumnWizardPage extends BaseDecisionTableColumnPage {
         view.init( this );
     }
 
+    Set<PortableWorkDefinition> getWorkItems() {
+        return presenter.getWorkItemDefinitions();
+    }
+
+    boolean hasWorkItems() {
+        return getWorkItems().size() > 0;
+    }
+
+    public DTColumnConfig52 getEditingCol() {
+        return plugin().getEditingCol();
+    }
+
+    boolean isReadOnly() {
+        return presenter.isReadOnly();
+    }
+
     @Override
     public Widget asWidget() {
         return content;
     }
 
-    public interface View extends UberView<MetaDataColumnWizardPage> {
+    public interface View extends UberView<WorkItemPage> {
 
-        String getMetadataText();
-
-        void showError( String errorMessage );
+        ListBox getWorkItems();
     }
 }

@@ -19,6 +19,9 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionInsertFactPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionRetractFactPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionWorkItemPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionWorkItemSetFieldPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.BRLConditionColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
 
 public class AdditionalInfoPageInitializer {
@@ -30,28 +33,47 @@ public class AdditionalInfoPageInitializer {
     }
 
     public AdditionalInfoPage init( ActionRetractFactPlugin plugin ) {
-        additionalInfoPage.init( plugin );
-
-        return additionalInfoPage
+        return additionalInfoPage( plugin )
                 .enableHeader()
                 .enableHideColumn();
     }
 
     public AdditionalInfoPage init( ActionInsertFactPlugin plugin ) {
-        additionalInfoPage.init( plugin );
-
-        return additionalInfoPage
+        return additionalInfoPage( plugin )
                 .enableHeader()
                 .enableHideColumn()
                 .enableLogicallyInsert();
     }
 
     public AdditionalInfoPage init( ConditionColumnWizardPlugin plugin ) {
-        additionalInfoPage.init( plugin );
-
-        return additionalInfoPage
+        return additionalInfoPage( plugin )
                 .enableEntryPointName()
                 .enableHeader()
                 .enableHideColumn();
+    }
+
+    public AdditionalInfoPage init( final ActionWorkItemPlugin plugin ) {
+        return additionalInfoPage( plugin )
+                .enableHeader()
+                .enableHideColumn();
+    }
+
+    public AdditionalInfoPage init( final ActionWorkItemSetFieldPlugin plugin ) {
+        return additionalInfoPage( plugin )
+                .enableHeader()
+                .enableUpdateEngineWithChanges()
+                .enableHideColumn();
+    }
+
+    public AdditionalInfoPage init( final BRLConditionColumnPlugin plugin ) {
+        return additionalInfoPage( plugin )
+                .enableHeader()
+                .enableHideColumn();
+    }
+
+    private AdditionalInfoPage additionalInfoPage( final DecisionTableColumnPlugin plugin ) {
+        additionalInfoPage.init( plugin );
+
+        return additionalInfoPage;
     }
 }
