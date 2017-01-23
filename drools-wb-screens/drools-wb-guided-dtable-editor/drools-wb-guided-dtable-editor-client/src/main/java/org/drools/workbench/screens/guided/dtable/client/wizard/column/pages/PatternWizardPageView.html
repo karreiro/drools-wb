@@ -1,0 +1,41 @@
+<!--
+  ~ Copyright 2016 Red Hat, Inc. and/or its affiliates.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<div>
+    <div class="form-group">
+        <h5 class="label label-default">Select a Pattern or create a new one</h5>
+        <hr/>
+    </div>
+
+    <div class="form-horizontal">
+        <div class="form-group">
+            <label class="col-sm-4 form-control-label" data-i18n-key="Metadata">Pattern:</label>
+
+            <div class="col-sm-8">
+                <select class="form-control" data-field="patternList"></select>
+
+                <label data-field="newPattern" class="new-pattern"></label>
+
+                <div>
+                    <button type="button" data-field="createANewFactPattern" class="btn btn-default btn-xs">
+                        <i class="fa fa-plus"></i>
+                        Create a new Fact Pattern
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

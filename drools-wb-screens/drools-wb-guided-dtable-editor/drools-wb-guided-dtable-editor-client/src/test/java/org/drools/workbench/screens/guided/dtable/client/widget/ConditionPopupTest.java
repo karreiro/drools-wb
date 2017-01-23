@@ -100,10 +100,10 @@ public class ConditionPopupTest {
     }
 
     private void setUpPopup( final GuidedDecisionTable52 model,
-                       final Pattern52 pattern,
-                       final ConditionCol52 column,
-                       final boolean isNew,
-                       final boolean isReadOnly ) {
+                             final Pattern52 pattern,
+                             final ConditionCol52 column,
+                             final boolean isNew,
+                             final boolean isReadOnly ) {
         this.popup = spy( new ConditionPopup( model,
                                               oracle,
                                               presenter,

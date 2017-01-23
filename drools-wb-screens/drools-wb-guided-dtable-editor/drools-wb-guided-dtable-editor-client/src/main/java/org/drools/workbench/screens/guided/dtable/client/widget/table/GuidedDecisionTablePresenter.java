@@ -182,6 +182,12 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
 
     //This EventBus is local to the screen and should be used for local operations, set data, add rows etc
     private EventBus eventBus = new SimpleEventBus();
+    private Set<PortableWorkDefinition> workItemDefinitions;
+
+    @Override
+    public Set<PortableWorkDefinition> getWorkItemDefinitions() {
+        return workItemDefinitions;
+    }
 
     public static class Access {
 
@@ -280,6 +286,11 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
     }
 
     @Override
+    public EventBus getEventBus() {
+        return eventBus;
+    }
+
+    @Override
     public void activate() {
         lockManager.fireChangeTitleEvent();
     }
@@ -351,7 +362,7 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
                             final boolean isReadOnly ) {
         final GuidedDecisionTable52 model = content.getModel();
         final PackageDataModelOracleBaselinePayload dataModel = content.getDataModel();
-        final Set<PortableWorkDefinition> workItemDefinitions = content.getWorkItemDefinitions();
+        workItemDefinitions = content.getWorkItemDefinitions();
 
         this.currentPath = path;
         this.placeRequest = placeRequest;

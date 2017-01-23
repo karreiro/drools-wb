@@ -257,11 +257,11 @@ public class ConditionPopup {
             view.setLimitedEntryVisibility( true );
             if ( lec.getValue() == null ) {
                 lec.setValue( factory.makeNewValue( editingPattern,
-                        editingCol ) );
+                                                    editingCol ) );
             }
             view.setLimitedEntryWidget( factory.getWidget( editingPattern,
-                    editingCol,
-                    lec.getValue() ) );
+                                                           editingCol,
+                                                           lec.getValue() ) );
         }
     }
 
@@ -286,7 +286,7 @@ public class ConditionPopup {
             view.setDefaultValueVisibility( true );
             if ( editingCol.getDefaultValue() == null ) {
                 editingCol.setDefaultValue( factory.makeNewValue( editingPattern,
-                        editingCol ) );
+                                                                  editingCol ) );
             }
 
             //Ensure the Default Value has been updated to represent the column's
@@ -294,9 +294,9 @@ public class ConditionPopup {
             //coerced to the correct type
             final DTCellValue52 defaultValue = editingCol.getDefaultValue();
             final DataType.DataTypes dataType = columnUtilities.getDataType( editingPattern,
-                    editingCol );
+                                                                             editingCol );
             cellUtilities.convertDTCellValueType( dataType,
-                    defaultValue );
+                                                  defaultValue );
 
             //Correct comma-separated Default Value if operator does not support it
             if ( !validator.doesOperatorAcceptCommaSeparatedValues( editingCol ) ) {
@@ -304,8 +304,8 @@ public class ConditionPopup {
             }
 
             view.setDefaultValueWidget( factory.getWidget( editingPattern,
-                    editingCol,
-                    defaultValue ) );
+                                                           editingCol,
+                                                           defaultValue ) );
         }
     }
 
@@ -804,9 +804,9 @@ public class ConditionPopup {
             //Ensure the Default Value has been updated to represent the column's data-type.
             final DTCellValue52 defaultValue = editingCol.getDefaultValue();
             final DataType.DataTypes dataType = columnUtilities.getDataType( editingPattern,
-                    editingCol );
+                                                                             editingCol );
             cellUtilities.convertDTCellValueType( dataType,
-                    defaultValue );
+                                                  defaultValue );
         }
     }
 

@@ -65,7 +65,7 @@ public class FactPatternsPage extends AbstractGuidedDecisionTableWizardPage
 
         final List<String> availableTypes = Arrays.asList( oracle.getFactTypes() );
         view.setAvailableFactTypes( availableTypes );
-        view.setChosenPatterns( new ArrayList<Pattern52>() );
+        view.setChosenPatterns( new ArrayList<>() );
 
         content.setWidget( view );
     }
