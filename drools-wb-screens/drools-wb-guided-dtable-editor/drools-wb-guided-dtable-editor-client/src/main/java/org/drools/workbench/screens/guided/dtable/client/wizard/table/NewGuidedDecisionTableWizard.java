@@ -27,7 +27,6 @@ import org.drools.workbench.models.guided.dtable.shared.model.BaseColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
-import org.drools.workbench.screens.guided.dtable.client.handlers.NewGuidedDecisionTableHandler;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.Validator;
 import org.drools.workbench.screens.guided.dtable.client.wizard.table.pages.AbstractGuidedDecisionTableWizardPage;
@@ -44,6 +43,7 @@ import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.core.client.wizards.AbstractWizard;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
+import org.uberfire.ext.widgets.core.client.wizards.WizardView;
 
 /**
  * Wizard for creating a Guided Decision Table
@@ -51,77 +51,61 @@ import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 @Dependent
 public class NewGuidedDecisionTableWizard extends AbstractWizard {
 
+    private final List<WizardPage> pages = new ArrayList<WizardPage>();
     @Inject
     private SummaryPage summaryPage;
-
     @Inject
     private ImportsPage importsPage;
-
     @Inject
     private ColumnExpansionPage columnExpansionPage;
-
     @Inject
     private FactPatternsPage factPatternsPage;
-
     @Inject
     private FactPatternConstraintsPage factPatternConstraintsPage;
-
     @Inject
     private ActionSetFieldsPage actionSetFieldsPage;
-
     @Inject
     private ActionInsertFactFieldsPage actionInsertFactFieldsPage;
-
-    private final List<WizardPage> pages = new ArrayList<WizardPage>();
-
     private Path contextPath;
 
     private GuidedDecisionTable52 model;
     private AsyncPackageDataModelOracle oracle;
     private GuidedDecisionTableWizardHandler handler;
-
-    public interface GuidedDecisionTableWizardHandler {
-
-        void save( final Path contextPath,
-                   final String baseFileName,
-                   final GuidedDecisionTable52 model );
-
-        void destroyWizard();
-
-    }
+    @Inject
+    private WizardView view;
 
     @PostConstruct
     public void setupPages() {
-        pages.add( summaryPage );
-        pages.add( importsPage );
-        pages.add( factPatternsPage );
-        pages.add( factPatternConstraintsPage );
-        pages.add( actionSetFieldsPage );
-        pages.add( actionInsertFactFieldsPage );
-        pages.add( columnExpansionPage );
+        pages.add(summaryPage);
+        pages.add(importsPage);
+        pages.add(factPatternsPage);
+        pages.add(factPatternConstraintsPage);
+        pages.add(actionSetFieldsPage);
+        pages.add(actionInsertFactFieldsPage);
+        pages.add(columnExpansionPage);
     }
 
-    public void setContent( final Path contextPath,
-                            final String baseFileName,
-                            final GuidedDecisionTable52.TableFormat tableFormat,
-                            final AsyncPackageDataModelOracle oracle,
-                            final GuidedDecisionTableWizardHandler handler ) {
+    public void setContent(final Path contextPath,
+                           final String baseFileName,
+                           final GuidedDecisionTable52.TableFormat tableFormat,
+                           final AsyncPackageDataModelOracle oracle,
+                           final GuidedDecisionTableWizardHandler handler) {
         this.model = new GuidedDecisionTable52();
-        this.model.setTableFormat( tableFormat );
+        this.model.setTableFormat(tableFormat);
         this.contextPath = contextPath;
         this.oracle = oracle;
         this.handler = handler;
 
-        final Validator validator = new Validator( model.getConditions() );
+        final Validator validator = new Validator(model.getConditions());
 
-        for ( WizardPage page : pages ) {
+        for (WizardPage page : pages) {
             final AbstractGuidedDecisionTableWizardPage dtp = (AbstractGuidedDecisionTableWizardPage) page;
-            dtp.setContent( contextPath,
-                            baseFileName,
-                            tableFormat,
-                            oracle,
-                            model,
-                            validator );
+            dtp.setContent(contextPath,
+                           baseFileName,
+                           tableFormat,
+                           oracle,
+                           model,
+                           validator);
             dtp.initialise();
         }
     }
@@ -137,8 +121,8 @@ public class NewGuidedDecisionTableWizard extends AbstractWizard {
     }
 
     @Override
-    public Widget getPageWidget( final int pageNumber ) {
-        final AbstractGuidedDecisionTableWizardPage dtp = (AbstractGuidedDecisionTableWizardPage) this.pages.get( pageNumber );
+    public Widget getPageWidget(final int pageNumber) {
+        final AbstractGuidedDecisionTableWizardPage dtp = (AbstractGuidedDecisionTableWizardPage) this.pages.get(pageNumber);
         final Widget w = dtp.asWidget();
         dtp.prepareView();
         return w;
@@ -155,19 +139,19 @@ public class NewGuidedDecisionTableWizard extends AbstractWizard {
     }
 
     @Override
-    public void isComplete( final Callback<Boolean> callback ) {
+    public void isComplete(final Callback<Boolean> callback) {
         //Assume complete
-        callback.callback( true );
+        callback.callback(true);
 
-        for ( WizardPage page : this.pages ) {
-            page.isComplete( new Callback<Boolean>() {
+        for (WizardPage page : this.pages) {
+            page.isComplete(new Callback<Boolean>() {
                 @Override
-                public void callback( final Boolean result ) {
-                    if ( Boolean.FALSE.equals( result ) ) {
-                        callback.callback( false );
+                public void callback(final Boolean result) {
+                    if (Boolean.FALSE.equals(result)) {
+                        callback.callback(false);
                     }
                 }
-            } );
+            });
         }
     }
 
@@ -175,51 +159,60 @@ public class NewGuidedDecisionTableWizard extends AbstractWizard {
     public void complete() {
 
         //Ensure each page updates the decision table as necessary
-        for ( WizardPage page : this.pages ) {
+        for (WizardPage page : this.pages) {
             AbstractGuidedDecisionTableWizardPage gep = (AbstractGuidedDecisionTableWizardPage) page;
-            gep.makeResult( model );
+            gep.makeResult(model);
         }
 
         //Expand rows
-        final RowExpander re = new RowExpander( model,
-                                                oracle );
+        final RowExpander re = new RowExpander(model,
+                                               oracle);
 
         //Mark columns on which we are to expand (default is to include all)
-        for ( BaseColumn c : model.getExpandedColumns() ) {
-            re.setExpandColumn( c,
-                                false );
+        for (BaseColumn c : model.getExpandedColumns()) {
+            re.setExpandColumn(c,
+                               false);
         }
         final List<ConditionCol52> columns = columnExpansionPage.getColumnsToExpand();
-        for ( ConditionCol52 c : columns ) {
-            re.setExpandColumn( c,
-                                true );
+        for (ConditionCol52 c : columns) {
+            re.setExpandColumn(c,
+                               true);
         }
 
         //Slurp out expanded rows and construct decision table data
         int rowIndex = 0;
         final RowExpander.RowIterator ri = re.iterator();
-        while ( ri.hasNext() ) {
+        while (ri.hasNext()) {
             List<DTCellValue52> row = ri.next();
-            model.getData().add( row );
-            model.getData().get( rowIndex ).get( 0 ).setNumericValue( new BigDecimal( rowIndex + 1 ) );
+            model.getData().add(row);
+            model.getData().get(rowIndex).get(0).setNumericValue(new BigDecimal(rowIndex + 1));
             rowIndex++;
         }
 
         //Save it!
         final String baseFileName = summaryPage.getBaseFileName();
         final Path contextPath = this.contextPath;
-        model.setTableName( baseFileName );
+        model.setTableName(baseFileName);
 
         super.complete();
 
-        handler.save( contextPath,
-                      baseFileName,
-                      model );
+        handler.save(contextPath,
+                     baseFileName,
+                     model);
     }
 
     @Override
     public void close() {
         super.close();
         handler.destroyWizard();
+    }
+
+    public interface GuidedDecisionTableWizardHandler {
+
+        void save(final Path contextPath,
+                  final String baseFileName,
+                  final GuidedDecisionTable52 model);
+
+        void destroyWizard();
     }
 }
