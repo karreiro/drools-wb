@@ -1,0 +1,110 @@
+/*
+ * Copyright 2017 Red Hat, Inc. and/or its affiliates.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
+
+import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
+
+import com.google.gwt.event.shared.EventBus;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
+import org.drools.workbench.models.datamodel.rule.RuleModel;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasRuleModellerPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
+import org.drools.workbench.screens.guided.rule.client.editor.RuleModeller;
+import org.drools.workbench.screens.guided.rule.client.editor.RuleModellerConfiguration;
+import org.drools.workbench.screens.guided.template.client.editor.TemplateModellerWidgetFactory;
+import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
+import org.uberfire.client.callbacks.Callback;
+import org.uberfire.client.mvp.UberView;
+
+@Dependent
+public class RuleModellerPage<T extends HasRuleModellerPage & DecisionTableColumnPlugin> extends BaseDecisionTableColumnPage<T> {
+
+    @Inject
+    private View view;
+
+    private SimplePanel content = new SimplePanel();
+
+    private RuleModeller ruleModeller;
+
+    @Override
+    public String getTitle() {
+        return "Rule Modeller";
+    }
+
+    @Override
+    public void isComplete(final Callback<Boolean> callback) {
+        callback.callback(false);
+    }
+
+    @Override
+    public void initialise() {
+        content.setWidget(view);
+    }
+
+    @Override
+    public void prepareView() {
+        view.init(this);
+    }
+
+    @Override
+    public Widget asWidget() {
+        return content;
+    }
+
+    RuleModeller ruleModeller() {
+        if (ruleModeller == null) {
+            ruleModeller = new RuleModeller(ruleModel(),
+                                            oracle(),
+                                            widgetFactory(),
+                                            configuration(),
+                                            eventBus(),
+                                            readOnly());
+        }
+        return ruleModeller;
+    }
+
+    private boolean readOnly() {
+        return presenter.isReadOnly();
+    }
+
+    private EventBus eventBus() {
+        return presenter.getEventBus();
+    }
+
+    private AsyncPackageDataModelOracle oracle() {
+        return presenter.getDataModelOracle();
+    }
+
+    private RuleModel ruleModel() {
+        return plugin().getRuleModel();
+    }
+
+    private RuleModellerConfiguration configuration() {
+        return plugin().getRuleModellerConfiguration();
+    }
+
+    private TemplateModellerWidgetFactory widgetFactory() {
+        return new TemplateModellerWidgetFactory();
+    }
+
+    public interface View extends UberView<RuleModellerPage> {
+
+    }
+}
