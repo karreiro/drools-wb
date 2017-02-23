@@ -44,6 +44,7 @@ import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.core.client.wizards.AbstractWizard;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
+import org.uberfire.ext.widgets.core.client.wizards.WizardView;
 
 /**
  * Wizard for creating a Guided Decision Table
@@ -51,44 +52,28 @@ import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 @Dependent
 public class NewGuidedDecisionTableWizard extends AbstractWizard {
 
+    private final List<WizardPage> pages = new ArrayList<WizardPage>();
     @Inject
     private SummaryPage summaryPage;
-
     @Inject
     private ImportsPage importsPage;
-
     @Inject
     private ColumnExpansionPage columnExpansionPage;
-
     @Inject
     private FactPatternsPage factPatternsPage;
-
     @Inject
     private FactPatternConstraintsPage factPatternConstraintsPage;
-
     @Inject
     private ActionSetFieldsPage actionSetFieldsPage;
-
     @Inject
     private ActionInsertFactFieldsPage actionInsertFactFieldsPage;
-
-    private final List<WizardPage> pages = new ArrayList<WizardPage>();
-
     private Path contextPath;
 
     private GuidedDecisionTable52 model;
     private AsyncPackageDataModelOracle oracle;
     private GuidedDecisionTableWizardHandler handler;
-
-    public interface GuidedDecisionTableWizardHandler {
-
-        void save( final Path contextPath,
-                   final String baseFileName,
-                   final GuidedDecisionTable52 model );
-
-        void destroyWizard();
-
-    }
+    @Inject
+    private WizardView view;
 
     @PostConstruct
     public void setupPages() {
@@ -234,5 +219,14 @@ public class NewGuidedDecisionTableWizard extends AbstractWizard {
     public void close() {
         super.close();
         handler.destroyWizard();
+    }
+
+    public interface GuidedDecisionTableWizardHandler {
+
+        void save(final Path contextPath,
+                  final String baseFileName,
+                  final GuidedDecisionTable52 model);
+
+        void destroyWizard();
     }
 }

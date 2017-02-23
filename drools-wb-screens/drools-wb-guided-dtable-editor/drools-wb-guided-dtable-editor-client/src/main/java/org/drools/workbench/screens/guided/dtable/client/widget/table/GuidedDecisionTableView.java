@@ -60,10 +60,10 @@ public interface GuidedDecisionTableView extends GridWidget,
 
     double ROW_HEIGHT = 24;
 
-    void setLocation(final double x,
-                     final double y);
+    void setLocation( final double x,
+                      final double y );
 
-    void newAttributeOrMetaDataColumn(final Set<String> reservedAttributeNames);
+    void newAttributeOrMetaDataColumn( final Set<String> reservedAttributeNames );
 
     void newExtendedEntryConditionColumn();
 
@@ -95,28 +95,28 @@ public interface GuidedDecisionTableView extends GridWidget,
 
     void newLimitedEntryActionBRLFragment();
 
-    void editCondition(final Pattern52 pattern,
-                       final ConditionCol52 column);
+    void editCondition( final Pattern52 pattern,
+                        final ConditionCol52 column );
 
-    void editExtendedEntryConditionBRLFragment(final BRLConditionColumn column);
+    void editExtendedEntryConditionBRLFragment( final BRLConditionColumn column );
 
-    void editLimitedEntryConditionBRLFragment(final LimitedEntryBRLConditionColumn column);
+    void editLimitedEntryConditionBRLFragment( final LimitedEntryBRLConditionColumn column );
 
-    void editActionInsertFact(final ActionInsertFactCol52 column);
+    void editActionInsertFact( final ActionInsertFactCol52 column );
 
-    void editActionSetField(final ActionSetFieldCol52 column);
+    void editActionSetField( final ActionSetFieldCol52 column );
 
-    void editActionRetractFact(final ActionRetractFactCol52 column);
+    void editActionRetractFact( final ActionRetractFactCol52 column );
 
-    void editActionWorkItemInsertFact(final ActionWorkItemInsertFactCol52 column);
+    void editActionWorkItemInsertFact( final ActionWorkItemInsertFactCol52 column );
 
-    void editActionWorkItemSetField(final ActionWorkItemSetFieldCol52 column);
+    void editActionWorkItemSetField( final ActionWorkItemSetFieldCol52 column );
 
-    void editActionWorkItem(final ActionWorkItemCol52 column);
+    void editActionWorkItem( final ActionWorkItemCol52 column );
 
-    void editExtendedEntryActionBRLFragment(final BRLActionColumn column);
+    void editExtendedEntryActionBRLFragment( final BRLActionColumn column );
 
-    void editLimitedEntryActionBRLFragment(final LimitedEntryBRLActionColumn column);
+    void editLimitedEntryActionBRLFragment( final LimitedEntryBRLActionColumn column );
 
     void showDataCutNotificationEvent();
 
@@ -145,16 +145,16 @@ public interface GuidedDecisionTableView extends GridWidget,
 
         GuidedDecisionTableModellerView.Presenter getModellerPresenter();
 
-        void setContent(final ObservablePath path,
-                        final PlaceRequest placeRequest,
-                        final GuidedDecisionTableEditorContent content,
-                        final GuidedDecisionTableModellerView.Presenter parent,
-                        final boolean isReadOnly);
+        void setContent( final ObservablePath path,
+                         final PlaceRequest placeRequest,
+                         final GuidedDecisionTableEditorContent content,
+                         final GuidedDecisionTableModellerView.Presenter parent,
+                         final boolean isReadOnly );
 
-        void refreshContent(final ObservablePath path,
-                            final PlaceRequest placeRequest,
-                            final GuidedDecisionTableEditorContent content,
-                            final boolean isReadOnly);
+        void refreshContent( final ObservablePath path,
+                             final PlaceRequest placeRequest,
+                             final GuidedDecisionTableEditorContent content,
+                             final boolean isReadOnly );
 
         GuidedDecisionTablePresenter.Access getAccess();
 
@@ -164,28 +164,28 @@ public interface GuidedDecisionTableView extends GridWidget,
 
         void terminateAnalysis();
 
-        void getPackageParentRuleNames(final ParameterizedCommand<Collection<String>> command);
+        void getPackageParentRuleNames( final ParameterizedCommand<Collection<String>> command );
 
-        void setParentRuleName(final String parentName);
+        void setParentRuleName( final String parentName );
 
         boolean hasColumnDefinitions();
 
         List<String> getLHSBoundFacts();
 
-        boolean canConditionBeDeleted(final ConditionCol52 col);
+        boolean canConditionBeDeleted( final ConditionCol52 col );
 
-        boolean canConditionBeDeleted(final BRLConditionColumn col);
+        boolean canConditionBeDeleted( final BRLConditionColumn col );
 
-        Map<String, String> getValueListLookups(final BaseColumn column);
+        Map<String, String> getValueListLookups( final BaseColumn column );
 
-        void getEnumLookups(final String factType,
-                            final String factField,
-                            final DependentEnumsUtilities.Context context,
-                            final Callback<Map<String, String>> callback);
+        void getEnumLookups( final String factType,
+                             final String factField,
+                             final DependentEnumsUtilities.Context context,
+                             final Callback<Map<String, String>> callback );
 
         void newAttributeOrMetaDataColumn();
 
-        boolean isMetaDataUnique(final String metaDataName);
+        boolean isMetaDataUnique( final String metaDataName );
 
         void newConditionColumn();
 
@@ -205,49 +205,51 @@ public interface GuidedDecisionTableView extends GridWidget,
 
         void newActionBRLFragment();
 
-        void editCondition(final Pattern52 pattern,
-                           final ConditionCol52 column);
+        void editCondition( final Pattern52 pattern,
+                            final ConditionCol52 column );
 
-        void editCondition(final BRLConditionColumn column);
+        void editCondition( final BRLConditionColumn column );
 
-        void editAction(final ActionCol52 column);
+        void editAction( final ActionCol52 column );
 
-        void appendColumn(final AttributeCol52 column);
+        void appendColumn( final AttributeCol52 column );
 
-        void appendColumn(final MetadataCol52 column);
+        void appendColumn( final MetadataCol52 column );
 
-        void appendColumn(final Pattern52 pattern,
-                          final ConditionCol52 column);
+        void appendColumn( final Pattern52 pattern,
+                           final ConditionCol52 column );
 
-        void appendColumn(final ConditionCol52 column);
+        void appendColumn( final ConditionCol52 column );
 
-        void appendColumn(final ActionCol52 column);
+        void appendColumn( final ActionCol52 column );
 
-        void deleteColumn(final AttributeCol52 column);
+        void deleteColumn( final AttributeCol52 column );
 
-        void deleteColumn(final MetadataCol52 column);
+        void deleteColumn( final MetadataCol52 column );
 
-        void deleteColumn(final ConditionCol52 column);
+        void deleteColumn( final ConditionCol52 column );
 
-        void deleteColumn(final ActionCol52 column);
+        void deleteColumn( final ActionCol52 column );
 
-        void updateColumn(final AttributeCol52 originalColumn,
-                          final AttributeCol52 editedColumn);
+        void updateColumn( final AttributeCol52 originalColumn,
+                           final AttributeCol52 editedColumn );
 
-        void updateColumn(final MetadataCol52 originalColumn,
-                          final MetadataCol52 editedColumn);
+        void updateColumn( final MetadataCol52 originalColumn,
+                           final MetadataCol52 editedColumn );
 
-        void updateColumn(final Pattern52 originalPattern,
-                          final ConditionCol52 originalColumn,
-                          final Pattern52 editedPattern,
-                          final ConditionCol52 editedColumn);
+        void updateColumn( final Pattern52 originalPattern,
+                           final ConditionCol52 originalColumn,
+                           final Pattern52 editedPattern,
+                           final ConditionCol52 editedColumn );
 
-        void updateColumn(final ConditionCol52 originalColumn,
-                          final ConditionCol52 editedColumn);
+        void updateColumn( final ConditionCol52 originalColumn,
+                           final ConditionCol52 editedColumn );
 
-        void updateColumn(final ActionCol52 originalColumn,
-                          final ActionCol52 editedColumn);
+        void updateColumn( final ActionCol52 originalColumn,
+                           final ActionCol52 editedColumn );
 
-        void link(final Set<GuidedDecisionTableView.Presenter> dtPresenters);
+        void link( final Set<GuidedDecisionTableView.Presenter> dtPresenters );
+
     }
+
 }
