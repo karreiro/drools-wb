@@ -25,7 +25,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTabl
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.modals.NewPatternPresenter;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,13 +49,13 @@ public class PatternPageTest {
     private GuidedDecisionTable52 model;
 
     @Mock
-    private ConditionColumnWizardPlugin plugin;
+    private ConditionColumnPlugin plugin;
 
     @Mock
     private GuidedDecisionTableView.Presenter presenter;
 
     @InjectMocks
-    private PatternPage<ConditionColumnWizardPlugin> page = spy(new PatternPage());
+    private PatternPage<ConditionColumnPlugin> page = spy(new PatternPage());
 
     @BeforeClass
     public static void staticSetup() {

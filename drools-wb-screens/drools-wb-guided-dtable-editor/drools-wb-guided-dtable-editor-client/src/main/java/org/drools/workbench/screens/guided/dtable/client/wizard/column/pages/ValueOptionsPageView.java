@@ -31,7 +31,7 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 @Dependent
 @Templated
-public class ValueOptionsWizardPageView extends Composite implements ValueOptionsWizardPage.View {
+public class ValueOptionsPageView extends Composite implements ValueOptionsPage.View {
 
     @Inject
     @DataField("valueList")
@@ -73,10 +73,10 @@ public class ValueOptionsWizardPageView extends Composite implements ValueOption
 
     private TextBox bindingTextBox;
 
-    private ValueOptionsWizardPage page;
+    private ValueOptionsPage page;
 
     @Override
-    public void init(final ValueOptionsWizardPage page) {
+    public void init(final ValueOptionsPage page) {
         this.page = page;
 
         setupComponents();

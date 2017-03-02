@@ -29,7 +29,7 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 @Dependent
 @Templated
-public class CalculationTypeWizardPageView extends Composite implements CalculationTypeWizardPage.View {
+public class CalculationTypePageView extends Composite implements CalculationTypePage.View {
 
     @Inject
     @DataField("isConstraintValueTypeLiteral")
@@ -43,7 +43,7 @@ public class CalculationTypeWizardPageView extends Composite implements Calculat
     @DataField("isConstraintValueTypePredicate")
     Input isConstraintValueTypePredicate;
 
-    private CalculationTypeWizardPage page;
+    private CalculationTypePage page;
 
     @EventHandler({"isConstraintValueTypeLiteral", "isConstraintValueTypeRetValue", "isConstraintValueTypePredicate"})
     public void onPluginSelected(ChangeEvent event) {
@@ -51,7 +51,7 @@ public class CalculationTypeWizardPageView extends Composite implements Calculat
     }
 
     @Override
-    public void init(final CalculationTypeWizardPage page) {
+    public void init(final CalculationTypePage page) {
         this.page = page;
 
         selectConstraintValue();

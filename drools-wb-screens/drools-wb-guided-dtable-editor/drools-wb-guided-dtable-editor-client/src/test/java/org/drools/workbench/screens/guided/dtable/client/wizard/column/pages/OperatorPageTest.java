@@ -28,7 +28,7 @@ import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,10 +41,10 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(GwtMockitoTestRunner.class)
-public class OperatorWizardPageTest {
+public class OperatorPageTest {
 
     @Mock
-    private ConditionColumnWizardPlugin plugin;
+    private ConditionColumnPlugin plugin;
 
     @Mock
     private GuidedDecisionTableView.Presenter presenter;
@@ -58,13 +58,13 @@ public class OperatorWizardPageTest {
     @Mock
     private ConditionCol52 editingCol;
 
-    private OperatorWizardPage page;
+    private OperatorPage page;
 
     @Before
     public void setup() {
-        page = spy(new OperatorWizardPage() {
+        page = spy(new OperatorPage() {
             {
-                presenter = OperatorWizardPageTest.this.presenter;
+                presenter = OperatorPageTest.this.presenter;
             }
 
             @Override

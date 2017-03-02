@@ -30,7 +30,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.widget.DTCellValueWidgetFactory;
 import org.drools.workbench.screens.guided.dtable.client.widget.Validator;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,13 +45,13 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(GwtMockitoTestRunner.class)
-public class ValueOptionsWizardPageTest {
+public class ValueOptionsPageTest {
 
     @Mock
     private Validator validator;
 
     @Mock
-    private ConditionColumnWizardPlugin plugin;
+    private ConditionColumnPlugin plugin;
 
     @Mock
     private AsyncPackageDataModelOracle oracle;
@@ -75,7 +75,7 @@ public class ValueOptionsWizardPageTest {
     private DTCellValueWidgetFactory factory;
 
     @InjectMocks
-    private ValueOptionsWizardPage page = spy(new ValueOptionsWizardPage() {
+    private ValueOptionsPage page = spy(new ValueOptionsPage() {
 
         @Override
         DTCellValueWidgetFactory factory() {

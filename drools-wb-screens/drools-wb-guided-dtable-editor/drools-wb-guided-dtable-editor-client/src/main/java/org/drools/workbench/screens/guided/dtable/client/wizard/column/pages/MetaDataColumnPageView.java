@@ -28,7 +28,7 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 @Dependent
 @Templated
-public class MetaDataColumnWizardPageView extends Composite implements MetaDataColumnWizardPage.View {
+public class MetaDataColumnPageView extends Composite implements MetaDataColumnPage.View {
 
     @Inject
     @DataField("metadataBox")
@@ -42,10 +42,10 @@ public class MetaDataColumnWizardPageView extends Composite implements MetaDataC
     @DataField("errorMessage")
     Span errorMessage;
 
-    private MetaDataColumnWizardPage page;
+    private MetaDataColumnPage page;
 
     @Override
-    public void init(final MetaDataColumnWizardPage page) {
+    public void init(final MetaDataColumnPage page) {
         this.page = page;
 
         clear();

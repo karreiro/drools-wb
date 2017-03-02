@@ -24,8 +24,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasPatternPage;
 import org.jboss.errai.common.client.dom.Label;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -35,7 +37,7 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 
 @Dependent
 @Templated
-public class PatternWizardPageView extends Composite implements PatternPage.View {
+public class PatternPageView extends Composite implements PatternPage.View {
 
     private PatternPage<? extends HasPatternPage> page;
 
@@ -50,6 +52,9 @@ public class PatternWizardPageView extends Composite implements PatternPage.View
     @Inject
     @DataField("createANewFactPattern")
     private Button createANewFactPattern;
+
+    @Inject
+    private TranslationService translationService;
 
     @Override
     public void init(final PatternPage page) {
@@ -95,8 +100,10 @@ public class PatternWizardPageView extends Composite implements PatternPage.View
     }
 
     private void setupPatternList() {
+        final String selectPattern = translate(GuidedDecisionTableErraiConstants.PatternPageView_SelectPattern);
+
         patternList.clear();
-        patternList.addItem("-- Select a pattern --",
+        patternList.addItem("-- " + selectPattern + " --",
                             "");
 
         page.forEachPattern((item, value) -> patternList.addItem(item,
@@ -121,5 +128,11 @@ public class PatternWizardPageView extends Composite implements PatternPage.View
         }
 
         patternList.setSelectedIndex(currentValueIndex);
+    }
+
+    private String translate(final String key,
+                             Object... args) {
+        return translationService.format(key,
+                                         args);
     }
 }

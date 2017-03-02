@@ -29,17 +29,16 @@ import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasFieldPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasPatternPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.CalculationTypeWizardPage;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.ConditionColumnWizardPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.CalculationTypePage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.FieldPage;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.OperatorWizardPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.OperatorPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.PatternPage;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.ValueOptionsWizardPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.ValueOptionsPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
@@ -48,30 +47,27 @@ import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
 @Dependent
-public class ConditionColumnWizardPlugin extends BaseDecisionTableColumnPlugin implements HasFieldPage,
-                                                                                          HasPatternPage,
-                                                                                          HasAdditionalInfoPage {
+public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin implements HasFieldPage,
+                                                                                    HasPatternPage,
+                                                                                    HasAdditionalInfoPage {
 
     @Inject
-    private ConditionColumnWizardPage conditionColumnWizardPage;
+    private PatternPage<ConditionColumnPlugin> patternPage;
 
     @Inject
-    private PatternPage<ConditionColumnWizardPlugin> patternPage;
-
-    @Inject
-    private CalculationTypeWizardPage calculationTypeWizardPage;
+    private CalculationTypePage calculationTypePage;
 
     @Inject
     private FieldPage fieldPage;
 
     @Inject
-    private OperatorWizardPage operatorWizardPage;
+    private OperatorPage operatorPage;
 
     @Inject
     private AdditionalInfoPage additionalInfoPage;
 
     @Inject
-    private ValueOptionsWizardPage valueOptionsWizardPage;
+    private ValueOptionsPage valueOptionsPage;
 
     private Pattern52 editingPattern;
 
@@ -81,17 +77,17 @@ public class ConditionColumnWizardPlugin extends BaseDecisionTableColumnPlugin i
 
     @Override
     public String getTitle() {
-        return GuidedDecisionTableConstants.INSTANCE.AddNewConditionSimpleColumn();
+        return translate(GuidedDecisionTableErraiConstants.ConditionColumnPlugin_AddNewConditionSimpleColumn);
     }
 
     @Override
     public List<WizardPage> getPages() {
         return new ArrayList<WizardPage>() {{
             add(patternPage);
-            add(calculationTypeWizardPage);
+            add(calculationTypePage);
             add(fieldPage);
-            add(operatorWizardPage);
-            add(valueOptionsWizardPage);
+            add(operatorPage);
+            add(valueOptionsPage);
             add(additionalInfoPage());
         }};
     }
@@ -108,7 +104,7 @@ public class ConditionColumnWizardPlugin extends BaseDecisionTableColumnPlugin i
     public Boolean generateColumn() {
 
         if (null == editingCol.getHeader() || "".equals(editingCol.getHeader())) {
-            Window.alert(GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnHeaderValueDescription());
+            Window.alert(translate(GuidedDecisionTableErraiConstants.ConditionColumnPlugin_YouMustEnterAColumnHeaderValueDescription));
             return false;
         }
 
@@ -116,13 +112,13 @@ public class ConditionColumnWizardPlugin extends BaseDecisionTableColumnPlugin i
 
             //Field mandatory for Literals and Formulae
             if (null == editingCol.getFactField() || "".equals(editingCol.getFactField())) {
-                Window.alert(GuidedDecisionTableConstants.INSTANCE.PleaseSelectOrEnterField());
+                Window.alert(translate(GuidedDecisionTableErraiConstants.ConditionColumnPlugin_PleaseSelectOrEnterField));
                 return false;
             }
 
             //Operator optional for Literals and Formulae
             if (editingCol.getOperator() == null) {
-                Window.alert(GuidedDecisionTableConstants.INSTANCE.NotifyNoSelectedOperator());
+                Window.alert(translate(GuidedDecisionTableErraiConstants.ConditionColumnPlugin_NotifyNoSelectedOperator));
                 return false;
             }
         } else {
@@ -132,12 +128,12 @@ public class ConditionColumnWizardPlugin extends BaseDecisionTableColumnPlugin i
         }
 
         if (editingCol.isBound() && !isBindingUnique(editingCol.getBinding())) {
-            Window.alert(GuidedDecisionTableConstants.INSTANCE.PleaseEnterANameThatIsNotAlreadyUsedByAnotherPattern());
+            Window.alert(translate(GuidedDecisionTableErraiConstants.ConditionColumnPlugin_PleaseEnterANameThatIsNotAlreadyUsedByAnotherPattern));
             return false;
         }
 
         if (!unique(editingCol.getHeader())) {
-            Window.alert(GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother());
+            Window.alert(translate(GuidedDecisionTableErraiConstants.ConditionColumnPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother));
             return false;
         }
 
@@ -178,23 +174,23 @@ public class ConditionColumnWizardPlugin extends BaseDecisionTableColumnPlugin i
 
         fireChangeEvent(patternPage);
         fireChangeEvent(fieldPage);
-        fireChangeEvent(operatorWizardPage);
+        fireChangeEvent(operatorPage);
     }
 
     public ConditionCol52 getEditingCol() {
         return editingCol;
     }
 
-    @Override
-    public void setEditingCol(final DTColumnConfig52 editingCol) {
-        this.editingCol = (ConditionCol52) editingCol;
-    }
-
     public void setEditingCol(final String selectedValue) {
         editingCol = newConditionColumn(selectedValue);
 
         fireChangeEvent(fieldPage);
-        fireChangeEvent(operatorWizardPage);
+        fireChangeEvent(operatorPage);
+    }
+
+    @Override
+    public void setEditingCol(final DTColumnConfig52 editingCol) {
+        this.editingCol = (ConditionCol52) editingCol;
     }
 
     ConditionCol52 newConditionColumn(final String selectedValue) {
@@ -229,8 +225,8 @@ public class ConditionColumnWizardPlugin extends BaseDecisionTableColumnPlugin i
 
         editingCol.setOperator(operator);
 
-        fireChangeEvent(operatorWizardPage);
-        fireChangeEvent(valueOptionsWizardPage);
+        fireChangeEvent(operatorPage);
+        fireChangeEvent(valueOptionsPage);
         fireChangeEvent(additionalInfoPage);
     }
 
@@ -241,8 +237,8 @@ public class ConditionColumnWizardPlugin extends BaseDecisionTableColumnPlugin i
 
         editingCol.setFactField(factField);
 
-        fireChangeEvent(operatorWizardPage);
-        fireChangeEvent(valueOptionsWizardPage);
+        fireChangeEvent(operatorPage);
+        fireChangeEvent(valueOptionsPage);
         fireChangeEvent(additionalInfoPage);
     }
 
@@ -253,7 +249,7 @@ public class ConditionColumnWizardPlugin extends BaseDecisionTableColumnPlugin i
     public void setConstraintValue(final int constraintValue) {
         this.constraintValue = constraintValue;
 
-        fireChangeEvent(calculationTypeWizardPage);
+        fireChangeEvent(calculationTypePage);
     }
 
     @Override

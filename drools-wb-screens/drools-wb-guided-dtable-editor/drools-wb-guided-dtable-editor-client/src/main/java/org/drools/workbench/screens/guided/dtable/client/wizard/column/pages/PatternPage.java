@@ -25,7 +25,7 @@ import javax.inject.Inject;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasPatternPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
@@ -54,7 +54,7 @@ public class PatternPage<T extends HasPatternPage & DecisionTableColumnPlugin> e
 
     @Override
     public String getTitle() {
-        return GuidedDecisionTableConstants.INSTANCE.Pattern();
+        return translate(GuidedDecisionTableErraiConstants.PatternPage_Pattern);
     }
 
     @Override
@@ -147,7 +147,8 @@ public class PatternPage<T extends HasPatternPage & DecisionTableColumnPlugin> e
     }
 
     private String patternToName(final Pattern52 pattern52) {
-        final String prefix = pattern52.isNegated() ? GuidedDecisionTableConstants.INSTANCE.negatedPattern() + " " : "";
+        final String not = translate(GuidedDecisionTableErraiConstants.PatternPage_NegatedPattern);
+        final String prefix = pattern52.isNegated() ? not + " " : "";
 
         return prefix + pattern52.getFactType() + " [" + pattern52.getBoundName() + "]";
     }

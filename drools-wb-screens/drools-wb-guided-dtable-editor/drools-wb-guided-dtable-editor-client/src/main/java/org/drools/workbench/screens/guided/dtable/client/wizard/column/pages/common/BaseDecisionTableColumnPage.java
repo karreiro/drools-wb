@@ -16,9 +16,12 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common;
 
+import javax.inject.Inject;
+
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 public abstract class BaseDecisionTableColumnPage<T extends DecisionTableColumnPlugin> implements WizardPage {
@@ -28,6 +31,9 @@ public abstract class BaseDecisionTableColumnPage<T extends DecisionTableColumnP
     protected GuidedDecisionTableView.Presenter presenter;
 
     protected T plugin;
+
+    @Inject
+    private TranslationService translationService;
 
     // TODO {karreiro} - remove this two methods (init)
 
@@ -46,5 +52,11 @@ public abstract class BaseDecisionTableColumnPage<T extends DecisionTableColumnP
 
     public T plugin() {
         return plugin;
+    }
+
+    protected String translate(final String key,
+                               Object... args) {
+        return translationService.format(key,
+                                         args);
     }
 }

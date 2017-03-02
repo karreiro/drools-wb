@@ -22,7 +22,9 @@ import javax.inject.Inject;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.jboss.errai.common.client.dom.Div;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -31,9 +33,9 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 
 @Dependent
 @Templated
-public class OperatorWizardPageView extends Composite implements OperatorWizardPage.View {
+public class OperatorPageView extends Composite implements OperatorPage.View {
 
-    private OperatorWizardPage page;
+    private OperatorPage page;
 
     @Inject
     @DataField("warning")
@@ -46,6 +48,9 @@ public class OperatorWizardPageView extends Composite implements OperatorWizardP
     @Inject
     @DataField("operatorsList")
     private ListBox operatorsList;
+    
+    @Inject
+    private TranslationService translationService;
 
     @EventHandler("operatorsList")
     public void onPluginSelected(ChangeEvent event) {
@@ -53,7 +58,7 @@ public class OperatorWizardPageView extends Composite implements OperatorWizardP
     }
 
     @Override
-    public void init(final OperatorWizardPage page) {
+    public void init(final OperatorPage page) {
         this.page = page;
 
         setupPatternList();
@@ -74,8 +79,10 @@ public class OperatorWizardPageView extends Composite implements OperatorWizardP
     }
 
     private void setupPatternList() {
+        final String selectOperator = translate(GuidedDecisionTableErraiConstants.OperatorPageView_SelectOperator);
+
         operatorsList.clear();
-        operatorsList.addItem("-- Select an operator --",
+        operatorsList.addItem("-- " + selectOperator + " --",
                               "");
 
         page.forEachOperator((item, value) -> operatorsList.addItem(item,
@@ -83,5 +90,11 @@ public class OperatorWizardPageView extends Composite implements OperatorWizardP
 
         operatorsList.setSelectedIndex(getCurrentIndexFromList(page.getOperator(),
                                                                operatorsList));
+    }
+
+    private String translate(final String key,
+                             Object... args) {
+        return translationService.format(key,
+                                         args);
     }
 }

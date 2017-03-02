@@ -28,6 +28,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.BRLConditionColumn
 import org.drools.workbench.models.guided.dtable.shared.model.BRLConditionVariableColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasRuleModellerPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
@@ -51,7 +52,7 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
 
     @Override
     public String getTitle() {
-        return "Add a Condition BRL fragment";
+        return translate(GuidedDecisionTableErraiConstants.BRLConditionColumnPlugin_AddConditionBRL);
     }
 
     @Override

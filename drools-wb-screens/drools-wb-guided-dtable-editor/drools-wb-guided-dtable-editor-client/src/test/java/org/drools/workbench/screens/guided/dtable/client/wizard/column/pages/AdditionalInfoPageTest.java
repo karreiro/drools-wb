@@ -21,7 +21,7 @@ import java.util.Map;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 import org.gwtbootstrap3.client.ui.CheckBox;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -37,7 +37,7 @@ import static org.mockito.Mockito.*;
 public class AdditionalInfoPageTest {
 
     @Mock
-    private ConditionColumnWizardPlugin plugin;
+    private ConditionColumnPlugin plugin;
 
     @Mock
     private ConditionCol52 editingCol;

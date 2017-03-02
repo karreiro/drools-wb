@@ -17,18 +17,42 @@
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
 import javax.enterprise.context.Dependent;
+import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.ListBox;
+import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 @Dependent
 @Templated
-public class ConditionColumnWizardPageView extends Composite implements ConditionColumnWizardPage.View {
+public class AttributeColumnPageView extends Composite implements AttributeColumnPage.View {
 
-    private ConditionColumnWizardPage page;
+    private AttributeColumnPage page;
+
+    @Inject
+    @DataField("attributeList")
+    private ListBox attributeList;
 
     @Override
-    public void init(final ConditionColumnWizardPage page) {
+    public void init(final AttributeColumnPage page) {
         this.page = page;
+
+        setup();
+    }
+
+    @Override
+    public String getAttributeText() {
+        return attributeList.getSelectedItemText();
+    }
+
+    private void setup() {
+        attributeList.clear();
+
+        for (String item : page.getAttributes()) {
+            attributeList.addItem(item);
+        }
+
+        attributeList.setSelectedIndex(0);
     }
 }

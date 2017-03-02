@@ -23,7 +23,7 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.A
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionWorkItemSetFieldPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.BRLActionColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.BRLConditionColumnPlugin;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 
 public class AdditionalInfoPageInitializer {
 
@@ -46,7 +46,7 @@ public class AdditionalInfoPageInitializer {
                 .enableLogicallyInsert();
     }
 
-    public AdditionalInfoPage init(ConditionColumnWizardPlugin plugin) {
+    public AdditionalInfoPage init(ConditionColumnPlugin plugin) {
         return additionalInfoPage(plugin)
                 .enableEntryPointName()
                 .enableHeader()

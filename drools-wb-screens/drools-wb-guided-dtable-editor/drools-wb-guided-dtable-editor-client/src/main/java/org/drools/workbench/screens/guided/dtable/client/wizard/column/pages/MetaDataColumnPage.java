@@ -16,21 +16,18 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
-import java.util.Arrays;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
-import org.drools.workbench.screens.guided.rule.client.editor.RuleAttributeWidget;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.UberView;
 
 @Dependent
-public class AttributeColumnWizardPage extends BaseDecisionTableColumnPage {
+public class MetaDataColumnPage extends BaseDecisionTableColumnPage {
 
     @Inject
     private View view;
@@ -38,8 +35,13 @@ public class AttributeColumnWizardPage extends BaseDecisionTableColumnPage {
     private SimplePanel content = new SimplePanel();
 
     @Override
+    public void initialise() {
+        content.setWidget(view);
+    }
+
+    @Override
     public String getTitle() {
-        return GuidedDecisionTableConstants.INSTANCE.AddNewAttributeColumn();
+        return translate(GuidedDecisionTableErraiConstants.MetaDataColumnPage_AddNewMetadata);
     }
 
     @Override
@@ -47,9 +49,25 @@ public class AttributeColumnWizardPage extends BaseDecisionTableColumnPage {
         callback.callback(false);
     }
 
-    @Override
-    public void initialise() {
-        content.setWidget(view);
+    public boolean isValidMetadata() {
+
+        final String metaData = getMetadataValue().trim();
+
+        if (metaData.isEmpty()) {
+            view.showError(translate(GuidedDecisionTableErraiConstants.MetaDataColumnPage_MetadataNameEmpty));
+            return false;
+        }
+
+        if (!presenter.isMetaDataUnique(metaData)) {
+            view.showError(translate(GuidedDecisionTableErraiConstants.MetaDataColumnPage_ThatColumnNameIsAlreadyInUsePleasePickAnother));
+            return false;
+        }
+
+        return true;
+    }
+
+    public String getMetadataValue() {
+        return view.getMetadataText();
     }
 
     @Override
@@ -62,26 +80,10 @@ public class AttributeColumnWizardPage extends BaseDecisionTableColumnPage {
         return content;
     }
 
-    public String getAttributeName() {
-        return view.getAttributeText();
-    }
+    public interface View extends UberView<MetaDataColumnPage> {
 
-    String[] getAttributes() {
-        String[] attributes = RuleAttributeWidget.getAttributesList();
+        String getMetadataText();
 
-        attributes = Arrays.copyOf(attributes,
-                                   attributes.length + 1);
-        attributes[attributes.length - 1] = GuidedDecisionTable52.NEGATE_RULE_ATTR;
-
-        return attributes;
-    }
-
-    String[] getDuplicates() {
-        return presenter.getExistingAttributeNames().toArray(new String[0]);
-    }
-
-    public interface View extends UberView<AttributeColumnWizardPage> {
-
-        String getAttributeText();
+        void showError(String errorMessage);
     }
 }

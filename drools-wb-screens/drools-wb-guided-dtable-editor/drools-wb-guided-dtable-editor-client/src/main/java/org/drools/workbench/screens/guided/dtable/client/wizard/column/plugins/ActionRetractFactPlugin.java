@@ -28,7 +28,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryActionRetractFactCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryCol;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
@@ -82,7 +82,7 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
 
     @Override
     public String getTitle() {
-        return "Delete an existing fact";
+        return translate(GuidedDecisionTableErraiConstants.ActionRetractFactPlugin_DeleteAnExistingFact);
     }
 
     @Override
@@ -103,12 +103,12 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
     @Override
     public Boolean generateColumn() {
         if (null == editingCol.getHeader() || "".equals(editingCol.getHeader())) {
-            Window.alert(GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnHeaderValueDescription());
+            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionRetractFactPlugin_YouMustEnterAColumnHeaderValueDescription));
             return false;
         }
 
         if (!unique(editingCol.getHeader())) {
-            Window.alert(GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother());
+            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionRetractFactPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother));
             return false;
         }
 

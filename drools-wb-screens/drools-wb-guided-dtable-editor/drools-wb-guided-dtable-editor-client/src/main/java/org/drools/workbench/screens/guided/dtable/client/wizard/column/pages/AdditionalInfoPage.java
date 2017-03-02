@@ -21,6 +21,7 @@ import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.DTCellValueWidgetFactory;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
@@ -32,20 +33,14 @@ import org.uberfire.client.mvp.UberView;
 @Dependent
 public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableColumnPlugin> extends BaseDecisionTableColumnPage<T> {
 
+    boolean hideColumnEnabled = false;
     @Inject
     private View view;
-
     private SimplePanel content = new SimplePanel();
-
     private boolean entryPointNameEnabled = false;
-
     private boolean headerEnabled = false;
-
     private boolean logicallyInsertEnabled = false;
-
     private boolean updateEngineWithChangesEnabled = false;
-
-    boolean hideColumnEnabled = false;
 
     @Override
     public void initialise() {
@@ -54,7 +49,7 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
 
     @Override
     public String getTitle() {
-        return "Additional info";
+        return translate(GuidedDecisionTableErraiConstants.AdditionalInfoPage_AdditionalInfo);
     }
 
     @Override

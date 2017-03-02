@@ -22,14 +22,14 @@ import javax.inject.Inject;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.UberView;
 
 @Dependent
-public class CalculationTypeWizardPage extends BaseDecisionTableColumnPage<ConditionColumnWizardPlugin> {
+public class CalculationTypePage extends BaseDecisionTableColumnPage<ConditionColumnPlugin> {
 
     @Inject
     private View view;
@@ -43,7 +43,7 @@ public class CalculationTypeWizardPage extends BaseDecisionTableColumnPage<Condi
 
     @Override
     public String getTitle() {
-        return GuidedDecisionTableConstants.INSTANCE.CalculationType();
+        return translate(GuidedDecisionTableErraiConstants.CalculationTypePage_CalculationType);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class CalculationTypeWizardPage extends BaseDecisionTableColumnPage<Condi
         plugin().setConstraintValue(constraintValue);
     }
 
-    public interface View extends UberView<CalculationTypeWizardPage> {
+    public interface View extends UberView<CalculationTypePage> {
 
     }
 }

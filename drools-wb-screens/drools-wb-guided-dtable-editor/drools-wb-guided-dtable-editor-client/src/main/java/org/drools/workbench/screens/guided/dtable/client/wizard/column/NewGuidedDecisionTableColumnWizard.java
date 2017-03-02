@@ -23,11 +23,12 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.Widget;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.SummaryPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.core.client.wizards.AbstractWizard;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
@@ -49,11 +50,14 @@ public class NewGuidedDecisionTableColumnWizard extends AbstractWizard {
     @Inject
     private SummaryPage summaryPage;
 
+    @Inject
+    private TranslationService translationService;
+
     private GuidedDecisionTableView.Presenter presenter;
 
     @Override
     public String getTitle() {
-        return GuidedDecisionTableConstants.INSTANCE.AddNewColumn();
+        return translate(GuidedDecisionTableErraiConstants.NewGuidedDecisionTableColumnWizard_AddNewColumn);
     }
 
     @Override
@@ -167,5 +171,11 @@ public class NewGuidedDecisionTableColumnWizard extends AbstractWizard {
 
     public GuidedDecisionTableView.Presenter getPresenter() {
         return presenter;
+    }
+
+    private String translate(final String key,
+                             Object... args) {
+        return translationService.format(key,
+                                         args);
     }
 }
