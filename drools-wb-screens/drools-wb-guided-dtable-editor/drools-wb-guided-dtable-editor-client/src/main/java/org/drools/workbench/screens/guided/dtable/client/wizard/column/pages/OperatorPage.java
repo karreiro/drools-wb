@@ -28,9 +28,9 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.kie.workbench.common.widgets.client.resources.HumanReadable;
 import org.uberfire.client.callbacks.Callback;
@@ -38,7 +38,7 @@ import org.uberfire.client.mvp.UberView;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
 
 @Dependent
-public class OperatorWizardPage extends BaseDecisionTableColumnPage<ConditionColumnWizardPlugin> {
+public class OperatorPage extends BaseDecisionTableColumnPage<ConditionColumnPlugin> {
 
     @Inject
     private View view;
@@ -55,7 +55,7 @@ public class OperatorWizardPage extends BaseDecisionTableColumnPage<ConditionCol
 
     @Override
     public String getTitle() {
-        return GuidedDecisionTableConstants.INSTANCE.Operator();
+        return translate(GuidedDecisionTableErraiConstants.OperatorPage_Operator);
     }
 
     @Override
@@ -129,7 +129,7 @@ public class OperatorWizardPage extends BaseDecisionTableColumnPage<ConditionCol
         return plugin().getEditingCol();
     }
 
-    public interface View extends UberView<OperatorWizardPage> {
+    public interface View extends UberView<OperatorPage> {
 
     }
 }

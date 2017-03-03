@@ -29,12 +29,13 @@ import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.DTCellValueWidgetFactory;
 import org.drools.workbench.screens.guided.dtable.client.widget.Validator;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.CellUtilities;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.ColumnUtilities;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 import org.drools.workbench.screens.guided.rule.client.editor.BindingTextBox;
 import org.drools.workbench.screens.guided.rule.client.editor.CEPWindowOperatorsDropdown;
 import org.gwtbootstrap3.client.ui.TextBox;
@@ -45,7 +46,7 @@ import org.uberfire.client.mvp.UberView;
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
 @Dependent
-public class ValueOptionsWizardPage extends BaseDecisionTableColumnPage<ConditionColumnWizardPlugin> {
+public class ValueOptionsPage extends BaseDecisionTableColumnPage<ConditionColumnPlugin> {
 
     @Inject
     private View view;
@@ -59,7 +60,7 @@ public class ValueOptionsWizardPage extends BaseDecisionTableColumnPage<Conditio
 
     @Override
     public String getTitle() {
-        return "Value options";
+        return translate(GuidedDecisionTableErraiConstants.ValueOptionsPage_ValueOptions);
     }
 
     @Override
@@ -220,7 +221,7 @@ public class ValueOptionsWizardPage extends BaseDecisionTableColumnPage<Conditio
         return plugin().getConstraintValue() == BaseSingleFieldConstraint.TYPE_LITERAL;
     }
 
-    public interface View extends UberView<ValueOptionsWizardPage> {
+    public interface View extends UberView<ValueOptionsPage> {
 
     }
 }

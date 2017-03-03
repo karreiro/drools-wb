@@ -25,13 +25,14 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.models.datamodel.workitems.PortableWorkDefinition;
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.UberView;
 
 @Dependent
-public class WorkItemPage extends BaseDecisionTableColumnPage<ConditionColumnWizardPlugin> {
+public class WorkItemPage extends BaseDecisionTableColumnPage<ConditionColumnPlugin> {
 
     @Inject
     private View view;
@@ -40,7 +41,7 @@ public class WorkItemPage extends BaseDecisionTableColumnPage<ConditionColumnWiz
 
     @Override
     public String getTitle() {
-        return "Work Item";
+        return translate(GuidedDecisionTableErraiConstants.WorkItemPage_WorkItem);
     }
 
     @Override

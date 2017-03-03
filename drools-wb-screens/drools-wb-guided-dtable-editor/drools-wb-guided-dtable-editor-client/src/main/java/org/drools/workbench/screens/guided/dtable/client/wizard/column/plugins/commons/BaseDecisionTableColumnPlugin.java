@@ -21,6 +21,7 @@ import javax.inject.Inject;
 
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
 
@@ -32,6 +33,9 @@ public abstract class BaseDecisionTableColumnPlugin implements DecisionTableColu
 
     @Inject
     private Event<WizardPageStatusChangeEvent> changeEvent;
+
+    @Inject
+    private TranslationService translationService;
 
     public void init(final NewGuidedDecisionTableColumnWizard wizard) {
         this.wizard = wizard;
@@ -58,5 +62,11 @@ public abstract class BaseDecisionTableColumnPlugin implements DecisionTableColu
 
     protected void fireChangeEvent(final WizardPage wizardPage) {
         changeEvent.fire(new WizardPageStatusChangeEvent(wizardPage));
+    }
+
+    protected String translate(final String key,
+                               final Object... args) {
+        return translationService.format(key,
+                                         args);
     }
 }

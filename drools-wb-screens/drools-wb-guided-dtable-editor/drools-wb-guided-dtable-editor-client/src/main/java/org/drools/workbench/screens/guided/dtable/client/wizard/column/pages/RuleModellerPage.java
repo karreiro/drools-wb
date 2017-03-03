@@ -23,6 +23,7 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.models.datamodel.rule.RuleModel;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasRuleModellerPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
@@ -45,7 +46,7 @@ public class RuleModellerPage<T extends HasRuleModellerPage & DecisionTableColum
 
     @Override
     public String getTitle() {
-        return "Rule Modeller";
+        return translate(GuidedDecisionTableErraiConstants.RuleModellerPage_RuleModeller);
     }
 
     @Override

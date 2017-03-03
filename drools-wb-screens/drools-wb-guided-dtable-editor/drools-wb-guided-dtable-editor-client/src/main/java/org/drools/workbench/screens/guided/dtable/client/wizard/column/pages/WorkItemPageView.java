@@ -21,7 +21,8 @@ import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
@@ -32,6 +33,9 @@ public class WorkItemPageView extends Composite implements WorkItemPage.View {
     @Inject
     @DataField("work-items")
     private ListBox workItems;
+
+    @Inject
+    private TranslationService translationService;
 
     private WorkItemPage page;
 
@@ -53,13 +57,13 @@ public class WorkItemPageView extends Composite implements WorkItemPage.View {
     private void setupEmptyWorkItemList() {
         workItems.clear();
         workItems.setEnabled(false);
-        workItems.addItem(GuidedDecisionTableConstants.INSTANCE.NoWorkItemsAvailable());
+        workItems.addItem(translate(GuidedDecisionTableErraiConstants.WorkItemPageView_NoWorkItemsAvailable));
     }
 
     private void setupWorkItemList() {
         workItems.clear();
         workItems.setEnabled(!page.isReadOnly());
-        workItems.addItem(GuidedDecisionTableConstants.INSTANCE.Choose());
+        workItems.addItem(translate(GuidedDecisionTableErraiConstants.WorkItemPageView_Choose));
 
         page.getWorkItems().forEach(wid -> workItems.addItem(wid.getDisplayName(),
                                                              wid.getName()));
@@ -68,5 +72,11 @@ public class WorkItemPageView extends Composite implements WorkItemPage.View {
     @Override
     public ListBox getWorkItems() {
         return workItems;
+    }
+
+    private String translate(final String key,
+                             Object... args) {
+        return translationService.format(key,
+                                         args);
     }
 }

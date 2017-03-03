@@ -21,15 +21,16 @@ import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.MetaDataColumnPlugin;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.UberView;
 
+import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
+
 @Dependent
-public class CalculationTypeWizardPage extends BaseDecisionTableColumnPage<ConditionColumnWizardPlugin> {
+public class MetaDataColumnPage extends BaseDecisionTableColumnPage<MetaDataColumnPlugin> {
 
     @Inject
     private View view;
@@ -43,12 +44,14 @@ public class CalculationTypeWizardPage extends BaseDecisionTableColumnPage<Condi
 
     @Override
     public String getTitle() {
-        return GuidedDecisionTableConstants.INSTANCE.CalculationType();
+        return translate(GuidedDecisionTableErraiConstants.MetaDataColumnPage_AddNewMetadata);
     }
 
     @Override
     public void isComplete(final Callback<Boolean> callback) {
-        callback.callback(plugin().getConstraintValue() != BaseSingleFieldConstraint.TYPE_UNDEFINED);
+        final boolean hasMetaData = !nil(plugin().getMetaData());
+
+        callback.callback(hasMetaData);
     }
 
     @Override
@@ -61,15 +64,24 @@ public class CalculationTypeWizardPage extends BaseDecisionTableColumnPage<Condi
         return content;
     }
 
-    int getConstraintValue() {
-        return plugin().getConstraintValue();
+    public String getMetadata() {
+        return plugin().getMetaData();
     }
 
-    void setConstraintValue(final int constraintValue) {
-        plugin().setConstraintValue(constraintValue);
+    public void setMetadata(String metadata) {
+        plugin().setMetaData(metadata.trim());
     }
 
-    public interface View extends UberView<CalculationTypeWizardPage> {
+    public void emptyMetadataError() {
+        view.showError(translate(GuidedDecisionTableErraiConstants.MetaDataColumnPage_MetadataNameEmpty));
+    }
 
+    public void columnNameIsAlreadyInUseError() {
+        view.showError(translate(GuidedDecisionTableErraiConstants.MetaDataColumnPage_ThatColumnNameIsAlreadyInUsePleasePickAnother));
+    }
+
+    public interface View extends UberView<MetaDataColumnPage> {
+
+        void showError(String errorMessage);
     }
 }

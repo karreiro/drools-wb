@@ -750,7 +750,8 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
         view.newAttributeOrMetaDataColumn( getReservedAttributeNames() );
     }
 
-    private Set<String> getReservedAttributeNames() {
+    @Override
+    public Set<String> getReservedAttributeNames() {
         final Set<String> result = new HashSet<>();
 
         result.addAll( getExistingAttributeNames() );

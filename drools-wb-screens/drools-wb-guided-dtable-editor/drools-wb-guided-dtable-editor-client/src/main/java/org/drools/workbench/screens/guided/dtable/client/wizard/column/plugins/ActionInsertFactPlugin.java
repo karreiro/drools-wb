@@ -27,7 +27,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.ActionInsertFactCo
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryActionInsertFactCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasFieldPage;
@@ -64,7 +64,7 @@ public class ActionInsertFactPlugin extends BaseDecisionTableColumnPlugin implem
 
     @Override
     public String getTitle() {
-        return GuidedDecisionTableConstants.INSTANCE.SetTheValueOfAField();
+        return translate(GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_SetTheValueOfAField);
     }
 
     @Override
@@ -92,20 +92,20 @@ public class ActionInsertFactPlugin extends BaseDecisionTableColumnPlugin implem
     @Override
     public Boolean generateColumn() {
         if (!isValidFactType()) {
-            Window.alert(GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnPattern());
+            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_YouMustEnterAColumnPattern));
             return false;
         }
         if (!isValidFactField()) {
-            Window.alert(GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnField());
+            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_YouMustEnterAColumnField));
             return false;
         }
         if (null == editingCol.getHeader() || "".equals(editingCol.getHeader())) {
-            Window.alert(GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnHeaderValueDescription());
+            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_YouMustEnterAColumnHeaderValueDescription));
             return false;
         }
 
         if (!unique(editingCol.getHeader())) {
-            Window.alert(GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother());
+            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother));
             return false;
         }
 

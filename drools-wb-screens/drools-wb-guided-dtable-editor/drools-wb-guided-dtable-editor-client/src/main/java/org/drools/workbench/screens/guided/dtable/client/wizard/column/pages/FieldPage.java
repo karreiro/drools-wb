@@ -31,6 +31,7 @@ import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasFieldPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
@@ -53,7 +54,7 @@ public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> exten
 
     @Override
     public String getTitle() {
-        return GuidedDecisionTableConstants.INSTANCE.Field();
+        return translate(GuidedDecisionTableErraiConstants.FieldPage_Field);
     }
 
     @Override

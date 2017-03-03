@@ -24,7 +24,7 @@ import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
@@ -47,7 +47,7 @@ public class SummaryPage extends BaseDecisionTableColumnPage {
 
     @Override
     public String getTitle() {
-        return GuidedDecisionTableConstants.INSTANCE.NewColumn();
+        return translate(GuidedDecisionTableErraiConstants.SummaryPage_NewColumn);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class SummaryPage extends BaseDecisionTableColumnPage {
     }
 
     void openPage(final String selectedItemText) {
-        if (selectedItemText.isEmpty()) {
+        if (selectedItemText.isEmpty() || presenter.isReadOnly()) {
             return;
         }
 

@@ -17,24 +17,24 @@
 <div>
     <div>
         <div class="form-group">
-            <h5 class="label label-default">Select the Field</h5>
+            <h5 class="label label-default" data-i18n-key="Select"></h5>
             <hr/>
         </div>
 
-        <div data-field="warning" class="alert alert-warning">
+        <div data-field="warning" class="alert alert-warning alert-dismissable">
             <span class="pficon pficon-warning-triangle-o"></span>
-            <span>You need to set the "Pattern" first</span>
+            <span data-field="errorMessage" data-i18n-key="YouNeedToSetTheField"></span>
         </div>
 
         <div data-field="info" class="alert alert-info">
             <span class="pficon pficon-info"></span>
-            <span>You don't need to set the Fact type when "Calculation type" is "Predicate"</span>
+            <span data-i18n-key="YouDontNeedToSetTheOperator"></span>
         </div>
 
-        <label class="col-sm-4 form-control-label" data-i18n-key="Metadata">Field:</label>
+        <label class="col-sm-4 form-control-label" data-i18n-key="Operator"></label>
 
         <div class="col-sm-8">
-            <select class="form-control" data-field="fieldsList"></select>
+            <select class="form-control" data-field="operatorsList"></select>
         </div>
     </div>
 </div>

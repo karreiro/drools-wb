@@ -18,7 +18,7 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,16 +27,16 @@ import org.mockito.Mock;
 import static org.mockito.Mockito.*;
 
 @RunWith(GwtMockitoTestRunner.class)
-public class CalculationTypeWizardPageTest {
+public class CalculationTypePageTest {
 
     @Mock
-    private ConditionColumnWizardPlugin plugin;
+    private ConditionColumnPlugin plugin;
 
-    private CalculationTypeWizardPage page;
+    private CalculationTypePage page;
 
     @Before
     public void setup() {
-        page = spy(new CalculationTypeWizardPage());
+        page = spy(new CalculationTypePage());
 
         when(page.plugin()).thenReturn(plugin);
     }

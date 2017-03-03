@@ -19,53 +19,50 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+
+import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.getCurrentIndexFromList;
 
 @Dependent
 @Templated
-public class AttributeColumnWizardPageView extends Composite implements AttributeColumnWizardPage.View {
+public class AttributeColumnPageView extends Composite implements AttributeColumnPage.View {
 
-    private AttributeColumnWizardPage page;
+    private AttributeColumnPage page;
 
     @Inject
     @DataField("attributeList")
     private ListBox attributeList;
 
     @Override
-    public void init(final AttributeColumnWizardPage page) {
+    public void init(final AttributeColumnPage page) {
         this.page = page;
 
-        setAttributesPanel();
+        setup();
     }
 
-    @Override
-    public String getAttributeText() {
-        return attributeList.getSelectedItemText();
+    @EventHandler("attributeList")
+    public void onSelectAttribute(ChangeEvent event) {
+        page.selectItem(attributeList.getSelectedItemText());
     }
 
-    private void setAttributesPanel() {
+    private void setup() {
         attributeList.clear();
 
         for (String item : page.getAttributes()) {
             attributeList.addItem(item);
         }
 
-        removeAttributesAlreadyAdded(attributeList);
-
-        attributeList.setSelectedIndex(0);
+        attributeList.setSelectedIndex(attributeIndex());
     }
 
-    private void removeAttributesAlreadyAdded(final ListBox attributeList) {
-        for (String at : page.getDuplicates()) {
-            for (int iItem = 0; iItem < attributeList.getItemCount(); iItem++) {
-                if (attributeList.getItemText(iItem).equals(at)) {
-                    attributeList.removeItem(iItem);
-                    break;
-                }
-            }
-        }
+    private int attributeIndex() {
+        return getCurrentIndexFromList(page.selectedAttribute(),
+                                       attributeList);
     }
 }

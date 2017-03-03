@@ -1,5 +1,5 @@
 <!--
-  ~ Copyright 2016 Red Hat, Inc. and/or its affiliates.
+  ~ Copyright 2017 Red Hat, Inc. and/or its affiliates.
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,15 +17,24 @@
 <div>
     <div>
         <div class="form-group">
-            <h5 class="label label-default">Select the Attribute</h5>
+            <h5 class="label label-default" data-i18n-key="Select"></h5>
             <hr/>
         </div>
 
-        <label class="col-sm-4 form-control-label" data-i18n-key="Attribute"></label>
+        <div data-field="warning" class="alert alert-warning">
+            <span class="pficon pficon-warning-triangle-o"></span>
+            <span data-i18n-key="SetThePatternFirst"></span>
+        </div>
+
+        <div data-field="info" class="alert alert-info">
+            <span class="pficon pficon-info"></span>
+            <span data-i18n-key="YouDontNeedToSetTheFact"></span>
+        </div>
+
+        <label class="col-sm-4 form-control-label" data-i18n-key="Field"></label>
 
         <div class="col-sm-8">
-            <select class="form-control" data-field="attributeList">
-            </select>
+            <select class="form-control" data-field="fieldsList" title=""></select>
         </div>
     </div>
 </div>

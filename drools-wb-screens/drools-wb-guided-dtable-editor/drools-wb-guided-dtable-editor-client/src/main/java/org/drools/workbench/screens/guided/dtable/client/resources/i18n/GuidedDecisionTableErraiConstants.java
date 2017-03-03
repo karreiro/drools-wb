@@ -76,4 +76,124 @@ public class GuidedDecisionTableErraiConstants {
 
     @TranslationKey(defaultValue = "")
     public static final String ViewMenu_auditLog = "ViewMenu.auditLog";
+
+    @TranslationKey(defaultValue = "")
+    public static final String AdditionalInfoPage_AdditionalInfo = "AdditionalInfoPage.AdditionalInfo";
+
+    @TranslationKey(defaultValue = "")
+    public static final String AttributeColumnPage_AddNewAttribute = "AttributeColumnPage.AddNewAttribute";
+
+    @TranslationKey(defaultValue = "")
+    public static final String CalculationTypePage_CalculationType = "CalculationTypePage.CalculationType";
+
+    @TranslationKey(defaultValue = "")
+    public static final String FieldPage_Field = "FieldPage.Field";
+
+    @TranslationKey(defaultValue = "")
+    public static final String MetaDataColumnPage_AddNewMetadata = "MetaDataColumnPage.AddNewMetadata";
+
+    @TranslationKey(defaultValue = "")
+    public static final String MetaDataColumnPage_MetadataNameEmpty = "MetaDataColumnPage.MetadataNameEmpty";
+
+    @TranslationKey(defaultValue = "")
+    public static final String MetaDataColumnPage_ThatColumnNameIsAlreadyInUsePleasePickAnother = "MetaDataColumnPage.ThatColumnNameIsAlreadyInUsePleasePickAnother";
+
+    @TranslationKey(defaultValue = "")
+    public static final String OperatorPage_Operator = "OperatorPage.Operator";
+
+    @TranslationKey(defaultValue = "")
+    public static final String PatternPage_Pattern = "PatternPage.Pattern";
+
+    @TranslationKey(defaultValue = "")
+    public static final String RuleModellerPage_RuleModeller = "RuleModellerPage.RuleModeller";
+
+    @TranslationKey(defaultValue = "")
+    public static final String SummaryPage_NewColumn = "SummaryPage.NewColumn";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ValueOptionsPage_ValueOptions = "ValueOptionsPage.ValueOptions";
+
+    @TranslationKey(defaultValue = "")
+    public static final String WorkItemPage_WorkItem = "WorkItemPage.WorkItem";
+
+    @TranslationKey(defaultValue = "")
+    public static final String FieldPageView_SelectField = "FieldPageView.SelectField";
+
+    @TranslationKey(defaultValue = "")
+    public static final String OperatorPageView_SelectOperator = "OperatorPageView.SelectOperator";
+
+    @TranslationKey(defaultValue = "")
+    public static final String PatternPage_NegatedPattern = "PatternPage.NegatedPattern";
+
+    @TranslationKey(defaultValue = "")
+    public static final String PatternPageView_SelectPattern = "PatternPageView.SelectPattern";
+
+    @TranslationKey(defaultValue = "")
+    public static final String WorkItemPageView_NoWorkItemsAvailable = "WorkItemPageView.NoWorkItemsAvailable";
+
+    @TranslationKey(defaultValue = "")
+    public static final String WorkItemPageView_Choose = "WorkItemPageView.Choose";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ActionInsertFactPlugin_SetTheValueOfAField = "ActionInsertFactPlugin.SetTheValueOfAField";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ActionInsertFactPlugin_YouMustEnterAColumnPattern = "ActionInsertFactPlugin.YouMustEnterAColumnPattern";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ActionInsertFactPlugin_YouMustEnterAColumnField = "ActionInsertFactPlugin.YouMustEnterAColumnField";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ActionInsertFactPlugin_YouMustEnterAColumnHeaderValueDescription = "ActionInsertFactPlugin.YouMustEnterAColumnHeaderValueDescription";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ActionInsertFactPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother = "ActionInsertFactPlugin.ThatColumnNameIsAlreadyInUsePleasePickAnother";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ActionRetractFactPlugin_DeleteAnExistingFact = "ActionRetractFactPlugin.DeleteAnExistingFact";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ActionRetractFactPlugin_YouMustEnterAColumnHeaderValueDescription = "ActionRetractFactPlugin.YouMustEnterAColumnHeaderValueDescription";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ActionRetractFactPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother = "ActionRetractFactPlugin.ThatColumnNameIsAlreadyInUsePleasePickAnother";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ActionWorkItemPlugin_ExecuteWorkItem = "ActionWorkItemPlugin.ExecuteWorkItem";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ActionWorkItemSetFieldPlugin_SetValue = "ActionWorkItemSetFieldPlugin.SetValue";
+
+    @TranslationKey(defaultValue = "")
+    public static final String AttributeColumnPlugin_AddNewAttributeColumn = "AttributeColumnPlugin.AddNewAttributeColumn";
+
+    @TranslationKey(defaultValue = "")
+    public static final String BRLConditionColumnPlugin_AddConditionBRL = "BRLConditionColumnPlugin.AddConditionBRL";
+
+    @TranslationKey(defaultValue = "")
+    public static final String BRLActionColumnPlugin_AddActionBRL = "BRLActionColumnPlugin.AddActionBRL";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ConditionColumnPlugin_AddNewConditionSimpleColumn = "ConditionColumnPlugin.AddNewConditionSimpleColumn";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ConditionColumnPlugin_YouMustEnterAColumnHeaderValueDescription = "ConditionColumnPlugin.YouMustEnterAColumnHeaderValueDescription";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ConditionColumnPlugin_PleaseSelectOrEnterField = "ConditionColumnPlugin.PleaseSelectOrEnterField";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ConditionColumnPlugin_NotifyNoSelectedOperator = "ConditionColumnPlugin.NotifyNoSelectedOperator";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ConditionColumnPlugin_PleaseEnterANameThatIsNotAlreadyUsedByAnotherPattern = "ConditionColumnPlugin.PleaseEnterANameThatIsNotAlreadyUsedByAnotherPattern";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ConditionColumnPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother = "ConditionColumnPlugin.ThatColumnNameIsAlreadyInUsePleasePickAnother";
+
+    @TranslationKey(defaultValue = "")
+    public static final String MetaDataColumnPlugin_AddNewMetadata = "MetaDataColumnPlugin.AddNewMetadata";
+
+    @TranslationKey(defaultValue = "")
+    public static final String NewGuidedDecisionTableColumnWizard_AddNewColumn = "NewGuidedDecisionTableColumnWizard.AddNewColumn";
 }

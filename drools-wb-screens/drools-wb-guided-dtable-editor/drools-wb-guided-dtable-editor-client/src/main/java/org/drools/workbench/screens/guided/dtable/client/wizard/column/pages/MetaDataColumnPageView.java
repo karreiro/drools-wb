@@ -19,20 +19,24 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.common.client.dom.Span;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 @Dependent
 @Templated
-public class MetaDataColumnWizardPageView extends Composite implements MetaDataColumnWizardPage.View {
+public class MetaDataColumnPageView extends Composite implements MetaDataColumnPage.View {
 
     @Inject
-    @DataField("metadataBox")
-    TextBox metadataBox;
+    @DataField("metaDataBox")
+    TextBox metaDataBox;
 
     @Inject
     @DataField("error")
@@ -42,29 +46,29 @@ public class MetaDataColumnWizardPageView extends Composite implements MetaDataC
     @DataField("errorMessage")
     Span errorMessage;
 
-    private MetaDataColumnWizardPage page;
+    private MetaDataColumnPage page;
 
     @Override
-    public void init(final MetaDataColumnWizardPage page) {
+    public void init(final MetaDataColumnPage page) {
         this.page = page;
 
-        clear();
+        setup();
+    }
+
+    @EventHandler("metaDataBox")
+    public void onSelectAttribute(KeyUpEvent event) {
+        page.setMetadata(metaDataBox.getText());
     }
 
     @Override
-    public String getMetadataText() {
-        return metadataBox.getText();
+    public void showError(String message) {
+        errorMessage.setTextContent(message);
+        error.setHidden(false);
     }
 
-    @Override
-    public void showError(String errorMessage) {
-        this.errorMessage.setTextContent(errorMessage);
-        this.error.setHidden(false);
-    }
-
-    private void clear() {
-        metadataBox.setText("");
-        this.errorMessage.setTextContent("");
+    private void setup() {
+        metaDataBox.setText(page.getMetadata());
+        errorMessage.setTextContent("");
         error.setHidden(true);
     }
 }

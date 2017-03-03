@@ -21,13 +21,15 @@ import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnWizardPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.UberView;
 
 @Dependent
-public class ActionInsertFactPage extends BaseDecisionTableColumnPage<ConditionColumnWizardPlugin> {
+public class CalculationTypePage extends BaseDecisionTableColumnPage<ConditionColumnPlugin> {
 
     @Inject
     private View view;
@@ -35,18 +37,18 @@ public class ActionInsertFactPage extends BaseDecisionTableColumnPage<ConditionC
     private SimplePanel content = new SimplePanel();
 
     @Override
+    public void initialise() {
+        content.setWidget(view);
+    }
+
+    @Override
     public String getTitle() {
-        return "Action Insert Fact Page";
+        return translate(GuidedDecisionTableErraiConstants.CalculationTypePage_CalculationType);
     }
 
     @Override
     public void isComplete(final Callback<Boolean> callback) {
-        callback.callback(false);
-    }
-
-    @Override
-    public void initialise() {
-        content.setWidget(view);
+        callback.callback(plugin().getConstraintValue() != BaseSingleFieldConstraint.TYPE_UNDEFINED);
     }
 
     @Override
@@ -59,7 +61,15 @@ public class ActionInsertFactPage extends BaseDecisionTableColumnPage<ConditionC
         return content;
     }
 
-    public interface View extends UberView<ActionInsertFactPage> {
+    int getConstraintValue() {
+        return plugin().getConstraintValue();
+    }
+
+    void setConstraintValue(final int constraintValue) {
+        plugin().setConstraintValue(constraintValue);
+    }
+
+    public interface View extends UberView<CalculationTypePage> {
 
     }
 }

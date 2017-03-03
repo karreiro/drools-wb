@@ -22,7 +22,9 @@ import javax.inject.Inject;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.jboss.errai.common.client.dom.Div;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -31,7 +33,7 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 
 @Dependent
 @Templated
-public class FieldWizardPageView extends Composite implements FieldPage.View {
+public class FieldPageView extends Composite implements FieldPage.View {
 
     private FieldPage<?> page;
 
@@ -46,6 +48,9 @@ public class FieldWizardPageView extends Composite implements FieldPage.View {
     @Inject
     @DataField("info")
     private Div info;
+
+    @Inject
+    private TranslationService translationService;
 
     @Override
     public void init(final FieldPage page) {
@@ -74,8 +79,10 @@ public class FieldWizardPageView extends Composite implements FieldPage.View {
     }
 
     private void setupFieldList() {
+        final String selectField = translate(GuidedDecisionTableErraiConstants.FieldPageView_SelectField);
+
         fieldsList.clear();
-        fieldsList.addItem("-- Select a field --",
+        fieldsList.addItem("-- " + selectField + " --",
                            "");
 
         page.factFields().forEach(fieldName -> fieldsList.addItem(fieldName));
@@ -86,5 +93,11 @@ public class FieldWizardPageView extends Composite implements FieldPage.View {
 
     private String getCurrentValue() {
         return page.getFactField();
+    }
+
+    private String translate(final String key,
+                             Object... args) {
+        return translationService.format(key,
+                                         args);
     }
 }

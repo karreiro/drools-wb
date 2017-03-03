@@ -21,21 +21,23 @@ import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import org.drools.workbench.models.guided.dtable.shared.model.MetadataCol52;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.MetaDataColumnWizardPage;
+import org.drools.workbench.models.guided.dtable.shared.model.AttributeCol52;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AttributeColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 @Dependent
-public class MetaDataColumnWizardPlugin extends BaseDecisionTableColumnPlugin {
+public class AttributeColumnPlugin extends BaseDecisionTableColumnPlugin {
 
     @Inject
-    private MetaDataColumnWizardPage page;
+    private AttributeColumnPage page;
+
+    private String attribute;
 
     @Override
     public String getTitle() {
-        return GuidedDecisionTableConstants.INSTANCE.AddNewMetadata();
+        return translate(GuidedDecisionTableErraiConstants.AttributeColumnPlugin_AddNewAttributeColumn);
     }
 
     @Override
@@ -47,21 +49,26 @@ public class MetaDataColumnWizardPlugin extends BaseDecisionTableColumnPlugin {
 
     @Override
     public Boolean generateColumn() {
-        if (!page.isValidMetadata()) {
-            return false;
-        }
-
-        presenter.appendColumn(metadataColumn());
+        presenter.appendColumn(getAttributeCol52());
 
         return true;
     }
 
-    private MetadataCol52 metadataColumn() {
-        final MetadataCol52 column = new MetadataCol52();
+    private AttributeCol52 getAttributeCol52() {
+        final AttributeCol52 column = new AttributeCol52();
 
-        column.setMetadata(page.getMetadataValue());
-        column.setHideColumn(true);
+        column.setAttribute(attribute);
 
         return column;
+    }
+
+    public String getAttribute() {
+        return attribute;
+    }
+
+    public void setAttribute(String attribute) {
+        this.attribute = attribute;
+
+        fireChangeEvent(page);
     }
 }

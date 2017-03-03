@@ -16,21 +16,26 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.AttributeColumnPlugin;
 import org.drools.workbench.screens.guided.rule.client.editor.RuleAttributeWidget;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.UberView;
 
+import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
+
 @Dependent
-public class AttributeColumnWizardPage extends BaseDecisionTableColumnPage {
+public class AttributeColumnPage extends BaseDecisionTableColumnPage<AttributeColumnPlugin> {
 
     @Inject
     private View view;
@@ -39,12 +44,14 @@ public class AttributeColumnWizardPage extends BaseDecisionTableColumnPage {
 
     @Override
     public String getTitle() {
-        return GuidedDecisionTableConstants.INSTANCE.AddNewAttributeColumn();
+        return translate(GuidedDecisionTableErraiConstants.AttributeColumnPage_AddNewAttribute);
     }
 
     @Override
     public void isComplete(final Callback<Boolean> callback) {
-        callback.callback(false);
+        final boolean hasAttribute = !nil(plugin().getAttribute());
+
+        callback.callback(hasAttribute);
     }
 
     @Override
@@ -62,26 +69,35 @@ public class AttributeColumnWizardPage extends BaseDecisionTableColumnPage {
         return content;
     }
 
-    public String getAttributeName() {
-        return view.getAttributeText();
+    List<String> getAttributes() {
+        return removeAttributesAlreadyAdded(rawAttributes());
     }
 
-    String[] getAttributes() {
-        String[] attributes = RuleAttributeWidget.getAttributesList();
+    private List<String> rawAttributes() {
+        return new ArrayList<String>() {{
+            addAll(Arrays.asList(RuleAttributeWidget.getAttributesList()));
+            add(GuidedDecisionTable52.NEGATE_RULE_ATTR);
+        }};
+    }
 
-        attributes = Arrays.copyOf(attributes,
-                                   attributes.length + 1);
-        attributes[attributes.length - 1] = GuidedDecisionTable52.NEGATE_RULE_ATTR;
+    private List<String> removeAttributesAlreadyAdded(final List<String> attributeList) {
+        final List<String> attributes = new ArrayList<>(attributeList);
+
+        attributes.removeAll(presenter.getReservedAttributeNames());
 
         return attributes;
     }
 
-    String[] getDuplicates() {
-        return presenter.getExistingAttributeNames().toArray(new String[0]);
+    void selectItem(String selectedItemText) {
+        plugin().setAttribute(selectedItemText);
     }
 
-    public interface View extends UberView<AttributeColumnWizardPage> {
+    String selectedAttribute() {
+        return plugin().getAttribute();
+    }
 
-        String getAttributeText();
+    public interface View extends UberView<AttributeColumnPage> {
+
     }
 }
+
