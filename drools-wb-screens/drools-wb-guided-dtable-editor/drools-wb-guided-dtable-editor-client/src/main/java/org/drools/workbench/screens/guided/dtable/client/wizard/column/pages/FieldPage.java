@@ -16,8 +16,8 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.enterprise.context.Dependent;
@@ -28,9 +28,6 @@ import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.models.datamodel.oracle.FieldAccessorsAndMutators;
 import org.drools.workbench.models.datamodel.oracle.ModelField;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
-import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
-import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasFieldPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
@@ -38,6 +35,8 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.c
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.UberView;
+
+import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
 @Dependent
 public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> extends BaseDecisionTableColumnPage<T> {
@@ -59,7 +58,7 @@ public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> exten
 
     @Override
     public void isComplete(final Callback<Boolean> callback) {
-        callback.callback(plugin().getEditingCol() != null || isConstraintValuePredicate());
+        callback.callback(!nil(plugin().getFactField()) || isConstraintValuePredicate());
     }
 
     @Override
@@ -67,33 +66,58 @@ public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> exten
         view.init(this);
     }
 
-    public DTColumnConfig52 getEditingCol() {
-        return plugin().getEditingCol();
-    }
-
-    void setEditingCol(final String selectedValue) {
-        plugin().setEditingCol(selectedValue);
-    }
-
     @Override
     public Widget asWidget() {
         return content;
     }
 
-    List<String> factFields() {
-        final List<String> fields = new ArrayList<>();
+    void setEditingCol(final String selectedValue) {
+        plugin().setFactField(selectedValue);
+    }
 
+    void forEachFactField(Consumer<String> consumer) {
         if (hasEditingPattern()) {
-            final Pattern52 pattern52 = plugin().getEditingPattern();
-            final String factType = pattern52.getFactType();
             final AsyncPackageDataModelOracle oracle = presenter.getDataModelOracle();
 
-            oracle.getFieldCompletions(factType,
+            oracle.getFieldCompletions(factType(),
                                        FieldAccessorsAndMutators.ACCESSOR,
-                                       modelFields -> fields.addAll(mapName(modelFields)));
+                                       fieldsCallback(consumer));
         }
+    }
 
-        return fields;
+    Callback<ModelField[]> fieldsCallback(Consumer<String> consumer) {
+        final AsyncPackageDataModelOracle oracle = presenter.getDataModelOracle();
+
+        return modelFields -> {
+            final List<String> fieldNames = mapName(modelFields);
+
+            if (isConstraintRetValue()) {
+                fieldNames
+                        .forEach(consumer);
+            } else {
+                fieldNames
+                        .stream()
+                        .filter(fieldName -> !oracle.hasEnums(factType(),
+                                                              fieldName))
+                        .forEach(consumer);
+            }
+        };
+    }
+
+    boolean isConstraintValuePredicate() {
+        return plugin().constraintValue() == BaseSingleFieldConstraint.TYPE_PREDICATE;
+    }
+
+    boolean isConstraintRetValue() {
+        return plugin().constraintValue() == BaseSingleFieldConstraint.TYPE_RET_VALUE;
+    }
+
+    boolean hasEditingPattern() {
+        return plugin().editingPattern() != null;
+    }
+
+    private String factType() {
+        return plugin().editingPattern().getFactType();
     }
 
     private List<String> mapName(final ModelField[] modelFields) {
@@ -101,14 +125,6 @@ public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> exten
                 .of(modelFields)
                 .map(ModelField::getName)
                 .collect(Collectors.toList());
-    }
-
-    boolean hasEditingPattern() {
-        return plugin().getEditingPattern() != null;
-    }
-
-    boolean isConstraintValuePredicate() {
-        return plugin().getConstraintValue() == BaseSingleFieldConstraint.TYPE_PREDICATE;
     }
 
     public String getFactField() {

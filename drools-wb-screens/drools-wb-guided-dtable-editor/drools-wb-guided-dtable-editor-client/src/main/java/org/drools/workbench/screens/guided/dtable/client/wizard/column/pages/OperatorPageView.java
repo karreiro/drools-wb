@@ -19,17 +19,13 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.ListBox;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
-import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
-import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.getCurrentIndexFromList;
+import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.addWidgetToContainer;
 
 @Dependent
 @Templated
@@ -46,55 +42,32 @@ public class OperatorPageView extends Composite implements OperatorPage.View {
     private Div info;
 
     @Inject
-    @DataField("operatorsList")
-    private ListBox operatorsList;
-    
+    @DataField("operatorsContainer")
+    private Div operatorsContainer;
+
     @Inject
     private TranslationService translationService;
-
-    @EventHandler("operatorsList")
-    public void onPluginSelected(ChangeEvent event) {
-        page.setOperator(operatorsList.getSelectedValue());
-    }
 
     @Override
     public void init(final OperatorPage page) {
         this.page = page;
 
-        setupPatternList();
-
         toggleFields();
+        setupOperator();
     }
 
     private void toggleFields() {
         if (page.isConstraintValuePredicate()) {
             info.setHidden(false);
             warning.setHidden(true);
-            operatorsList.setEnabled(false);
         } else {
             info.setHidden(true);
             warning.setHidden(page.canSetOperator());
-            operatorsList.setEnabled(page.canSetOperator());
         }
     }
 
-    private void setupPatternList() {
-        final String selectOperator = translate(GuidedDecisionTableErraiConstants.OperatorPageView_SelectOperator);
-
-        operatorsList.clear();
-        operatorsList.addItem("-- " + selectOperator + " --",
-                              "");
-
-        page.forEachOperator((item, value) -> operatorsList.addItem(item,
-                                                                    value));
-
-        operatorsList.setSelectedIndex(getCurrentIndexFromList(page.getOperator(),
-                                                               operatorsList));
-    }
-
-    private String translate(final String key,
-                             Object... args) {
-        return translationService.format(key,
-                                         args);
+    private void setupOperator() {
+        page.operatorDropdown(dropdown -> addWidgetToContainer(dropdown,
+                                                               operatorsContainer));
     }
 }

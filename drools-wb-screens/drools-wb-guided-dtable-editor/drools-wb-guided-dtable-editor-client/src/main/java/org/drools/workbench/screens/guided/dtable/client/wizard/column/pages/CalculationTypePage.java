@@ -19,6 +19,7 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
@@ -48,7 +49,7 @@ public class CalculationTypePage extends BaseDecisionTableColumnPage<ConditionCo
 
     @Override
     public void isComplete(final Callback<Boolean> callback) {
-        callback.callback(plugin().getConstraintValue() != BaseSingleFieldConstraint.TYPE_UNDEFINED);
+        callback.callback(getConstraintValue() != BaseSingleFieldConstraint.TYPE_UNDEFINED);
     }
 
     @Override
@@ -62,7 +63,7 @@ public class CalculationTypePage extends BaseDecisionTableColumnPage<ConditionCo
     }
 
     int getConstraintValue() {
-        return plugin().getConstraintValue();
+        return plugin().constraintValue();
     }
 
     void setConstraintValue(final int constraintValue) {

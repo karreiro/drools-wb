@@ -24,6 +24,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.models.datamodel.oracle.DataType;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
+import org.drools.workbench.models.datamodel.rule.CEPWindow;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
@@ -65,21 +66,19 @@ public class ValueOptionsPage extends BaseDecisionTableColumnPage<ConditionColum
 
     @Override
     public void isComplete(final Callback<Boolean> callback) {
-        callback.callback(false);
+        callback.callback(plugin().isValueOptionsPageCompleted());
     }
 
     @Override
     public void prepareView() {
         view.init(this);
+
+        markAsViewed();
     }
 
     @Override
     public Widget asWidget() {
         return content;
-    }
-
-    public boolean isReadOnly() {
-        return presenter.isReadOnly();
     }
 
     IsWidget newDefaultValueWidget() {
@@ -131,12 +130,28 @@ public class ValueOptionsPage extends BaseDecisionTableColumnPage<ConditionColum
     }
 
     CEPWindowOperatorsDropdown newCEPWindowOperatorsDropdown() {
-        return new CEPWindowOperatorsDropdown(editingPattern(),
-                                              isReadOnly());
+        final Pattern52 editingPattern = editingPattern();
+
+        return new CEPWindowOperatorsDropdown(editingPattern,
+                                              false) {{
+            addValueChangeHandler(event -> {
+                final CEPWindow cepWindow = editingPattern.getWindow();
+                final String operator = event.getValue().getValue();
+
+                cepWindow.setOperator(operator);
+            });
+        }};
     }
 
     TextBox newBindingTextBox() {
-        return new BindingTextBox();
+        final BindingTextBox bindingTextBox = new BindingTextBox();
+
+        bindingTextBox.setText(editingCol().getBinding());
+        bindingTextBox.addChangeHandler(event -> {
+            editingCol().setBinding(bindingTextBox.getText());
+        });
+
+        return bindingTextBox;
     }
 
     boolean canSetupCepOperators() {
@@ -144,11 +159,11 @@ public class ValueOptionsPage extends BaseDecisionTableColumnPage<ConditionColum
     }
 
     boolean canSetupDefaultValue() {
-        if (editingCol() == null || editingPattern() == null) {
+        if (tableFormat() != GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY) {
             return false;
         }
 
-        if (nil(editingCol().getFactField())) {
+        if (doesNotHaveFactTypeOrFactField()) {
             return false;
         }
 
@@ -156,15 +171,15 @@ public class ValueOptionsPage extends BaseDecisionTableColumnPage<ConditionColum
             return false;
         }
 
-        if (tableFormat() != GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY) {
-            return false;
-        }
-
         return true;
     }
 
     boolean canSetupLimitedValue() {
-        if (editingCol() == null || editingPattern() == null) {
+        if (tableFormat() == GuidedDecisionTable52.TableFormat.LIMITED_ENTRY) {
+            return false;
+        }
+
+        if (doesNotHaveFactTypeOrFactField()) {
             return false;
         }
 
@@ -176,26 +191,45 @@ public class ValueOptionsPage extends BaseDecisionTableColumnPage<ConditionColum
             return false;
         }
 
-        if (tableFormat() != GuidedDecisionTable52.TableFormat.LIMITED_ENTRY) {
+        return true;
+    }
+
+    boolean canSetupBinding() {
+        return plugin().constraintValue() == BaseSingleFieldConstraint.TYPE_LITERAL;
+    }
+
+    boolean canSetupValueList() {
+        if (tableFormat() != GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY) {
+            return false;
+        }
+
+        if (doesNotHaveFactTypeOrFactField()) {
+            return false;
+        }
+
+        if (!validator().doesOperatorAcceptValueList(editingCol())) {
+            return false;
+        }
+
+        if (presenter.getDataModelOracle().hasEnums(editingPattern().getFactType(),
+                                                    editingCol().getFactField())) {
             return false;
         }
 
         return true;
     }
 
+    private boolean doesNotHaveFactTypeOrFactField() {
+        return nil(plugin().getFactType()) || nil(plugin().getFactField());
+    }
+
     void isFactTypeAnEvent(final Callback<Boolean> callback) {
         if (canSetupCepOperators()) {
             presenter.getDataModelOracle().isFactTypeAnEvent(editingPattern().getFactType(),
                                                              callback);
+        } else {
+            callback.callback(false);
         }
-    }
-
-    Validator validator() {
-        return new Validator(presenter.getModel().getConditions());
-    }
-
-    private GuidedDecisionTable52.TableFormat tableFormat() {
-        return presenter.getModel().getTableFormat();
     }
 
     DTCellValueWidgetFactory factory() {
@@ -205,20 +239,36 @@ public class ValueOptionsPage extends BaseDecisionTableColumnPage<ConditionColum
 
         return DTCellValueWidgetFactory.getInstance(model,
                                                     oracle,
-                                                    isReadOnly(),
+                                                    false,
                                                     allowEmptyValues);
     }
 
+    private Validator validator() {
+        return new Validator(presenter.getModel().getConditions());
+    }
+
+    private GuidedDecisionTable52.TableFormat tableFormat() {
+        return presenter.getModel().getTableFormat();
+    }
+
     private ConditionCol52 editingCol() {
-        return plugin().getEditingCol();
+        return plugin().editingCol();
     }
 
     private Pattern52 editingPattern() {
-        return plugin().getEditingPattern();
+        return plugin().editingPattern();
     }
 
-    boolean canSetupBinding() {
-        return plugin().getConstraintValue() == BaseSingleFieldConstraint.TYPE_LITERAL;
+    public String getValueList() {
+        return editingCol().getValueList();
+    }
+
+    public void setValueList(final String valueList) {
+        plugin().setValueList(valueList);
+    }
+
+    private void markAsViewed() {
+        plugin().setValueOptionsPageAsCompleted();
     }
 
     public interface View extends UberView<ValueOptionsPage> {

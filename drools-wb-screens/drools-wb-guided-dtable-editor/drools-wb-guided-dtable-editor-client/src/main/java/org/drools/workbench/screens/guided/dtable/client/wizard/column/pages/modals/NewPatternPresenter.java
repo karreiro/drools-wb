@@ -25,9 +25,10 @@ import javax.inject.Inject;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasPatternPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.PatternPage;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.client.mvp.UberElement;
 
@@ -36,11 +37,15 @@ public class NewPatternPresenter {
 
     private final View view;
 
+    private TranslationService translationService;
+
     private PatternPage<? extends HasPatternPage> patternPage;
 
     @Inject
-    public NewPatternPresenter(View view) {
+    public NewPatternPresenter(final View view,
+                               final TranslationService translationService) {
         this.view = view;
+        this.translationService = translationService;
     }
 
     public void show() {
@@ -74,38 +79,18 @@ public class NewPatternPresenter {
             return;
         }
 
-        setTheNewEditingPattern();
-        clearEditingCol();
+        setEditingPattern();
         updatePatternPageView();
         hide();
     }
 
-    private void updatePatternPageView() {
-        patternPage.updateNewPatternLabel();
+    boolean isBindingUnique(String binding) {
+        final BRLRuleModel brlRuleModel = new BRLRuleModel(model());
+
+        return !brlRuleModel.isVariableNameUsed(binding);
     }
 
-    private boolean isValid() {
-        if (!isNegatePatternMatch()) {
-            if (factName().equals("")) {
-                view.showError(GuidedDecisionTableConstants.INSTANCE.PleaseEnterANameForFact());
-                return false;
-            } else if (factName().equals(factType())) {
-                view.showError(GuidedDecisionTableConstants.INSTANCE.PleaseEnterANameThatIsNotTheSameAsTheFactType());
-                return false;
-            } else if (!isBindingUnique(factName())) {
-                view.showError(GuidedDecisionTableConstants.INSTANCE.PleaseEnterANameThatIsNotAlreadyUsedByAnotherPattern());
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private void setTheNewEditingPattern() {
-        patternPage.plugin().setEditingPattern(newPattern52());
-    }
-
-    private Pattern52 newPattern52() {
+    Pattern52 pattern52() {
         final Pattern52 editingPattern = new Pattern52();
 
         editingPattern.setFactType(factType());
@@ -113,6 +98,31 @@ public class NewPatternPresenter {
         editingPattern.setNegated(isNegatePatternMatch());
 
         return editingPattern;
+    }
+
+    private void updatePatternPageView() {
+        patternPage.prepareView();
+    }
+
+    private boolean isValid() {
+        if (!isNegatePatternMatch()) {
+            if (factName().equals("")) {
+                view.showError(translate(GuidedDecisionTableErraiConstants.NewPatternPresenter_PleaseEnterANameForFact));
+                return false;
+            } else if (factName().equals(factType())) {
+                view.showError(translate(GuidedDecisionTableErraiConstants.NewPatternPresenter_PleaseEnterANameThatIsNotTheSameAsTheFactType));
+                return false;
+            } else if (!isBindingUnique(factName())) {
+                view.showError(translate(GuidedDecisionTableErraiConstants.NewPatternPresenter_PleaseEnterANameThatIsNotAlreadyUsedByAnotherPattern));
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void setEditingPattern() {
+        patternPage.setEditingPattern(pattern52());
     }
 
     private String factName() {
@@ -127,23 +137,18 @@ public class NewPatternPresenter {
         return view.isNegatePatternMatch();
     }
 
-    private void clearEditingCol() {
-//        patternPage.plugin().setEditingColFactField( null );
-//        patternPage.plugin().setEditingColOperator( null );
-    }
-
-    private boolean isBindingUnique(String binding) {
-        final BRLRuleModel brlRuleModel = new BRLRuleModel(model());
-
-        return !brlRuleModel.isVariableNameUsed(binding);
-    }
-
     private AsyncPackageDataModelOracle oracle() {
         return patternPage.presenter().getDataModelOracle();
     }
 
     private GuidedDecisionTable52 model() {
         return patternPage.presenter().getModel();
+    }
+
+    private String translate(final String key,
+                             final Object... args) {
+        return translationService.format(key,
+                                         args);
     }
 
     public interface View extends UberElement<NewPatternPresenter> {

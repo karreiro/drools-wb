@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-[data-i18n-prefix="ValueOptionsWizardPageView."] {
+[data-i18n-prefix="ValueOptionsPageView."] {
   .control-label {
     font-weight: bold;
     margin-bottom: 15px;
@@ -22,5 +22,20 @@
 
   .form-group {
     margin-bottom: 0;
+
+    label,
+    .gwt-Label {
+      margin-bottom: 25px;
+      font-weight: bold;
+    }
+
+    .cep-operators-container {
+      input[type="text"] {
+        margin-left: 10px;
+      }
+      input[type="text"][disabled="disabled"] {
+        margin-left: 0;
+      }
+    }
   }
 }

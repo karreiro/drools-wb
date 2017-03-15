@@ -53,17 +53,12 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
     private WorkItemPage workItemPage;
 
     @Override
-    public DTColumnConfig52 getEditingCol() {
+    public DTColumnConfig52 editingCol() {
         return null;
     }
 
     @Override
-    public void setEditingCol(final String selectedValue) {
-
-    }
-
-    @Override
-    public void setEditingCol(final DTColumnConfig52 editingCol) {
+    public void setHeader(String header) {
 
     }
 
@@ -83,11 +78,8 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
     }
 
     private AdditionalInfoPage additionalInfoPage() {
-        return additionalInfoPageInitializer().init(this);
-    }
-
-    private AdditionalInfoPageInitializer additionalInfoPageInitializer() {
-        return new AdditionalInfoPageInitializer(additionalInfoPage);
+        return AdditionalInfoPageInitializer.init(additionalInfoPage,
+                                                  this);
     }
 
     @Override
@@ -96,7 +88,7 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
     }
 
     @Override
-    public Pattern52 getEditingPattern() {
+    public Pattern52 editingPattern() {
         return null;
     }
 
@@ -106,17 +98,27 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
     }
 
     @Override
-    public void setEditingColFactField(final String factField) {
+    public String getEntryPointName() {
+        return null;
+    }
+
+    @Override
+    public void setEntryPointName(String entryPointName) {
 
     }
 
     @Override
-    public int getConstraintValue() {
+    public int constraintValue() {
         return 0;
     }
 
     @Override
     public String getFactField() {
         return null;
+    }
+
+    @Override
+    public void setFactField(final String selectedValue) {
+
     }
 }

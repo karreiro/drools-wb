@@ -27,60 +27,69 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.C
 
 public class AdditionalInfoPageInitializer {
 
-    private final AdditionalInfoPage additionalInfoPage;
+    public static AdditionalInfoPage<ActionRetractFactPlugin> init(final AdditionalInfoPage<ActionRetractFactPlugin> page,
+                                                                   final ActionRetractFactPlugin plugin) {
+        page.init(plugin);
+        page.enableHeader();
+        page.enableHideColumn();
 
-    public AdditionalInfoPageInitializer(AdditionalInfoPage additionalInfoPage) {
-        this.additionalInfoPage = additionalInfoPage;
+        return page;
     }
 
-    public AdditionalInfoPage init(ActionRetractFactPlugin plugin) {
-        return additionalInfoPage(plugin)
-                .enableHeader()
-                .enableHideColumn();
+    public static AdditionalInfoPage<ActionInsertFactPlugin> init(final AdditionalInfoPage<ActionInsertFactPlugin> page,
+                                                                  final ActionInsertFactPlugin plugin) {
+        page.init(plugin);
+        page.enableHeader();
+        page.enableHideColumn();
+        page.enableLogicallyInsert();
+
+        return page;
     }
 
-    public AdditionalInfoPage init(ActionInsertFactPlugin plugin) {
-        return additionalInfoPage(plugin)
-                .enableHeader()
-                .enableHideColumn()
-                .enableLogicallyInsert();
+    public static AdditionalInfoPage<ConditionColumnPlugin> init(final AdditionalInfoPage<ConditionColumnPlugin> page,
+                                                                 final ConditionColumnPlugin plugin) {
+        page.init(plugin);
+        page.enableHeader();
+        page.enableHideColumn();
+
+        return page;
     }
 
-    public AdditionalInfoPage init(ConditionColumnPlugin plugin) {
-        return additionalInfoPage(plugin)
-                .enableEntryPointName()
-                .enableHeader()
-                .enableHideColumn();
+    public static AdditionalInfoPage<ActionWorkItemPlugin> init(final AdditionalInfoPage<ActionWorkItemPlugin> page,
+                                                                final ActionWorkItemPlugin plugin) {
+        page.init(plugin);
+        page.enableHeader();
+        page.enableHideColumn();
+
+        return page;
     }
 
-    public AdditionalInfoPage init(final ActionWorkItemPlugin plugin) {
-        return additionalInfoPage(plugin)
-                .enableHeader()
-                .enableHideColumn();
+    public static AdditionalInfoPage<ActionWorkItemSetFieldPlugin> init(final AdditionalInfoPage<ActionWorkItemSetFieldPlugin> page,
+                                                                        final ActionWorkItemSetFieldPlugin plugin) {
+
+        page.init(plugin);
+        page.enableHeader();
+        page.enableUpdateEngineWithChanges();
+        page.enableHideColumn();
+
+        return page;
     }
 
-    public AdditionalInfoPage init(final ActionWorkItemSetFieldPlugin plugin) {
-        return additionalInfoPage(plugin)
-                .enableHeader()
-                .enableUpdateEngineWithChanges()
-                .enableHideColumn();
+    public static AdditionalInfoPage<BRLConditionColumnPlugin> init(final AdditionalInfoPage<BRLConditionColumnPlugin> page,
+                                                                    final BRLConditionColumnPlugin plugin) {
+        page.init(plugin);
+        page.enableHeader();
+        page.enableHideColumn();
+
+        return page;
     }
 
-    public AdditionalInfoPage init(final BRLConditionColumnPlugin plugin) {
-        return additionalInfoPage(plugin)
-                .enableHeader()
-                .enableHideColumn();
-    }
+    public static AdditionalInfoPage<BRLActionColumnPlugin> init(final AdditionalInfoPage<BRLActionColumnPlugin> page,
+                                                                 final BRLActionColumnPlugin plugin) {
+        page.init(plugin);
+        page.enableHeader();
+        page.enableHideColumn();
 
-    public AdditionalInfoPage init(final BRLActionColumnPlugin plugin) {
-        return additionalInfoPage(plugin)
-                .enableHeader()
-                .enableHideColumn();
-    }
-
-    private AdditionalInfoPage additionalInfoPage(final DecisionTableColumnPlugin plugin) {
-        additionalInfoPage.init(plugin);
-
-        return additionalInfoPage;
+        return page;
     }
 }

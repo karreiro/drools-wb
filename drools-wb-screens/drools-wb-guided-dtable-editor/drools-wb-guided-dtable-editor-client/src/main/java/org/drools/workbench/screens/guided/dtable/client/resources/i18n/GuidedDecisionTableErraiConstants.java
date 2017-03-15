@@ -120,9 +120,6 @@ public class GuidedDecisionTableErraiConstants {
     public static final String FieldPageView_SelectField = "FieldPageView.SelectField";
 
     @TranslationKey(defaultValue = "")
-    public static final String OperatorPageView_SelectOperator = "OperatorPageView.SelectOperator";
-
-    @TranslationKey(defaultValue = "")
     public static final String PatternPage_NegatedPattern = "PatternPage.NegatedPattern";
 
     @TranslationKey(defaultValue = "")
@@ -196,4 +193,28 @@ public class GuidedDecisionTableErraiConstants {
 
     @TranslationKey(defaultValue = "")
     public static final String NewGuidedDecisionTableColumnWizard_AddNewColumn = "NewGuidedDecisionTableColumnWizard.AddNewColumn";
+
+    @TranslationKey(defaultValue = "")
+    public static final String NewPatternView_CreateANewFact = "NewPatternView.CreateANewFact";
+
+    @TranslationKey(defaultValue = "")
+    public static final String NewPatternView_Cancel = "NewPatternView.Cancel";
+
+    @TranslationKey(defaultValue = "")
+    public static final String NewPatternView_OK = "NewPatternView.OK";
+
+    @TranslationKey(defaultValue = "")
+    public static final String NewPatternPresenter_PleaseEnterANameForFact = "NewPatternPresenter.PleaseEnterANameForFact";
+
+    @TranslationKey(defaultValue = "")
+    public static final String NewPatternPresenter_PleaseEnterANameThatIsNotTheSameAsTheFactType = "NewPatternPresenter.PleaseEnterANameThatIsNotTheSameAsTheFactType";
+
+    @TranslationKey(defaultValue = "")
+    public static final String NewPatternPresenter_PleaseEnterANameThatIsNotAlreadyUsedByAnotherPattern = "NewPatternPresenter.PleaseEnterANameThatIsNotAlreadyUsedByAnotherPattern";
+
+    @TranslationKey(defaultValue = "")
+    public static final String OperatorPage_NoOperator = "OperatorPage.NoOperator";
+
+    @TranslationKey(defaultValue = "")
+    public static final String OperatorPage_PleaseChoose = "OperatorPage.PleaseChoose";
 }

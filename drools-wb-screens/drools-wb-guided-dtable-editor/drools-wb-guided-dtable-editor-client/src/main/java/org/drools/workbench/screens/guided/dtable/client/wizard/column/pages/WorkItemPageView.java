@@ -75,7 +75,7 @@ public class WorkItemPageView extends Composite implements WorkItemPage.View {
     }
 
     private String translate(final String key,
-                             Object... args) {
+                             final Object... args) {
         return translationService.format(key,
                                          args);
     }

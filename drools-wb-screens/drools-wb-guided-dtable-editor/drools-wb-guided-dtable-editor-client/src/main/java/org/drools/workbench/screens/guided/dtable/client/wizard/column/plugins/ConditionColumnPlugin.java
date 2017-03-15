@@ -17,19 +17,25 @@
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.Window;
+import org.drools.workbench.models.datamodel.oracle.DataType;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
 import org.drools.workbench.models.guided.dtable.shared.model.CompositeColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
-import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
+import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
+import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
+import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.CellUtilities;
+import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.ColumnUtilities;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasFieldPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasPatternPage;
@@ -64,7 +70,7 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     private OperatorPage operatorPage;
 
     @Inject
-    private AdditionalInfoPage additionalInfoPage;
+    private AdditionalInfoPage<ConditionColumnPlugin> additionalInfoPage;
 
     @Inject
     private ValueOptionsPage valueOptionsPage;
@@ -75,16 +81,29 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     private int constraintValue;
 
+    private Boolean valueOptionsPageCompleted;
+
     @Override
     public String getTitle() {
         return translate(GuidedDecisionTableErraiConstants.ConditionColumnPlugin_AddNewConditionSimpleColumn);
     }
 
     @Override
+    public void init(NewGuidedDecisionTableColumnWizard wizard) {
+        super.init(wizard);
+
+        setupDefaultValues();
+    }
+
+    @Override
     public List<WizardPage> getPages() {
         return new ArrayList<WizardPage>() {{
             add(patternPage);
-            add(calculationTypePage);
+
+            if (isExtendedEntryTable()) {
+                add(calculationTypePage);
+            }
+
             add(fieldPage);
             add(operatorPage);
             add(valueOptionsPage);
@@ -92,60 +111,177 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         }};
     }
 
-    private AdditionalInfoPage additionalInfoPage() {
-        return additionalInfoPageInitializer().init(this);
-    }
-
-    private AdditionalInfoPageInitializer additionalInfoPageInitializer() {
-        return new AdditionalInfoPageInitializer(additionalInfoPage);
-    }
-
     @Override
     public Boolean generateColumn() {
-
-        if (null == editingCol.getHeader() || "".equals(editingCol.getHeader())) {
+        if (nil(editingCol().getHeader())) {
             Window.alert(translate(GuidedDecisionTableErraiConstants.ConditionColumnPlugin_YouMustEnterAColumnHeaderValueDescription));
             return false;
         }
 
-        if (editingCol.getConstraintValueType() != BaseSingleFieldConstraint.TYPE_PREDICATE) {
-
-            //Field mandatory for Literals and Formulae
-            if (null == editingCol.getFactField() || "".equals(editingCol.getFactField())) {
+        if (constraintValue() != BaseSingleFieldConstraint.TYPE_PREDICATE) {
+            if (nil(getFactField())) {
                 Window.alert(translate(GuidedDecisionTableErraiConstants.ConditionColumnPlugin_PleaseSelectOrEnterField));
                 return false;
             }
 
-            //Operator optional for Literals and Formulae
-            if (editingCol.getOperator() == null) {
+            if (nil(getOperator())) {
                 Window.alert(translate(GuidedDecisionTableErraiConstants.ConditionColumnPlugin_NotifyNoSelectedOperator));
                 return false;
             }
         } else {
-
-            //Clear operator for predicates, but leave field intact for interpolation of $param values
-            editingCol.setOperator(null);
+            editingCol().setOperator(null);
         }
 
-        if (editingCol.isBound() && !isBindingUnique(editingCol.getBinding())) {
+        if (editingCol().isBound() && !isBindingUnique(editingCol().getBinding())) {
             Window.alert(translate(GuidedDecisionTableErraiConstants.ConditionColumnPlugin_PleaseEnterANameThatIsNotAlreadyUsedByAnotherPattern));
             return false;
         }
 
-        if (!unique(editingCol.getHeader())) {
+        if (!unique(editingCol().getHeader())) {
             Window.alert(translate(GuidedDecisionTableErraiConstants.ConditionColumnPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother));
             return false;
         }
 
-        //Clear binding if column is not a literal
-        if (editingCol.getConstraintValueType() != BaseSingleFieldConstraint.TYPE_LITERAL) {
-            editingCol.setBinding(null);
+        if (editingCol().getConstraintValueType() != BaseSingleFieldConstraint.TYPE_LITERAL) {
+            editingCol().setBinding(null);
         }
 
         presenter.appendColumn(editingPattern,
                                editingCol);
 
         return true;
+    }
+
+    @Override
+    public Pattern52 editingPattern() {
+        return editingPattern;
+    }
+
+    @Override
+    public void setEditingPattern(final Pattern52 editingPattern) {
+        this.editingPattern = editingPattern;
+
+        setupDefaultValues();
+
+        fireChangeEvent(patternPage);
+        fireChangeEvent(calculationTypePage);
+        fireChangeEvent(fieldPage);
+        fireChangeEvent(operatorPage);
+        fireChangeEvent(valueOptionsPage);
+        fireChangeEvent(additionalInfoPage);
+    }
+
+    @Override
+    public String getEntryPointName() {
+        if (editingPattern() != null) {
+            return editingPattern().getEntryPointName();
+        }
+
+        return "";
+    }
+
+    @Override
+    public void setEntryPointName(final String entryPointName) {
+        if (editingPattern() != null) {
+            editingPattern().setEntryPointName(entryPointName);
+        }
+    }
+
+    @Override
+    public ConditionCol52 editingCol() {
+        if (editingPattern() == null) {
+            resetFieldAndOperator();
+        }
+
+        return editingCol;
+    }
+
+    @Override
+    public void setHeader(final String header) {
+        editingCol().setHeader(header);
+
+        fireChangeEvent(additionalInfoPage);
+    }
+
+    @Override
+    public String getFactField() {
+        return editingCol() == null ? "" : editingCol().getFactField();
+    }
+
+    @Override
+    public void setFactField(final String selectedValue) {
+        final AsyncPackageDataModelOracle oracle = presenter.getDataModelOracle();
+
+        editingCol().setFactField(selectedValue);
+        editingCol().setFieldType(oracle.getFieldType(getFactType(),
+                                                      getFactField()));
+
+        fireChangeEvent(fieldPage);
+        fireChangeEvent(operatorPage);
+        fireChangeEvent(additionalInfoPage);
+        fireChangeEvent(valueOptionsPage);
+    }
+
+    public int constraintValue() {
+        final boolean factHasEnums = presenter.getDataModelOracle().hasEnums(getFactType(),
+                                                                             getFactField());
+
+        if (factHasEnums) {
+            setConstraintValueFieldAndUpdateEditingCol(BaseSingleFieldConstraint.TYPE_LITERAL);
+        }
+
+        return constraintValue;
+    }
+
+    public void setConstraintValue(final int constraintValue) {
+        setConstraintValueFieldAndUpdateEditingCol(constraintValue);
+
+        resetFieldAndOperator();
+
+        fireChangeEvent(calculationTypePage);
+        fireChangeEvent(fieldPage);
+        fireChangeEvent(operatorPage);
+    }
+
+    public void setValueOptionsPageAsCompleted() {
+        if (valueOptionsPageCompleted.equals(Boolean.FALSE)) {
+            valueOptionsPageCompleted = Boolean.TRUE;
+
+            fireChangeEvent(valueOptionsPage);
+        }
+    }
+
+    public Boolean isValueOptionsPageCompleted() {
+        return valueOptionsPageCompleted;
+    }
+
+    public void setValueList(final String valueList) {
+        editingCol().setValueList(valueList);
+
+        assertDefaultValue();
+
+        fireChangeEvent(valueOptionsPage);
+    }
+
+    public String getFactType() {
+        return editingPattern() == null ? "" : editingPattern().getFactType();
+    }
+
+    private String getOperator() {
+        return editingCol().getOperator();
+    }
+
+    public void setOperator(String operator) {
+        editingCol().setOperator(operator);
+
+        fireChangeEvent(operatorPage);
+        fireChangeEvent(additionalInfoPage);
+        fireChangeEvent(valueOptionsPage);
+    }
+
+    private AdditionalInfoPage additionalInfoPage() {
+        return AdditionalInfoPageInitializer.init(additionalInfoPage,
+                                                  this);
     }
 
     private boolean unique(String header) {
@@ -165,95 +301,63 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         return !rm.isVariableNameUsed(binding);
     }
 
-    public Pattern52 getEditingPattern() {
-        return editingPattern;
-    }
+    private void setConstraintValueFieldAndUpdateEditingCol(int constraintValue) {
+        this.constraintValue = constraintValue;
 
-    public void setEditingPattern(final Pattern52 editingPattern) {
-        this.editingPattern = editingPattern;
-
-        fireChangeEvent(patternPage);
-        fireChangeEvent(fieldPage);
-        fireChangeEvent(operatorPage);
-    }
-
-    public ConditionCol52 getEditingCol() {
-        return editingCol;
-    }
-
-    public void setEditingCol(final String selectedValue) {
-        editingCol = newConditionColumn(selectedValue);
-
-        fireChangeEvent(fieldPage);
-        fireChangeEvent(operatorPage);
-    }
-
-    @Override
-    public void setEditingCol(final DTColumnConfig52 editingCol) {
-        this.editingCol = (ConditionCol52) editingCol;
-    }
-
-    ConditionCol52 newConditionColumn(final String selectedValue) {
-        if (nil(selectedValue)) {
-            return null;
-        }
-
-        final ConditionCol52 conditionCol52 = newConditionColumn();
-        final AsyncPackageDataModelOracle oracle = presenter.getDataModelOracle();
-
-        conditionCol52.setFactField(selectedValue);
-        conditionCol52.setFieldType(oracle.getFieldType(getEditingPattern().getFactType(),
-                                                        conditionCol52.getFactField()));
-        return conditionCol52;
+        editingCol().setConstraintValueType(constraintValue);
     }
 
     private ConditionCol52 newConditionColumn() {
-        switch (presenter.getModel().getTableFormat()) {
+        switch (tableFormat()) {
             case EXTENDED_ENTRY:
                 return new ConditionCol52();
             case LIMITED_ENTRY:
                 return new LimitedEntryConditionCol52();
             default:
-                throw new UnsupportedOperationException("Unsupported table format: " + presenter.getModel().getTableFormat());
+                throw new UnsupportedOperationException("Unsupported table format: " + tableFormat());
         }
     }
 
-    public void setEditingColOperator(String operator) {
-        if (editingCol == null) {
-            return;
+    private boolean isExtendedEntryTable() {
+        return tableFormat() == GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY;
+    }
+
+    private GuidedDecisionTable52.TableFormat tableFormat() {
+        return presenter.getModel().getTableFormat();
+    }
+
+    private void assertDefaultValue() {
+        final CellUtilities cellUtilities = new CellUtilities();
+        final GuidedDecisionTable52 model = presenter.getModel();
+        final AsyncPackageDataModelOracle oracle = presenter.getDataModelOracle();
+        final ColumnUtilities columnUtilities = new ColumnUtilities(model,
+                                                                    oracle);
+        final List<String> valueList = Arrays.asList(columnUtilities.getValueList(editingCol));
+
+        if (valueList.size() > 0) {
+            final String defaultValue = cellUtilities.asString(editingCol().getDefaultValue());
+            if (!valueList.contains(defaultValue)) {
+                editingCol.getDefaultValue().clearValues();
+            }
+        } else {
+            //Ensure the Default Value has been updated to represent the column's data-type.
+            final DTCellValue52 defaultValue = editingCol().getDefaultValue();
+            final DataType.DataTypes dataType = columnUtilities.getDataType(editingPattern(),
+                                                                            editingCol());
+            cellUtilities.convertDTCellValueType(dataType,
+                                                 defaultValue);
         }
-
-        editingCol.setOperator(operator);
-
-        fireChangeEvent(operatorPage);
-        fireChangeEvent(valueOptionsPage);
-        fireChangeEvent(additionalInfoPage);
     }
 
-    public void setEditingColFactField(final String factField) {
-        if (editingCol == null) {
-            return;
-        }
-
-        editingCol.setFactField(factField);
-
-        fireChangeEvent(operatorPage);
-        fireChangeEvent(valueOptionsPage);
-        fireChangeEvent(additionalInfoPage);
+    private void setupDefaultValues() {
+        editingCol = newConditionColumn();
+        constraintValue = BaseSingleFieldConstraint.TYPE_UNDEFINED;
+        valueOptionsPageCompleted = Boolean.FALSE;
     }
 
-    public int getConstraintValue() {
-        return constraintValue;
-    }
-
-    public void setConstraintValue(final int constraintValue) {
-        this.constraintValue = constraintValue;
-
-        fireChangeEvent(calculationTypePage);
-    }
-
-    @Override
-    public String getFactField() {
-        return editingCol == null ? "" : editingCol.getFactField();
+    private void resetFieldAndOperator() {
+        editingCol.setFactField("");
+        editingCol.setFieldType("");
+        editingCol.setOperator("");
     }
 }

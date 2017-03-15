@@ -19,15 +19,18 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gwt.junit.GWTMockUtilities;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 import org.gwtbootstrap3.client.ui.CheckBox;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.services.shared.preferences.ApplicationPreferences;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import static org.junit.Assert.*;
@@ -42,7 +45,11 @@ public class AdditionalInfoPageTest {
     @Mock
     private ConditionCol52 editingCol;
 
-    private AdditionalInfoPage page;
+    @Mock
+    private AdditionalInfoPage.View view;
+
+    @InjectMocks
+    private AdditionalInfoPage<ConditionColumnPlugin> page = spy(new AdditionalInfoPage<>());
 
     @BeforeClass
     public static void setupPreferences() {
@@ -51,18 +58,60 @@ public class AdditionalInfoPageTest {
                 "dd/mm/yyyy");
         }};
         ApplicationPreferences.setUp(preferences);
+
+        // Prevent runtime GWT.create() error at 'content = new SimplePanel()'
+        GWTMockUtilities.disarm();
     }
 
     @Before
     public void setup() {
-        page = spy(new AdditionalInfoPage());
-
         when(page.plugin()).thenReturn(plugin);
     }
 
     @Test
+    public void testIsCompleteWhenHeaderIsNotEnabled() throws Exception {
+        page.isComplete(Assert::assertFalse);
+    }
+
+    @Test
+    public void testIsCompleteWhenHeaderIsEnabledButNotCompleted() throws Exception {
+        when(plugin.editingCol()).thenReturn(mock(ConditionCol52.class));
+
+        page.enableHeader();
+
+        page.isComplete(Assert::assertFalse);
+    }
+
+    @Test
+    public void testIsCompleteWhenHeaderIsEnabledAndCompleted() throws Exception {
+        when(editingCol.getHeader()).thenReturn("header");
+        when(plugin.editingCol()).thenReturn(editingCol);
+
+        page.enableHeader();
+
+        page.isComplete(Assert::assertTrue);
+    }
+
+    @Test
+    public void testGetHeader() throws Exception {
+        when(plugin.editingCol()).thenReturn(editingCol);
+
+        page.getHeader();
+
+        verify(plugin).editingCol();
+        verify(editingCol).getHeader();
+    }
+
+    @Test
+    public void testSetHeader() throws Exception {
+        page.setHeader("header");
+
+        verify(plugin).setHeader(eq("header"));
+    }
+
+    @Test
     public void testNewHideColumnCheckBox() throws Exception {
-        when(plugin.getEditingCol()).thenReturn(editingCol);
+        when(plugin.editingCol()).thenReturn(editingCol);
         when(editingCol.isHideColumn()).thenReturn(true);
 
         final CheckBox checkBox = page.newHideColumnCheckBox();
@@ -73,27 +122,37 @@ public class AdditionalInfoPageTest {
     }
 
     @Test
-    public void testCanSetupHideColumnCheckBoxWhenEditingColIsNull() throws Exception {
-        when(plugin.getEditingCol()).thenReturn(null);
+    public void testSetupHeaderWhenHeaderIsEnabled() throws Exception {
+        page.enableHeader();
 
-        assertFalse(page.canSetupHideColumn());
+        page.setupHeader();
+
+        verify(view).showHeader();
     }
 
     @Test
-    public void testCanSetupHideColumnCheckBoxWhenEditingColIsNotNullAndHideColumnIsEnabled() throws Exception {
-        page.hideColumnEnabled = true;
+    public void testSetupHeaderWhenHeaderIsNotEnabled() throws Exception {
+        page.setupHeader();
 
-        when(plugin.getEditingCol()).thenReturn(editingCol);
-
-        assertTrue(page.canSetupHideColumn());
+        verify(view,
+               never()).showHeader();
     }
 
     @Test
-    public void testCanSetupHideColumnCheckBoxWhenEditingColIsNotNullAndHideColumnIsDisabled() throws Exception {
-        page.hideColumnEnabled = false;
+    public void testSetupHideColumnWhenHideColumnIsEnabled() throws Exception {
+        when(plugin.editingCol()).thenReturn(editingCol);
 
-        when(plugin.getEditingCol()).thenReturn(editingCol);
+        page.enableHideColumn();
+        page.setupHideColumn();
 
-        assertFalse(page.canSetupHideColumn());
+        verify(view).showHideColumn(any(CheckBox.class));
+    }
+
+    @Test
+    public void testSetupHideColumnWhenHideColumnIsNotEnabled() throws Exception {
+        page.setupHideColumn();
+
+        verify(view,
+               never()).showHideColumn(any(CheckBox.class));
     }
 }

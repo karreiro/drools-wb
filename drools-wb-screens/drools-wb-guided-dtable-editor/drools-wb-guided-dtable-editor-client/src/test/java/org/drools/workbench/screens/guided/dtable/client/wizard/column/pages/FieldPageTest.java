@@ -16,6 +16,7 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
@@ -27,14 +28,15 @@ import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTabl
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.mockito.Mock;
+import org.uberfire.client.callbacks.Callback;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 @RunWith(GwtMockitoTestRunner.class)
@@ -58,111 +60,175 @@ public class FieldPageTest {
     @Mock
     private GuidedDecisionTable52 model;
 
-    private FieldPage page;
+    private FieldPage<ConditionColumnPlugin> page;
 
     @Before
     public void setup() {
-        page = spy(new FieldPage() {{
+        page = spy(new FieldPage<ConditionColumnPlugin>() {{
             presenter = FieldPageTest.this.presenter;
         }});
 
-        when(oracle.getFieldType(any(),
-                                 any())).thenReturn("fieldType");
-        when(presenter.getDataModelOracle()).thenReturn(oracle);
-        when(presenter.getModel()).thenReturn(model);
-        when(pattern52.getFactType()).thenReturn("factType");
-        when(plugin.getEditingPattern()).thenReturn(pattern52);
-        when(plugin.getEditingCol()).thenReturn(editingCol);
         when(page.plugin()).thenReturn(plugin);
     }
 
     @Test
-    public void testFactFields() throws Exception {
-        final List<String> factFields = page.factFields();
+    public void testSetEditingCol() throws Exception {
+        page.setEditingCol("factField");
 
-        verify(oracle).getFieldCompletions(eq("factType"),
-                                           eq(FieldAccessorsAndMutators.ACCESSOR),
-                                           any());
-
-        assertNotNull(factFields);
+        verify(plugin).setFactField(eq("factField"));
     }
 
     @Test
-    public void testHasEditingPatternWhenEditingPatternIsNull() throws Exception {
-        when(plugin.getEditingPattern()).thenReturn(null);
-
-        assertFalse(page.hasEditingPattern());
-    }
-
-    @Test
-    public void testHasEditingPatternWhenEditingPatternIsNotNull() throws Exception {
-        assertTrue(page.hasEditingPattern());
-    }
-
-    @Test
-    public void testIsConstraintValuePredicateWhenItIs() throws Exception {
-        when(plugin.getConstraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_PREDICATE);
+    public void testIsConstraintValuePredicateWhenItIsTypePredicate() throws Exception {
+        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_PREDICATE);
 
         assertTrue(page.isConstraintValuePredicate());
     }
 
     @Test
-    public void testIsConstraintValuePredicateWhenItIsNot() throws Exception {
-        when(plugin.getConstraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_LITERAL);
+    public void testIsConstraintValuePredicateWhenItIsNotTypePredicate() throws Exception {
+        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_UNDEFINED);
 
         assertFalse(page.isConstraintValuePredicate());
     }
 
     @Test
-    public void testGetEditingCol() throws Exception {
-        page.getEditingCol();
+    public void testHasEditingPatternWhenEditingPatternIsNotNull() throws Exception {
+        when(plugin.editingPattern()).thenReturn(pattern52);
 
-        verify(plugin).getEditingCol();
+        assertTrue(page.hasEditingPattern());
     }
 
     @Test
-    public void testSetEditingCol() throws Exception {
-//        when(model.getTableFormat()).thenReturn(GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY);
-//
-//        page.setEditingCol("selectedValue");
-//
-//        verify(plugin).setEditingCol(any(ConditionCol52.class));
+    public void testHasEditingPatternWhenEditingPatternIsNull() throws Exception {
+        when(plugin.editingPattern()).thenReturn(null);
+
+        assertFalse(page.hasEditingPattern());
     }
 
     @Test
-    public void testNewConditionColumnWhenTableFormatIsExtendedEntry() throws Exception {
-//        when( model.getTableFormat() ).thenReturn( GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY );
-//
-//        final ConditionCol52 column = page.newConditionColumn( "factType" );
-//
-//        assertEquals( "factType", column.getFactField() );
-//        assertEquals( "fieldType", column.getFieldType() );
-//        assertThat( column, instanceOf( ConditionCol52.class ) );
+    public void testIsConstraintRetValueWhenItIsTypeRetValue() throws Exception {
+        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_RET_VALUE);
+
+        assertTrue(page.isConstraintRetValue());
     }
 
     @Test
-    public void testNewConditionColumnWhenTableFormatIsLimitedEntry() throws Exception {
-//        when( model.getTableFormat() ).thenReturn( GuidedDecisionTable52.TableFormat.LIMITED_ENTRY );
-//
-//        final ConditionCol52 column = page.newConditionColumn( "factType" );
-//
-//        assertEquals( "factType", column.getFactField() );
-//        assertEquals( "fieldType", column.getFieldType() );
-//        assertThat( column, instanceOf( LimitedEntryConditionCol52.class ) );
+    public void testIsConstraintRetValueWhenItIsNotTypeRetValue() throws Exception {
+        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_UNDEFINED);
+
+        assertFalse(page.isConstraintRetValue());
     }
 
     @Test
-    public void testNewConditionColumnWhenSelectedValueIsNull() throws Exception {
-//        final ConditionCol52 conditionCol52 = page.newConditionColumn( null );
-//
-//        assertNull( conditionCol52 );
+    public void testForEachFactFieldWhenEditingPatternIsNotNull() throws Exception {
+        when(pattern52.getFactType()).thenReturn("factType");
+        when(plugin.editingPattern()).thenReturn(pattern52);
+        when(presenter.getDataModelOracle()).thenReturn(oracle);
+
+        page.forEachFactField(s -> {
+        });
+
+        verify(oracle).getFieldCompletions(eq("factType"),
+                                           eq(FieldAccessorsAndMutators.ACCESSOR),
+                                           any());
     }
 
     @Test
-    public void testNewConditionColumnWhenSelectedValueIsBlank() throws Exception {
-//        final ConditionCol52 conditionCol52 = page.newConditionColumn( "" );
-//
-//        assertNull( conditionCol52 );
+    public void testForEachFactFieldWhenEditingPatternIsNull() throws Exception {
+        when(plugin.editingPattern()).thenReturn(null);
+        when(presenter.getDataModelOracle()).thenReturn(oracle);
+
+        page.forEachFactField(s -> {
+        });
+
+        verify(oracle,
+               never()).getFieldCompletions(any(),
+                                            any(),
+                                            any());
+    }
+
+    @Test
+    public void testFieldsCallbackWhenConstraintIsRetValue() throws Exception {
+        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_RET_VALUE);
+        when(pattern52.getFactType()).thenReturn("factType");
+        when(plugin.editingPattern()).thenReturn(pattern52);
+        when(presenter.getDataModelOracle()).thenReturn(oracle);
+
+        final List<String> expected = new ArrayList<String>() {{
+            add("modelField1");
+            add("modelField2");
+            add("modelField3");
+        }};
+
+        final List<String> result = new ArrayList<>();
+
+        final ModelField[] modelFields = new ModelField[]{
+                modelField("modelField1"),
+                modelField("modelField2"),
+                modelField("modelField3")
+        };
+
+        final Callback<ModelField[]> fieldsCallback = page.fieldsCallback(result::add);
+
+        fieldsCallback.callback(modelFields);
+
+        assertEquals(expected,
+                     result);
+    }
+
+    @Test
+    public void testFieldsCallbackWhenConstraintIsNotRetValue() throws Exception {
+        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_LITERAL);
+        when(pattern52.getFactType()).thenReturn("factType");
+        when(plugin.editingPattern()).thenReturn(pattern52);
+        when(presenter.getDataModelOracle()).thenReturn(oracle);
+        when(oracle.hasEnums("factType",
+                             "modelField2")).thenReturn(true);
+
+        final List<String> expected = new ArrayList<String>() {{
+            add("modelField1");
+            add("modelField3");
+        }};
+
+        final List<String> result = new ArrayList<>();
+
+        final ModelField[] modelFields = new ModelField[]{
+                modelField("modelField1"),
+                modelField("modelField2"),
+                modelField("modelField3")
+        };
+
+        final Callback<ModelField[]> fieldsCallback = page.fieldsCallback(result::add);
+
+        fieldsCallback.callback(modelFields);
+
+        assertEquals(expected,
+                     result);
+    }
+
+    @Test
+    public void testIsCompleteWhenFactFieldIsNull() throws Exception {
+        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_LITERAL);
+        when(plugin.getFactField()).thenReturn(null);
+
+        page.isComplete(Assert::assertFalse);
+    }
+
+    @Test
+    public void testIsCompleteWhenFactFieldIsNotNull() throws Exception {
+        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_LITERAL);
+        when(plugin.getFactField()).thenReturn("factField");
+
+        page.isComplete(Assert::assertTrue);
+    }
+
+    @Test
+    public void testIsCompleteWhenConstraintValueIsPredicate() throws Exception {
+        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_PREDICATE);
+        when(plugin.getFactField()).thenReturn(null);
+
+        page.isComplete(Assert::assertTrue);
     }
 
     private ModelField modelField(final String name) {

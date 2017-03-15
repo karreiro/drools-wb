@@ -16,25 +16,39 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
+import com.google.gwt.junit.GWTMockUtilities;
+import com.google.gwt.user.client.Element;
+import com.google.gwtmockito.GwtMockito;
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import com.google.gwtmockito.fakes.FakeProvider;
 import org.drools.workbench.models.datamodel.oracle.OperatorsOracle;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
+import org.drools.workbench.screens.guided.rule.client.editor.CEPOperatorsDropdown;
+import org.drools.workbench.screens.guided.rule.client.resources.GuidedRuleEditorResources;
+import org.drools.workbench.screens.guided.rule.client.resources.css.GuidedRuleEditorCss;
+import org.drools.workbench.screens.guided.rule.client.resources.images.GuidedRuleEditorImages;
+import org.gwtbootstrap3.client.ui.ListBox;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
-import org.kie.workbench.common.widgets.client.datamodel.OracleUtils;
+import org.kie.workbench.common.widgets.client.resources.ItemImages;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.uberfire.client.callbacks.Callback;
 
 import static org.junit.Assert.*;
@@ -43,8 +57,17 @@ import static org.mockito.Mockito.*;
 @RunWith(GwtMockitoTestRunner.class)
 public class OperatorPageTest {
 
+    @Captor
+    ArgumentCaptor<Callback<String[]>> callbackArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<String[]> stringArrayArgumentCaptor;
+
     @Mock
     private ConditionColumnPlugin plugin;
+
+    @Mock
+    private TranslationService translationService;
 
     @Mock
     private GuidedDecisionTableView.Presenter presenter;
@@ -58,116 +81,203 @@ public class OperatorPageTest {
     @Mock
     private ConditionCol52 editingCol;
 
-    private OperatorPage page;
+    @InjectMocks
+    private OperatorPage page = spy(new OperatorPage() {{
+        presenter = OperatorPageTest.this.presenter;
+    }});
+
+    @BeforeClass
+    public static void setupPreferences() {
+        // Prevent runtime GWT.create() error at 'content = new SimplePanel()'
+        GWTMockUtilities.disarm();
+    }
 
     @Before
     public void setup() {
-        page = spy(new OperatorPage() {
-            {
-                presenter = OperatorPageTest.this.presenter;
-            }
-
-            @Override
-            void getOperatorCompletions(final Callback<String[]> callback) {
-                callback.callback(OracleUtils.joinArrays(OperatorsOracle.STANDARD_OPERATORS,
-                                                         OperatorsOracle.SIMPLE_CEP_OPERATORS,
-                                                         OperatorsOracle.COMPLEX_CEP_OPERATORS,
-                                                         OperatorsOracle.EXPLICIT_LIST_OPERATORS));
-            }
-        });
-
-        when(oracle.getFieldType(any(),
-                                 any())).thenReturn("fieldType");
-        when(presenter.getDataModelOracle()).thenReturn(oracle);
-        when(pattern52.getFactType()).thenReturn("factType");
-        when(plugin.getEditingPattern()).thenReturn(pattern52);
-        when(plugin.getEditingCol()).thenReturn(editingCol);
         when(page.plugin()).thenReturn(plugin);
     }
 
     @Test
-    public void testForEachOperator() {
-        final Map<String, String> map = new HashMap<>();
-
-        page.forEachOperator(map::put);
-
-        final Set<String> humanizedValues = map.keySet();
-        final Collection<String> regularValues = map.values();
-
-        assertTrue(humanizedValues.contains("isEqualToNull"));
-        assertTrue(regularValues.contains("== null"));
-    }
-
-    @Test
-    public void testOperatorOptionsWhenConstraintValueTypeIsPredicate() {
-        when(editingCol.getConstraintValueType()).thenReturn(BaseSingleFieldConstraint.TYPE_PREDICATE);
-
-        final List<String> operators = page.operatorOptions();
-
-        assertFalse(operators.contains("in"));
-        assertFalse(operators.contains("not in"));
-        assertEquals(17,
-                     operators.size());
-    }
-
-    @Test
-    public void testOperatorOptionsWhenConstraintValueTypeIsLiteral() {
-        when(editingCol.getConstraintValueType()).thenReturn(BaseSingleFieldConstraint.TYPE_LITERAL);
-
-        final List<String> operators = page.operatorOptions();
-
-        assertTrue(operators.contains("in"));
-        assertTrue(operators.contains("not in"));
-        assertEquals(19,
-                     operators.size());
-    }
-
-    @Test
     public void testIsConstraintValuePredicateWhenConstraintValueIsPredicate() {
-        when(plugin.getConstraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_PREDICATE);
+        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_PREDICATE);
 
         assertTrue(page.isConstraintValuePredicate());
     }
 
     @Test
     public void testIsConstraintValuePredicateWhenConstraintValueIsNotPredicate() {
-        when(plugin.getConstraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_LITERAL);
+        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_LITERAL);
 
         assertFalse(page.isConstraintValuePredicate());
     }
 
     @Test
+    public void testCanSetOperatorWhenEditingColIsBlank() {
+        when(plugin.getFactField()).thenReturn("");
+
+        assertFalse(page.canSetOperator());
+    }
+
+    @Test
     public void testCanSetOperatorWhenEditingColIsNull() {
-        when(plugin.getEditingCol()).thenReturn(null);
+        when(plugin.getFactField()).thenReturn(null);
 
         assertFalse(page.canSetOperator());
     }
 
     @Test
     public void testCanSetOperatorWhenEditingColIsNotNull() {
+        when(plugin.getFactField()).thenReturn("factField");
+
         assertTrue(page.canSetOperator());
     }
 
     @Test
-    public void testGetOperatorWhenOperatorIsNull() {
-        when(editingCol.getOperator()).thenReturn("==");
+    public void testGetOperator() {
+        final String expectedOperator = "operator";
 
-        assertEquals("==",
-                     page.getOperator());
+        when(plugin.getFactField()).thenReturn("factField");
+        when(plugin.editingCol()).thenReturn(editingCol);
+        when(editingCol.getOperator()).thenReturn(expectedOperator);
+
+        final String operator = page.getOperator();
+
+        verify(plugin).editingCol();
+        verify(editingCol).getOperator();
+
+        assertEquals(expectedOperator,
+                     operator);
     }
 
     @Test
-    public void testGetOperatorWhenOperatorIsNotNull() {
-        when(editingCol.getOperator()).thenReturn(null);
+    public void testOperatorDropdownWhenOperatorCanBeSet() {
+        registerFakeProvider();
 
-        assertEquals("",
-                     page.getOperator());
+        when(translationService.format(GuidedDecisionTableErraiConstants.OperatorPage_NoOperator)).thenReturn("(no operator)");
+        when(presenter.getDataModelOracle()).thenReturn(oracle);
+        when(plugin.getFactField()).thenReturn("factField");
+        when(plugin.editingCol()).thenReturn(editingCol);
+
+        mockGetOperatorCompletionsToReturn(OperatorsOracle.STANDARD_OPERATORS);
+
+        spyOperatorsDropdown();
+
+        page.operatorDropdown(widget -> {
+            assertTrue(widget instanceof CEPOperatorsDropdown);
+
+            final CEPOperatorsDropdown operatorsDropdown = (CEPOperatorsDropdown) widget;
+
+            verify(operatorsDropdown).insertItem("(no operator)",
+                                                 "",
+                                                 1);
+            verify(operatorsDropdown).addValueChangeHandler(any());
+        });
     }
 
     @Test
-    public void testSetOperator() {
-        page.setOperator("==");
+    public void testOperatorDropdownWhenOperatorCanNotBeSet() {
+        final Element elementMock = mock(Element.class);
+        final ListBox listBoxMock = mock(ListBox.class);
 
-        verify(plugin).setEditingColOperator("==");
+        when(listBoxMock.getElement()).thenReturn(elementMock);
+        when(plugin.getFactField()).thenReturn("");
+        when(translationService.format(GuidedDecisionTableErraiConstants.OperatorPage_PleaseChoose)).thenReturn("Choose...");
+
+        doReturn(listBoxMock).when(page).newListBox();
+
+        page.operatorDropdown(widget -> {
+            assertTrue(widget instanceof ListBox);
+
+            verify(listBoxMock).addItem("Choose...");
+            verify(elementMock).setAttribute("disabled",
+                                             "disabled");
+        });
+    }
+
+    @Test
+    public void testFilterOptionsForConstraintTypeLiteralWhenConstraintValueIsLiteral() {
+        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_LITERAL);
+
+        final String[] result = page.filterOptionsForConstraintTypeLiteral(OperatorsOracle.EXPLICIT_LIST_OPERATORS);
+        final List<String> operators = Arrays.asList(result);
+
+        assertTrue(operators.contains("in"));
+        assertTrue(operators.contains("not in"));
+        assertEquals(2,
+                     operators.size());
+    }
+
+    @Test
+    public void testFilterOptionsForConstraintTypeLiteralWhenConstraintValueIsNotLiteral() {
+        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_PREDICATE);
+
+        final String[] result = page.filterOptionsForConstraintTypeLiteral(OperatorsOracle.EXPLICIT_LIST_OPERATORS);
+        final List<String> operators = Arrays.asList(result);
+
+        assertFalse(operators.contains("in"));
+        assertFalse(operators.contains("not in"));
+        assertEquals(0,
+                     operators.size());
+    }
+
+    @Test
+    public void testGetOperatorCompletions() {
+        when(plugin.getFactType()).thenReturn("factType");
+        when(plugin.getFactField()).thenReturn("factField");
+        when(presenter.getDataModelOracle()).thenReturn(oracle);
+
+        page.getOperatorCompletions(s -> {
+        });
+
+        verify(oracle).getOperatorCompletions(eq("factType"),
+                                              eq("factField"),
+                                              any());
+    }
+
+    private void spyOperatorsDropdown() {
+        doAnswer(answer -> {
+            final Object firstArgument = answer.getArguments()[0];
+            final String[] operators = (String[]) firstArgument;
+
+            return spy(new CEPOperatorsDropdown(operators,
+                                                editingCol));
+        }).when(page).newCepOperatorsDropdown(any());
+    }
+
+    private void mockGetOperatorCompletionsToReturn(final String[] standardOperators) {
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                final Callback<String[]> callback = callbackArgumentCaptor.getValue();
+
+                callback.callback(standardOperators);
+
+                return null;
+            }
+        }).when(page).getOperatorCompletions(callbackArgumentCaptor.capture());
+    }
+
+    private void registerFakeProvider() {
+        GwtMockito.useProviderForType(GuidedRuleEditorResources.class,
+                                      fakeProvider());
+    }
+
+    private FakeProvider<GuidedRuleEditorResources> fakeProvider() {
+        return provider -> new GuidedRuleEditorResources() {
+            @Override
+            public ItemImages itemImages() {
+                return mock(ItemImages.class);
+            }
+
+            @Override
+            public GuidedRuleEditorCss css() {
+                return mock(GuidedRuleEditorCss.class);
+            }
+
+            @Override
+            public GuidedRuleEditorImages images() {
+                return mock(GuidedRuleEditorImages.class);
+            }
+        };
     }
 }

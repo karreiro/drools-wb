@@ -64,11 +64,8 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     }
 
     private AdditionalInfoPage additionalInfoPage() {
-        return additionalInfoPageInitializer().init(this);
-    }
-
-    private AdditionalInfoPageInitializer additionalInfoPageInitializer() {
-        return new AdditionalInfoPageInitializer(additionalInfoPage);
+        return AdditionalInfoPageInitializer.init(additionalInfoPage,
+                                                  this);
     }
 
     @Override
@@ -77,8 +74,12 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     }
 
     @Override
-    public DTColumnConfig52 getEditingCol() {
+    public DTColumnConfig52 editingCol() {
         return (DTColumnConfig52) editingCol;
+    }
+
+    @Override
+    public void setHeader(String header) {
     }
 
     @Override

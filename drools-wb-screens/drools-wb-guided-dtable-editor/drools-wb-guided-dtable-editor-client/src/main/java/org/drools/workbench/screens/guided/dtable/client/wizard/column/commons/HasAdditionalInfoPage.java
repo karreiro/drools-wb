@@ -17,8 +17,11 @@
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.commons;
 
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
+import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 
 public interface HasAdditionalInfoPage {
 
-    DTColumnConfig52 getEditingCol();
+    DTColumnConfig52 editingCol();
+
+    void setHeader(final String header);
 }

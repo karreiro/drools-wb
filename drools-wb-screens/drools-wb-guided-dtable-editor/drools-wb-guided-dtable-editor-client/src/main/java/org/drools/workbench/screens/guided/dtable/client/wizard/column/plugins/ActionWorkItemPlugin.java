@@ -40,8 +40,13 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
     private WorkItemPage workItemPage;
 
     @Override
-    public DTColumnConfig52 getEditingCol() {
+    public DTColumnConfig52 editingCol() {
         return null;
+    }
+
+    @Override
+    public void setHeader(String header) {
+
     }
 
     @Override
@@ -58,11 +63,8 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
     }
 
     private AdditionalInfoPage additionalInfoPage() {
-        return additionalInfoPageInitializer().init(this);
-    }
-
-    private AdditionalInfoPageInitializer additionalInfoPageInitializer() {
-        return new AdditionalInfoPageInitializer(additionalInfoPage);
+        return AdditionalInfoPageInitializer.init(additionalInfoPage,
+                                                  this);
     }
 
     @Override

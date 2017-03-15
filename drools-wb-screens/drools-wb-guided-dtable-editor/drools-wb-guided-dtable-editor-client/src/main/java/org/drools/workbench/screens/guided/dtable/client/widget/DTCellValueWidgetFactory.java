@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -419,44 +420,41 @@ public class DTCellValueWidgetFactory {
         // Wire up update handler
         lb.setEnabled( !isReadOnly );
         if ( !isReadOnly ) {
-            lb.addClickHandler( new ClickHandler() {
-
-                public void onClick( ClickEvent event ) {
-                    String value = null;
-                    if ( lb.isMultipleSelect() ) {
-                        for ( int i = 0; i < lb.getItemCount(); i++ ) {
-                            if ( lb.isItemSelected( i ) ) {
-                                if ( value == null ) {
-                                    value = lb.getValue( i );
-                                } else {
-                                    value = value + "," + lb.getValue( i );
-                                }
+            lb.addChangeHandler(event -> {
+                String value = null;
+                if ( lb.isMultipleSelect() ) {
+                    for ( int i = 0; i < lb.getItemCount(); i++ ) {
+                        if ( lb.isItemSelected( i ) ) {
+                            if ( value == null ) {
+                                value = lb.getValue( i );
+                            } else {
+                                value = value + "," + lb.getValue( i );
                             }
                         }
-                    } else {
-                        int index = lb.getSelectedIndex();
-                        if ( index > -1 ) {
-                            //Set base column value
-                            value = lb.getValue( index );
-                        }
                     }
-
-                    dcv.setStringValue( value );
-
-                    //Update any dependent enumerations
-                    final LimitedEntryDropDownManager.Context context = new LimitedEntryDropDownManager.Context( basePattern,
-                                                                                                                 baseCondition );
-                    Set<Integer> dependentColumnIndexes = dropDownManager.getDependentColumnIndexes( context );
-                    for ( Integer iCol : dependentColumnIndexes ) {
-                        BaseColumn column = model.getExpandedColumns().get( iCol );
-                        if ( column instanceof LimitedEntryCol ) {
-                            ( (LimitedEntryCol) column ).setValue( null );
-                        } else if ( column instanceof DTColumnConfig52 ) {
-                            ( (DTColumnConfig52) column ).setDefaultValue( null );
-                        }
+                } else {
+                    int index = lb.getSelectedIndex();
+                    if ( index > -1 ) {
+                        //Set base column value
+                        value = lb.getValue( index );
                     }
                 }
-            } );
+
+                dcv.setStringValue( value );
+
+                //Update any dependent enumerations
+                final LimitedEntryDropDownManager.Context context = new LimitedEntryDropDownManager.Context( basePattern,
+                                                                                                             baseCondition );
+                Set<Integer> dependentColumnIndexes = dropDownManager.getDependentColumnIndexes( context );
+                for ( Integer iCol : dependentColumnIndexes ) {
+                    BaseColumn column = model.getExpandedColumns().get( iCol );
+                    if ( column instanceof LimitedEntryCol ) {
+                        ( (LimitedEntryCol) column ).setValue( null );
+                    } else if ( column instanceof DTColumnConfig52 ) {
+                        ( (DTColumnConfig52) column ).setDefaultValue( null );
+                    }
+                }
+            });
         }
         return lb;
     }

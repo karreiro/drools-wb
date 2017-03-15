@@ -20,22 +20,24 @@
         <hr/>
     </div>
 
-    <div class="form-horizontal">
-        <div class="form-group">
-            <label class="col-sm-4 form-control-label" data-i18n-key="Metadata" data-i18n-key="Pattern"></label>
+    <div class="form-group">
+        <label class="col-sm-4 form-control-label" data-i18n-key="Pattern"></label>
 
-            <div class="col-sm-8">
-                <select class="form-control" data-field="patternList"></select>
+        <div class="col-sm-8">
+            <select class="form-control" data-field="patternList"></select>
 
-                <label data-field="newPattern" class="new-pattern"></label>
+            <button type="button" data-field="createANewFactPattern" class="new-fact-pattern btn btn-default btn-xs">
+                <i class="fa fa-plus"></i>
+                <span data-i18n-key="CreateANewFact"></span>
+            </button>
+        </div>
+    </div>
 
-                <div>
-                    <button type="button" data-field="createANewFactPattern" class="btn btn-default btn-xs">
-                        <i class="fa fa-plus"></i>
-                        <span data-i18n-key="CreateANewFact"></span>
-                    </button>
-                </div>
-            </div>
+    <div class="form-group">
+        <label class="col-sm-4 form-control-label" data-i18n-key="EntryPoint"></label>
+
+        <div class="col-sm-8">
+            <input type="text" class="form-control" data-field="entryPointName"/>
         </div>
     </div>
 </div>

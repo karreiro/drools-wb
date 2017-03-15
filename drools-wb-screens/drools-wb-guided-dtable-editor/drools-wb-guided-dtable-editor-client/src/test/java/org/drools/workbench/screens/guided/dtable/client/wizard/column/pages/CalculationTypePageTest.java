@@ -19,6 +19,7 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,7 +46,7 @@ public class CalculationTypePageTest {
     public void testGetConstraintValue() throws Exception {
         page.getConstraintValue();
 
-        verify(plugin).getConstraintValue();
+        verify(plugin).constraintValue();
     }
 
     @Test
@@ -53,5 +54,19 @@ public class CalculationTypePageTest {
         page.setConstraintValue(BaseSingleFieldConstraint.TYPE_LITERAL);
 
         verify(plugin).setConstraintValue(BaseSingleFieldConstraint.TYPE_LITERAL);
+    }
+
+    @Test
+    public void testIsCompleteWhenItIsCompleted() throws Exception {
+        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_LITERAL);
+
+        page.isComplete(Assert::assertTrue);
+    }
+
+    @Test
+    public void testIsCompleteWhenItIsNotCompleted() throws Exception {
+        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_UNDEFINED);
+
+        page.isComplete(Assert::assertFalse);
     }
 }

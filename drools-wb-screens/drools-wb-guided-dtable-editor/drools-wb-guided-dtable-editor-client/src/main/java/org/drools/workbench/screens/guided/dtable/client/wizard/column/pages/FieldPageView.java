@@ -42,8 +42,8 @@ public class FieldPageView extends Composite implements FieldPage.View {
     private ListBox fieldsList;
 
     @Inject
-    @DataField("warning")
-    private Div warning;
+    @DataField("patternWarning")
+    private Div patternWarning;
 
     @Inject
     @DataField("info")
@@ -62,18 +62,18 @@ public class FieldPageView extends Composite implements FieldPage.View {
     }
 
     @EventHandler("fieldsList")
-    public void onPluginSelected(ChangeEvent event) {
+    public void onFieldSelected(final ChangeEvent event) {
         page.setEditingCol(fieldsList.getSelectedValue());
     }
 
     private void toggleFields() {
         if (page.isConstraintValuePredicate()) {
             info.setHidden(false);
-            warning.setHidden(true);
+            patternWarning.setHidden(true);
             fieldsList.setEnabled(false);
         } else {
             info.setHidden(true);
-            warning.setHidden(page.hasEditingPattern());
+            patternWarning.setHidden(page.hasEditingPattern());
             fieldsList.setEnabled(page.hasEditingPattern());
         }
     }
@@ -85,7 +85,7 @@ public class FieldPageView extends Composite implements FieldPage.View {
         fieldsList.addItem("-- " + selectField + " --",
                            "");
 
-        page.factFields().forEach(fieldName -> fieldsList.addItem(fieldName));
+        page.forEachFactField(fieldName -> fieldsList.addItem(fieldName));
 
         fieldsList.setSelectedIndex(getCurrentIndexFromList(getCurrentValue(),
                                                             fieldsList));
@@ -96,7 +96,7 @@ public class FieldPageView extends Composite implements FieldPage.View {
     }
 
     private String translate(final String key,
-                             Object... args) {
+                             final Object... args) {
         return translationService.format(key,
                                          args);
     }

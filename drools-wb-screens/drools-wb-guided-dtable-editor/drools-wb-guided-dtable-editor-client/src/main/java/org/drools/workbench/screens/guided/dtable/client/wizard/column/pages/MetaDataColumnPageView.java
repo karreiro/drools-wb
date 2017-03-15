@@ -19,8 +19,6 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;

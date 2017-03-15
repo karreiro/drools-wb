@@ -81,11 +81,11 @@ public class ValueOptionsPageTest {
         DTCellValueWidgetFactory factory() {
             return factory;
         }
-
-        @Override
-        Validator validator() {
-            return validator;
-        }
+//
+//        @Override
+//        Validator validator() {
+//            return validator;
+//        }
     });
 
     @BeforeClass
@@ -105,16 +105,9 @@ public class ValueOptionsPageTest {
         when(editingCol.getDefaultValue()).thenReturn(defaultValue);
         when(presenter.getModel()).thenReturn(model);
         when(presenter.getDataModelOracle()).thenReturn(oracle);
-        when(plugin.getEditingPattern()).thenReturn(pattern52);
-        when(plugin.getEditingCol()).thenReturn(editingCol);
+        when(plugin.editingPattern()).thenReturn(pattern52);
+        when(plugin.editingCol()).thenReturn(editingCol);
         when(page.plugin()).thenReturn(plugin);
-    }
-
-    @Test
-    public void testIsReadOnly() throws Exception {
-        page.isReadOnly();
-
-        verify(presenter).isReadOnly();
     }
 
     @Test
@@ -133,7 +126,7 @@ public class ValueOptionsPageTest {
     public void testNewLimitedValueWidget() throws Exception {
         final LimitedEntryConditionCol52 limitedEntryConditionCol52 = mock(LimitedEntryConditionCol52.class);
 
-        when(plugin.getEditingCol()).thenReturn(limitedEntryConditionCol52);
+        when(plugin.editingCol()).thenReturn(limitedEntryConditionCol52);
 
         page.newLimitedValueWidget();
 
@@ -149,21 +142,21 @@ public class ValueOptionsPageTest {
 
     @Test
     public void testCanSetupCepOperatorsWhenEditingPatternIsNull() throws Exception {
-        when(plugin.getEditingPattern()).thenReturn(null);
+        when(plugin.editingPattern()).thenReturn(null);
 
         assertFalse(page.canSetupCepOperators());
     }
 
     @Test
     public void testCanSetupDefaultValueWhenEditingColIsNull() throws Exception {
-        when(plugin.getEditingCol()).thenReturn(null);
+        when(plugin.editingCol()).thenReturn(null);
 
         assertFalse(page.canSetupDefaultValue());
     }
 
     @Test
     public void testCanSetupDefaultValueWhenEditingPatternIsNull() throws Exception {
-        when(plugin.getEditingPattern()).thenReturn(null);
+        when(plugin.editingPattern()).thenReturn(null);
 
         assertFalse(page.canSetupDefaultValue());
     }
@@ -203,28 +196,28 @@ public class ValueOptionsPageTest {
 
     @Test
     public void testCanSetupLimitedValueWhenEditingColIsNull() throws Exception {
-        when(plugin.getEditingCol()).thenReturn(null);
+        when(plugin.editingCol()).thenReturn(null);
 
         assertFalse(page.canSetupLimitedValue());
     }
 
     @Test
     public void testCanSetupLimitedValueWhenEditingPatternIsNull() throws Exception {
-        when(plugin.getEditingPattern()).thenReturn(null);
+        when(plugin.editingPattern()).thenReturn(null);
 
         assertFalse(page.canSetupLimitedValue());
     }
 
     @Test
     public void testCanSetupLimitedValueWhenEditingColIsNotAnInstanceOfLimitedEntryConditionCol52() throws Exception {
-        when(plugin.getEditingCol()).thenReturn(new ConditionCol52());
+        when(plugin.editingCol()).thenReturn(new ConditionCol52());
 
         assertFalse(page.canSetupLimitedValue());
     }
 
     @Test
     public void testCanSetupLimitedValueWhenOperatorNeedsAValue() throws Exception {
-        when(plugin.getEditingCol()).thenReturn(new LimitedEntryConditionCol52());
+        when(plugin.editingCol()).thenReturn(new LimitedEntryConditionCol52());
         when(validator.doesOperatorNeedValue(any())).thenReturn(false);
 
         assertFalse(page.canSetupLimitedValue());
@@ -232,7 +225,7 @@ public class ValueOptionsPageTest {
 
     @Test
     public void testCanSetupLimitedValueWhenTableFormatIsNotLimitedEntry() throws Exception {
-        when(plugin.getEditingCol()).thenReturn(new LimitedEntryConditionCol52());
+        when(plugin.editingCol()).thenReturn(new LimitedEntryConditionCol52());
         when(model.getTableFormat()).thenReturn(GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY);
         when(validator.doesOperatorNeedValue(any())).thenReturn(true);
 
@@ -241,7 +234,7 @@ public class ValueOptionsPageTest {
 
     @Test
     public void testCanSetupLimitedValueWhenCanSetup() throws Exception {
-        when(plugin.getEditingCol()).thenReturn(new LimitedEntryConditionCol52());
+        when(plugin.editingCol()).thenReturn(new LimitedEntryConditionCol52());
         when(model.getTableFormat()).thenReturn(GuidedDecisionTable52.TableFormat.LIMITED_ENTRY);
         when(validator.doesOperatorNeedValue(any())).thenReturn(true);
 
@@ -263,14 +256,14 @@ public class ValueOptionsPageTest {
 
     @Test
     public void testCanSetupBindingWhenConstraintValueIsLiteral() throws Exception {
-        when(plugin.getConstraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_LITERAL);
+        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_LITERAL);
 
         assertTrue(page.canSetupBinding());
     }
 
     @Test
     public void testCanSetupBindingWhenConstraintValueIsNotLiteral() throws Exception {
-        when(plugin.getConstraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_PREDICATE);
+        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_PREDICATE);
 
         assertFalse(page.canSetupBinding());
     }

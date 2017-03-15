@@ -19,11 +19,13 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.user.client.ui.Composite;
 import org.gwtbootstrap3.client.ui.CheckBox;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.addWidgetToContainer;
@@ -31,10 +33,6 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 @Dependent
 @Templated
 public class AdditionalInfoPageView extends Composite implements AdditionalInfoPage.View {
-
-    @Inject
-    @DataField("entryPointFormItem")
-    private Div entryPointFormItem;
 
     @Inject
     @DataField("headerFormItem")
@@ -54,11 +52,7 @@ public class AdditionalInfoPageView extends Composite implements AdditionalInfoP
 
     @Inject
     @DataField("header")
-    private TextBox headerTextBox;
-
-    @Inject
-    @DataField("entryPointName")
-    private TextBox entryPointName;
+    private TextBox header;
 
     @Inject
     @DataField("hideColumnContainer")
@@ -71,6 +65,11 @@ public class AdditionalInfoPageView extends Composite implements AdditionalInfoP
     private AdditionalInfoPage page;
 
     private CheckBox hideColumnCheckBox;
+
+    @EventHandler("header")
+    public void onSelectHeader(KeyUpEvent event) {
+        page.setHeader(header.getText());
+    }
 
     @Override
     public void init(final AdditionalInfoPage page) {
@@ -92,12 +91,9 @@ public class AdditionalInfoPageView extends Composite implements AdditionalInfoP
 
     @Override
     public void showHeader() {
-        headerFormItem.setHidden(false);
-    }
+        header.setText(page.getHeader());
 
-    @Override
-    public void showEntryPoint() {
-        entryPointFormItem.setHidden(false);
+        headerFormItem.setHidden(false);
     }
 
     @Override
@@ -112,14 +108,12 @@ public class AdditionalInfoPageView extends Composite implements AdditionalInfoP
 
     private void setup() {
         page.setupHeader();
-        page.setupEntryPoint();
         page.setupHideColumn();
         page.setupLogicallyInsert();
         page.setupUpdateEngineWithChanges();
     }
 
     private void clear() {
-        entryPointFormItem.setHidden(true);
         headerFormItem.setHidden(true);
         hideColumnFormItem.setHidden(true);
         logicallyInsertFormItem.setHidden(true);

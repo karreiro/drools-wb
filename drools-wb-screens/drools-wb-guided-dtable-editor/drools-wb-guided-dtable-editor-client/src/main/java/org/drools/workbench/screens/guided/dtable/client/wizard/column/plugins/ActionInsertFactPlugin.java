@@ -77,11 +77,8 @@ public class ActionInsertFactPlugin extends BaseDecisionTableColumnPlugin implem
     }
 
     private AdditionalInfoPage additionalInfoPage() {
-        return additionalInfoPageInitializer().init(this);
-    }
-
-    private AdditionalInfoPageInitializer additionalInfoPageInitializer() {
-        return new AdditionalInfoPageInitializer(additionalInfoPage);
+        return AdditionalInfoPageInitializer.init(additionalInfoPage,
+                                                  this);
     }
 
     @Override
@@ -132,7 +129,7 @@ public class ActionInsertFactPlugin extends BaseDecisionTableColumnPlugin implem
     }
 
     @Override
-    public Pattern52 getEditingPattern() {
+    public Pattern52 editingPattern() {
         return editingPattern;
     }
 
@@ -145,20 +142,23 @@ public class ActionInsertFactPlugin extends BaseDecisionTableColumnPlugin implem
     }
 
     @Override
-    public DTColumnConfig52 getEditingCol() {
+    public String getEntryPointName() {
+        return null;
+    }
+
+    @Override
+    public void setEntryPointName(String entryPointName) {
+
+    }
+
+    @Override
+    public DTColumnConfig52 editingCol() {
         return editingCol;
     }
 
     @Override
-    public void setEditingCol(final String selectedValue) {
-        editingCol = newActionInsertColumn(selectedValue);
+    public void setHeader(String header) {
 
-        fireChangeEvent(fieldPage);
-    }
-
-    @Override
-    public void setEditingCol(final DTColumnConfig52 editingCol) {
-        this.editingCol = (ActionInsertFactCol52) editingCol;
     }
 
     private ActionInsertFactCol52 newActionInsertColumn(String selectedValue) {
@@ -170,10 +170,15 @@ public class ActionInsertFactPlugin extends BaseDecisionTableColumnPlugin implem
         final AsyncPackageDataModelOracle oracle = presenter.getDataModelOracle();
 
         insertFactCol52.setFactField(selectedValue);
-        insertFactCol52.setType(oracle.getFieldType(getEditingPattern().getFactType(),
+        insertFactCol52.setType(oracle.getFieldType(editingPattern().getFactType(),
                                                     insertFactCol52.getFactField()));
         return insertFactCol52;
     }
+
+//    @Override
+//    public void setEditingCol(final DTColumnConfig52 editingCol) {
+//        this.editingCol = (ActionInsertFactCol52) editingCol;
+//    }
 
     private ActionInsertFactCol52 newActionInsertFact() {
         switch (presenter.getModel().getTableFormat()) {
@@ -187,21 +192,28 @@ public class ActionInsertFactPlugin extends BaseDecisionTableColumnPlugin implem
     }
 
     @Override
-    public void setEditingColFactField(final String factField) {
-        if (editingCol == null) {
-            return;
-        }
-
-        editingCol.setFactField(factField);
-    }
-
-    @Override
-    public int getConstraintValue() {
+    public int constraintValue() {
         return constraintValue;
     }
+
+//    @Override
+//    public void setEditingColFactField(final String factField) {
+//        if (editingCol == null) {
+//            return;
+//        }
+//
+//        editingCol.setFactField(factField);
+//    }
 
     @Override
     public String getFactField() {
         return editingCol == null ? "" : editingCol.getFactField();
+    }
+
+    @Override
+    public void setFactField(final String selectedValue) {
+        editingCol = newActionInsertColumn(selectedValue);
+
+        fireChangeEvent(fieldPage);
     }
 }

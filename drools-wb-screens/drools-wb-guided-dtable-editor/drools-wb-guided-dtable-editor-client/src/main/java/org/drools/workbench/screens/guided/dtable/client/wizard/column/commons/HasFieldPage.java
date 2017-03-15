@@ -21,15 +21,13 @@ import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 
 public interface HasFieldPage {
 
-    Pattern52 getEditingPattern();
+    Pattern52 editingPattern();
 
-    DTColumnConfig52 getEditingCol();
+    DTColumnConfig52 editingCol();
 
-    void setEditingCol(final String selectedValue);
-
-    void setEditingColFactField(final String factField);
-
-    int getConstraintValue();
+    void setFactField(final String selectedValue);
 
     String getFactField();
+
+    int constraintValue();
 }

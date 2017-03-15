@@ -93,11 +93,8 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
     }
 
     private AdditionalInfoPage additionalInfoPage() {
-        return additionalInfoPageInitializer().init(this);
-    }
-
-    private AdditionalInfoPageInitializer additionalInfoPageInitializer() {
-        return new AdditionalInfoPageInitializer(additionalInfoPage);
+        return AdditionalInfoPageInitializer.init(additionalInfoPage,
+                                                  this);
     }
 
     @Override
@@ -128,7 +125,12 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
     }
 
     @Override
-    public DTColumnConfig52 getEditingCol() {
+    public DTColumnConfig52 editingCol() {
         return editingCol;
+    }
+
+    @Override
+    public void setHeader(String header) {
+
     }
 }

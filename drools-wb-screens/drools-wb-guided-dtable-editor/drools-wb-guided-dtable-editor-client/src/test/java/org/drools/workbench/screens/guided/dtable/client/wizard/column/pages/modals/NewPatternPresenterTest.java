@@ -20,9 +20,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
+import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.PatternPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,6 +43,9 @@ public class NewPatternPresenterTest {
     private NewPatternPresenter.View view;
 
     @Mock
+    private TranslationService translationService;
+
+    @Mock
     private PatternPage patternPage;
 
     @Mock
@@ -50,17 +57,24 @@ public class NewPatternPresenterTest {
     @Mock
     private ConditionColumnPlugin plugin;
 
+    @Mock
+    private GuidedDecisionTable52 table52;
+
     private NewPatternPresenter presenter;
 
     @Before
     public void setup() {
+        when(decisionTablePresenter.getModel()).thenReturn(table52);
         when(decisionTablePresenter.getDataModelOracle()).thenReturn(oracle);
         when(patternPage.presenter()).thenReturn(decisionTablePresenter);
         when(patternPage.plugin()).thenReturn(plugin);
 
-        presenter = new NewPatternPresenter(view) {{
+        final NewPatternPresenter presenter = new NewPatternPresenter(view,
+                                                                      translationService) {{
             init(patternPage);
         }};
+
+        this.presenter = spy(presenter);
     }
 
     @Test
@@ -72,7 +86,7 @@ public class NewPatternPresenterTest {
 
         final List<String> factTypes = presenter.getFactTypes();
 
-        assertEquals(Arrays.asList(fakeFactTypesArray),
+        assertEquals(expectedFactTypes,
                      factTypes);
     }
 
@@ -84,15 +98,101 @@ public class NewPatternPresenterTest {
     }
 
     @Test
-    public void testAddPattern() throws Exception {
-//        when(view.isNegatePatternMatch()).thenReturn(true);
-//
-//        presenter.addPattern();
-//
-//        verify(plugin).setEditingPattern(any(Pattern52.class));
-//        verify(plugin).setEditingColFactField(null);
-//        verify(plugin).setEditingColOperator(null);
-//        verify(patternPage).updateNewPatternLabel();
-//        verify(view).hide();
+    public void testAddPatternWhenPatternIsValid() throws Exception {
+        when(view.getSelectedFactType()).thenReturn("Applicant");
+        when(view.getBindingText()).thenReturn("app");
+        when(view.isNegatePatternMatch()).thenReturn(false);
+
+        presenter.addPattern();
+
+        verify(plugin).setEditingPattern(any(Pattern52.class));
+        verify(patternPage).prepareView();
+        verify(view).hide();
+        verify(view,
+               never()).showError(any());
+    }
+
+    @Test
+    public void testAddPatternWhenIsNegatePatternMatch() throws Exception {
+        when(view.getSelectedFactType()).thenReturn("");
+        when(view.getBindingText()).thenReturn("");
+        when(view.isNegatePatternMatch()).thenReturn(true);
+
+        presenter.addPattern();
+
+        verify(plugin).setEditingPattern(any(Pattern52.class));
+        verify(patternPage).prepareView();
+        verify(view).hide();
+        verify(view,
+               never()).showError(any());
+    }
+
+    @Test
+    public void testAddPatternWhenFactNameIsBlank() throws Exception {
+        when(view.getSelectedFactType()).thenReturn("Applicant");
+        when(view.getBindingText()).thenReturn("");
+        when(view.isNegatePatternMatch()).thenReturn(false);
+
+        presenter.addPattern();
+
+        verify(plugin,
+               never()).setEditingPattern(any(Pattern52.class));
+        verify(patternPage,
+               never()).prepareView();
+        verify(view,
+               never()).hide();
+        verify(view).showError(any());
+        verify(translationService).format(GuidedDecisionTableErraiConstants.NewPatternPresenter_PleaseEnterANameForFact);
+    }
+
+    @Test
+    public void testAddPatternWhenFactNameIsEqualsToFactType() throws Exception {
+        when(view.getSelectedFactType()).thenReturn("Applicant");
+        when(view.getBindingText()).thenReturn("Applicant");
+        when(view.isNegatePatternMatch()).thenReturn(false);
+
+        presenter.addPattern();
+
+        verify(plugin,
+               never()).setEditingPattern(any(Pattern52.class));
+        verify(patternPage,
+               never()).prepareView();
+        verify(view,
+               never()).hide();
+        verify(view).showError(any());
+        verify(translationService).format(GuidedDecisionTableErraiConstants.NewPatternPresenter_PleaseEnterANameThatIsNotTheSameAsTheFactType);
+    }
+
+    @Test
+    public void testAddPatternWhenFactNameIsAlreadyUsedByAnotherPattern() throws Exception {
+        when(view.getSelectedFactType()).thenReturn("Applicant");
+        when(view.getBindingText()).thenReturn("app");
+        when(view.isNegatePatternMatch()).thenReturn(false);
+
+        doReturn(false).when(presenter).isBindingUnique("app");
+
+        presenter.addPattern();
+
+        verify(plugin,
+               never()).setEditingPattern(any(Pattern52.class));
+        verify(patternPage,
+               never()).prepareView();
+        verify(view,
+               never()).hide();
+        verify(view).showError(any());
+        verify(translationService).format(GuidedDecisionTableErraiConstants.NewPatternPresenter_PleaseEnterANameThatIsNotAlreadyUsedByAnotherPattern);
+    }
+
+    @Test
+    public void testPattern52() throws Exception {
+        when(view.getSelectedFactType()).thenReturn("Applicant");
+        when(view.getBindingText()).thenReturn("app");
+        when(view.isNegatePatternMatch()).thenReturn(false);
+
+        final Pattern52 pattern52 = presenter.pattern52();
+
+        assertEquals("Applicant", pattern52.getFactType());
+        assertEquals("app", pattern52.getBoundName());
+        assertEquals(false, pattern52.isNegated());
     }
 }

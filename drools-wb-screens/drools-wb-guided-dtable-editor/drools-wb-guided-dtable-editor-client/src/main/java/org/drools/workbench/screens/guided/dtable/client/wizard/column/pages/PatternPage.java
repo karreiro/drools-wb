@@ -16,7 +16,10 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import javax.enterprise.context.Dependent;
@@ -24,6 +27,7 @@ import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
@@ -59,7 +63,7 @@ public class PatternPage<T extends HasPatternPage & DecisionTableColumnPlugin> e
 
     @Override
     public void isComplete(final Callback<Boolean> callback) {
-        callback.callback(plugin().getEditingPattern() != null);
+        callback.callback(plugin().editingPattern() != null);
     }
 
     @Override
@@ -76,38 +80,57 @@ public class PatternPage<T extends HasPatternPage & DecisionTableColumnPlugin> e
         return presenter;
     }
 
-    public void updateNewPatternLabel() {
-        view.setup();
-    }
-
     void forEachPattern(final BiConsumer<String, String> biConsumer) {
         final Set<String> addedBounds = new HashSet<>();
 
-        presenter.getModel().getPatterns().forEach(pattern52 -> {
-            if (!addedBounds.contains(pattern52.getBoundName())) {
-                final String patternName = patternToName(pattern52);
-                final String patternValue = patternToValue(pattern52);
+        getPatterns()
+                .forEach(pattern52 -> {
+                    if (!addedBounds.contains(pattern52.getBoundName())) {
+                        final String patternName = patternToName(pattern52);
+                        final String patternValue = patternToValue(pattern52);
 
-                biConsumer.accept(patternName,
-                                  patternValue);
+                        biConsumer.accept(patternName,
+                                          patternValue);
 
-                addedBounds.add(pattern52.getBoundName());
-            }
-        });
+                        addedBounds.add(pattern52.getBoundName());
+                    }
+                });
     }
 
-    boolean canSetNewFactPatternLabel() {
-        final Pattern52 editingPattern = plugin().getEditingPattern();
+    void setSelectedEditingPattern() {
+        final String selectedValue = view.getSelectedValue();
+        final String[] metadata = selectedValue.split("\\s");
+        final Pattern52 editingPattern = extractEditingPattern(metadata);
 
-        return editingPattern != null && isPatternANewFactPattern(editingPattern);
+        setEditingPattern(editingPattern);
     }
 
-    void setEditingPattern(final String selectedValue) {
-        final String boundName = selectedValue.split("\\s")[1];
+    public void setEditingPattern(final Pattern52 pattern52) {
+        pattern52.setEntryPointName(view.getEntryPointName());
 
-        plugin().setEditingPattern(presenter.getModel().getConditionPattern(boundName));
+        plugin().setEditingPattern(pattern52);
+    }
 
-        clearEditingCol();
+    Pattern52 extractEditingPattern(final String[] metadata) {
+        final GuidedDecisionTable52 model = presenter.getModel();
+        final String factType = metadata[0];
+        final String factBinding = metadata[1];
+        final boolean negated = Boolean.parseBoolean(metadata[2]);
+        final Optional<Pattern52> pattern52Optional;
+
+        if (!negated) {
+            pattern52Optional = Optional.ofNullable(model.getConditionPattern(factBinding));
+        } else {
+            pattern52Optional = model
+                    .getPatterns()
+                    .stream()
+                    .filter(Pattern52::isNegated)
+                    .filter(p -> p.getFactType().equals(factType))
+                    .findFirst();
+        }
+
+        // This should never be thrown; but let's fail fast to make debugging easier
+        return pattern52Optional.orElseThrow(IllegalStateException::new);
     }
 
     void showNewPatternModal() {
@@ -115,31 +138,34 @@ public class PatternPage<T extends HasPatternPage & DecisionTableColumnPlugin> e
     }
 
     String currentPatternName() {
-        final Pattern52 currentPattern = plugin().getEditingPattern();
+        final Pattern52 currentPattern = plugin().editingPattern();
 
         return currentPattern == null ? "" : patternToName(currentPattern);
     }
 
     String currentPatternValue() {
-        final Pattern52 currentPattern = plugin().getEditingPattern();
+        final Pattern52 currentPattern = plugin().editingPattern();
 
         return currentPattern == null ? "" : patternToValue(currentPattern);
     }
 
-    private boolean isPatternANewFactPattern(final Pattern52 pattern52) {
-        final String currentPatternValue = patternToValue(pattern52);
+    List<Pattern52> getPatterns() {
+        final List<Pattern52> patterns = new ArrayList<>(presenter.getModel().getPatterns());
+        final Pattern52 currentPattern = plugin().editingPattern();
 
-        for (final Pattern52 p : presenter.getModel().getPatterns()) {
-            if (currentPatternValue.equals(patternToValue(p))) {
-                return false;
-            }
+        if (currentPattern != null) {
+            patterns.add(currentPattern);
         }
 
-        return true;
+        return patterns;
     }
 
-    private void clearEditingCol() {
-        plugin().setEditingCol(null);
+    String getEntryPointName() {
+        return plugin().getEntryPointName();
+    }
+
+    void setEntryPoint() {
+        plugin().setEntryPointName(view.getEntryPointName());
     }
 
     private String patternToValue(final Pattern52 pattern52) {
@@ -155,8 +181,10 @@ public class PatternPage<T extends HasPatternPage & DecisionTableColumnPlugin> e
 
     public interface View extends UberView<PatternPage> {
 
-        void setNewPatternLabel(String patternName);
-
         void setup();
+
+        String getSelectedValue();
+
+        String getEntryPointName();
     }
 }

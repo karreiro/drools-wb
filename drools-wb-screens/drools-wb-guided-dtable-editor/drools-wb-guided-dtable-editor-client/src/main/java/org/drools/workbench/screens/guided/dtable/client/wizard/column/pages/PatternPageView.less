@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-[data-i18n-prefix="PatternWizardPageView."] {
-  .gwt-ListBox {
-    margin-bottom: 15px;
+[data-i18n-prefix="PatternPageView."] {
+  .gwt-ListBox + .new-fact-pattern {
+    margin: 0 0 15px;
   }
-
-  .new-pattern {
-    padding-bottom: 15px;
+  .gwt-ListBox:not([style="display: none;"]) + .new-fact-pattern {
+    margin: 10px 0 15px;
   }
 }

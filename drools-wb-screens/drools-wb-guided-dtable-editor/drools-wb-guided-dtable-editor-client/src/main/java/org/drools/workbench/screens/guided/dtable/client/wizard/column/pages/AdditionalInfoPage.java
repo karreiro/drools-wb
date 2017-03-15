@@ -30,16 +30,22 @@ import org.gwtbootstrap3.client.ui.CheckBox;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.UberView;
 
+import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
+
 @Dependent
 public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableColumnPlugin> extends BaseDecisionTableColumnPage<T> {
 
-    boolean hideColumnEnabled = false;
     @Inject
     private View view;
+
     private SimplePanel content = new SimplePanel();
-    private boolean entryPointNameEnabled = false;
+
     private boolean headerEnabled = false;
+
+    private boolean hideColumnEnabled = false;
+
     private boolean logicallyInsertEnabled = false;
+
     private boolean updateEngineWithChangesEnabled = false;
 
     @Override
@@ -53,11 +59,6 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
     }
 
     @Override
-    public void isComplete(final Callback<Boolean> callback) {
-        callback.callback(false); // TODO
-    }
-
-    @Override
     public void prepareView() {
         view.init(this);
     }
@@ -67,36 +68,27 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
         return content;
     }
 
-    public boolean isReadOnly() {
-        return presenter.isReadOnly();
+    @Override
+    public void isComplete(final Callback<Boolean> callback) {
+        final boolean result = isHeaderCompleted() && isLogicallyInsertCompleted() && isUpdateEngineWithChangesCompleted();
+
+        callback.callback(result);
     }
 
-    CheckBox newHideColumnCheckBox() {
-        return DTCellValueWidgetFactory.getHideColumnIndicator(plugin().getEditingCol());
+    public AdditionalInfoPage<T> enableHideColumn() {
+        hideColumnEnabled = true;
+
+        return this;
     }
 
-    boolean canSetupHideColumn() {
-        return hideColumnEnabled && plugin().getEditingCol() != null;
+    public AdditionalInfoPage<T> enableLogicallyInsert() {
+        logicallyInsertEnabled = true;
+
+        return this;
     }
 
-    boolean canSetupHeader() {
-        return headerEnabled;
-    }
-
-    boolean canSetupEntryPoint() {
-        return entryPointNameEnabled;
-    }
-
-    boolean canSetupLogicallyInsert() {
-        return logicallyInsertEnabled && plugin().getEditingCol() != null;
-    }
-
-    boolean canSetupUpdateEngineWithChanges() {
-        return updateEngineWithChangesEnabled && plugin().getEditingCol() != null;
-    }
-
-    public AdditionalInfoPage<T> enableEntryPointName() {
-        this.entryPointNameEnabled = true;
+    public AdditionalInfoPage<T> enableUpdateEngineWithChanges() {
+        updateEngineWithChangesEnabled = true;
 
         return this;
     }
@@ -107,52 +99,58 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
         return this;
     }
 
-    public AdditionalInfoPage<T> enableHideColumn() {
-        this.hideColumnEnabled = true;
-
-        return this;
+    public String getHeader() {
+        return plugin().editingCol().getHeader();
     }
 
-    public AdditionalInfoPage<T> enableLogicallyInsert() {
-        this.logicallyInsertEnabled = true;
-
-        return this;
+    void setHeader(final String header) {
+        plugin().setHeader(header);
     }
 
-    public AdditionalInfoPage<T> enableUpdateEngineWithChanges() {
-        this.updateEngineWithChangesEnabled = true;
-
-        return this;
-    }
-
-    void setupHideColumn() {
-        if (canSetupHideColumn()) {
-            view.showHideColumn(newHideColumnCheckBox());
-        }
+    CheckBox newHideColumnCheckBox() {
+        return DTCellValueWidgetFactory.getHideColumnIndicator(plugin().editingCol());
     }
 
     void setupHeader() {
-        if (canSetupHeader()) {
+        if (headerEnabled) {
             view.showHeader();
         }
     }
 
-    void setupEntryPoint() {
-        if (canSetupEntryPoint()) {
-            view.showEntryPoint();
+    void setupHideColumn() {
+        final boolean canSetupHideColumn = hideColumnEnabled;
+
+        if (canSetupHideColumn) {
+            view.showHideColumn(newHideColumnCheckBox());
         }
     }
 
     void setupLogicallyInsert() {
-        if (canSetupLogicallyInsert()) {
+        final boolean canSetupLogicallyInsert = logicallyInsertEnabled;
+
+        if (canSetupLogicallyInsert) {
             view.showLogicallyInsert();
         }
     }
 
     void setupUpdateEngineWithChanges() {
-        if (canSetupUpdateEngineWithChanges()) {
+        final boolean canSetupUpdateEngine = updateEngineWithChangesEnabled;
+
+        if (canSetupUpdateEngine) {
             view.showUpdateEngineWithChanges();
         }
+    }
+
+    private boolean isUpdateEngineWithChangesCompleted() {
+        return true;
+    }
+
+    private boolean isLogicallyInsertCompleted() {
+        return true;
+    }
+
+    private boolean isHeaderCompleted() {
+        return headerEnabled && !nil(getHeader());
     }
 
     public interface View extends UberView<AdditionalInfoPage> {
@@ -160,8 +158,6 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
         void showHideColumn(final CheckBox checkBox);
 
         void showHeader();
-
-        void showEntryPoint();
 
         void showLogicallyInsert();
 

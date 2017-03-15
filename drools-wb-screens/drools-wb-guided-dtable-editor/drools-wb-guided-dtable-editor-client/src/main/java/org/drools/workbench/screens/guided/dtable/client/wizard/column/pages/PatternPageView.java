@@ -21,19 +21,19 @@ import javax.inject.Inject;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.TextBox;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasPatternPage;
-import org.jboss.errai.common.client.dom.Label;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.getCurrentIndexFromList;
-import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
 @Dependent
 @Templated
@@ -46,8 +46,8 @@ public class PatternPageView extends Composite implements PatternPage.View {
     private ListBox patternList;
 
     @Inject
-    @DataField("newPattern")
-    private Label newPattern;
+    @DataField("entryPointName")
+    private TextBox entryPointName;
 
     @Inject
     @DataField("createANewFactPattern")
@@ -66,7 +66,11 @@ public class PatternPageView extends Composite implements PatternPage.View {
     @Override
     public void setup() {
         setupPatternList();
-        setupNewPatternLabel();
+        setupEntryPointName();
+    }
+
+    private void setupEntryPointName() {
+        entryPointName.setText(page.getEntryPointName());
     }
 
     @EventHandler("createANewFactPattern")
@@ -75,28 +79,23 @@ public class PatternPageView extends Composite implements PatternPage.View {
     }
 
     @EventHandler("patternList")
-    public void onPluginSelected(ChangeEvent event) {
-        setEditingPattern();
-        setupNewPatternLabel();
+    public void onEditingPatternSelected(ChangeEvent event) {
+        page.setSelectedEditingPattern();
+    }
+
+    @EventHandler("entryPointName")
+    public void onEntryPointChange(KeyUpEvent event) {
+        page.setEntryPoint();
     }
 
     @Override
-    public void setNewPatternLabel(final String patternName) {
-        newPattern.setTextContent(patternName);
+    public String getSelectedValue() {
+        return patternList.getSelectedValue();
     }
 
-    private void setEditingPattern() {
-        page.setEditingPattern(patternList.getSelectedValue());
-    }
-
-    private void setupNewPatternLabel() {
-        final boolean canSetNewFactPatternLabel = page.canSetNewFactPatternLabel();
-
-        if (canSetNewFactPatternLabel) {
-            newPattern.setTextContent(page.currentPatternName());
-        }
-
-        newPattern.setHidden(!canSetNewFactPatternLabel);
+    @Override
+    public String getEntryPointName() {
+        return entryPointName.getText();
     }
 
     private void setupPatternList() {
@@ -121,17 +120,12 @@ public class PatternPageView extends Composite implements PatternPage.View {
         final String currentValue = page.currentPatternValue();
         final int currentValueIndex = getCurrentIndexFromList(currentValue,
                                                               patternList);
-        final boolean patternListContainsCurrentValue = currentValueIndex != 0;
-
-        if (!nil(currentValue) && !patternListContainsCurrentValue) {
-            newPattern.setTextContent(currentValue);
-        }
 
         patternList.setSelectedIndex(currentValueIndex);
     }
 
     private String translate(final String key,
-                             Object... args) {
+                             final Object... args) {
         return translationService.format(key,
                                          args);
     }

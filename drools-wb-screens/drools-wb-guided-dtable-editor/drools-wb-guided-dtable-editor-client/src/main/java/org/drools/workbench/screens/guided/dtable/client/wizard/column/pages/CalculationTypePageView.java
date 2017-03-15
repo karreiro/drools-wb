@@ -19,6 +19,7 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.user.client.ui.Composite;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
@@ -46,7 +47,7 @@ public class CalculationTypePageView extends Composite implements CalculationTyp
     private CalculationTypePage page;
 
     @EventHandler({"isConstraintValueTypeLiteral", "isConstraintValueTypeRetValue", "isConstraintValueTypePredicate"})
-    public void onPluginSelected(ChangeEvent event) {
+    public void onConstraintValueSelected(ChangeEvent event) {
         page.setConstraintValue(constraintValue());
     }
 
@@ -58,6 +59,10 @@ public class CalculationTypePageView extends Composite implements CalculationTyp
     }
 
     private void selectConstraintValue() {
+        isConstraintValueTypeLiteral.setChecked(false);
+        isConstraintValueTypeRetValue.setChecked(false);
+        isConstraintValueTypePredicate.setChecked(false);
+
         switch (page.getConstraintValue()) {
             case BaseSingleFieldConstraint.TYPE_LITERAL:
                 isConstraintValueTypeLiteral.setChecked(true);

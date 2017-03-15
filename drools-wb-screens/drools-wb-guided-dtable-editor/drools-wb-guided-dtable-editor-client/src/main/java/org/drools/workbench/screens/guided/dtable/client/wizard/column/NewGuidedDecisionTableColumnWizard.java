@@ -131,6 +131,8 @@ public class NewGuidedDecisionTableColumnWizard extends AbstractWizard {
 //
 //        super.start();
 
+        plugin.init(this);
+
         this.pages = new ArrayList<WizardPage>() {{
             add(summaryPage);
             addAll(plugin.getPages());
@@ -140,8 +142,6 @@ public class NewGuidedDecisionTableColumnWizard extends AbstractWizard {
             ((BaseDecisionTableColumnPage) page).init(this);
             ((BaseDecisionTableColumnPage) page).init(plugin);
         }
-
-        plugin.init(this);
 
         super.start();
     }
@@ -174,7 +174,7 @@ public class NewGuidedDecisionTableColumnWizard extends AbstractWizard {
     }
 
     private String translate(final String key,
-                             Object... args) {
+                             final Object... args) {
         return translationService.format(key,
                                          args);
     }

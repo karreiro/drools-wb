@@ -68,7 +68,7 @@ public class WorkItemPage extends BaseDecisionTableColumnPage<ConditionColumnPlu
     }
 
     public DTColumnConfig52 getEditingCol() {
-        return plugin().getEditingCol();
+        return plugin().editingCol();
     }
 
     boolean isReadOnly() {

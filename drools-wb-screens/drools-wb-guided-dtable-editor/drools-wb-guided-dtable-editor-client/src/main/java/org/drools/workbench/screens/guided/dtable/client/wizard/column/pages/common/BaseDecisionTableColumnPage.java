@@ -37,7 +37,6 @@ public abstract class BaseDecisionTableColumnPage<T extends DecisionTableColumnP
 
     // TODO {karreiro} - remove this two methods (init)
 
-    @Deprecated
     public void init(final NewGuidedDecisionTableColumnWizard wizard) {
         this.wizard = wizard;
         this.presenter = wizard.getPresenter();
@@ -45,7 +44,6 @@ public abstract class BaseDecisionTableColumnPage<T extends DecisionTableColumnP
         initialise();
     }
 
-    @Deprecated
     public void init(final T plugin) {
         this.plugin = plugin;
     }

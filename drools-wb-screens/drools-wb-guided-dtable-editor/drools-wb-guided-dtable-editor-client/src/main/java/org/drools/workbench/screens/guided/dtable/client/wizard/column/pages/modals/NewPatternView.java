@@ -20,15 +20,18 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.gwtbootstrap3.client.ui.ModalFooter;
 import org.gwtbootstrap3.client.ui.constants.ButtonType;
 import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.ui.client.local.api.IsElement;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -59,6 +62,9 @@ public class NewPatternView implements NewPatternPresenter.View,
     @DataField("negatePatternMatch")
     private CheckBox negatePatternMatch;
 
+    @Inject
+    private TranslationService translationService;
+
     private NewPatternPresenter presenter;
 
     private BaseModal modal;
@@ -83,6 +89,7 @@ public class NewPatternView implements NewPatternPresenter.View,
     public void clear() {
         factTypeList.setSelectedIndex(0);
         binding.setText("");
+        binding.setEnabled(true);
         negatePatternMatch.setValue(false);
     }
 
@@ -103,11 +110,11 @@ public class NewPatternView implements NewPatternPresenter.View,
 
     @Override
     public void showError(final String errorMessage) {
-        Window.alert(errorMessage); // TODO
+        Window.alert(errorMessage);
     }
 
     @EventHandler("binding")
-    public void onBindingChange(ChangeEvent event) {
+    public void onBindingChange(KeyUpEvent event) {
         binding.setText(binding.getText().trim());
     }
 
@@ -125,7 +132,7 @@ public class NewPatternView implements NewPatternPresenter.View,
 
     private void createModal() {
         this.modal = new CommonModalBuilder()
-                .addHeader("Create a new fact pattern")
+                .addHeader(translate(GuidedDecisionTableErraiConstants.NewPatternView_CreateANewFact))
                 .addBody(body)
                 .addFooter(footer())
                 .build();
@@ -135,10 +142,10 @@ public class NewPatternView implements NewPatternPresenter.View,
     private ModalFooter footer() {
         final GenericModalFooter footer = new GenericModalFooter();
 
-        footer.addButton("Cancel",
+        footer.addButton(translate(GuidedDecisionTableErraiConstants.NewPatternView_Cancel),
                          presenter::cancel,
                          ButtonType.DEFAULT);
-        footer.addButton("OK",
+        footer.addButton(translate(GuidedDecisionTableErraiConstants.NewPatternView_OK),
                          presenter::addPattern,
                          IconType.PLUS,
                          ButtonType.PRIMARY);
@@ -154,5 +161,11 @@ public class NewPatternView implements NewPatternPresenter.View,
 
     private void showModal() {
         modal.show();
+    }
+
+    private String translate(final String key,
+                             final Object... args) {
+        return translationService.format(key,
+                                         args);
     }
 }
