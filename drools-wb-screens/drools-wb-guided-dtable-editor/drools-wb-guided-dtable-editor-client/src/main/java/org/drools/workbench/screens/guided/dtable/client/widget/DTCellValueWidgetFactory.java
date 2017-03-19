@@ -414,11 +414,11 @@ public class DTCellValueWidgetFactory {
                                        dcv);
 
         // Wire up update handler
-        lb.setEnabled( !isReadOnly );
-        if ( !isReadOnly ) {
-            lb.addChangeHandler( new ChangeHandler() {
+        lb.setEnabled(!isReadOnly);
+        if (!isReadOnly) {
+            lb.addChangeHandler(new ChangeHandler() {
 
-                public void onChange( ChangeEvent event ) {
+                public void onChange(ChangeEvent event) {
                     String value = null;
                     if (lb.isMultipleSelect()) {
                         for (int i = 0; i < lb.getItemCount(); i++) {
