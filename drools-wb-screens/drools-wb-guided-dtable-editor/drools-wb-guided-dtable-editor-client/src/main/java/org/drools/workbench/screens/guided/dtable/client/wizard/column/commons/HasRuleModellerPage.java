@@ -17,6 +17,7 @@
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.commons;
 
 import org.drools.workbench.models.datamodel.rule.RuleModel;
+import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.screens.guided.rule.client.editor.RuleModellerConfiguration;
 
 public interface HasRuleModellerPage {
@@ -28,4 +29,6 @@ public interface HasRuleModellerPage {
     void setRuleModellerPageAsCompleted();
 
     Boolean isRuleModellerPageCompleted();
+
+    GuidedDecisionTable52.TableFormat tableFormat();
 }

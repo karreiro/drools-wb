@@ -21,9 +21,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Window;
 import org.drools.workbench.models.datamodel.oracle.DataType;
 import org.drools.workbench.models.datamodel.rule.IAction;
@@ -33,7 +35,6 @@ import org.drools.workbench.models.datamodel.rule.visitors.RuleModelVisitor;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLActionColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLActionVariableColumn;
-import org.drools.workbench.models.guided.dtable.shared.model.BRLColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
@@ -48,13 +49,15 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.Rul
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
 import org.drools.workbench.screens.guided.rule.client.editor.RuleModellerConfiguration;
+import org.drools.workbench.screens.guided.rule.client.editor.events.TemplateVariablesChangedEvent;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
 @Dependent
 public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin implements HasRuleModellerPage,
-                                                                                    HasAdditionalInfoPage {
+                                                                                    HasAdditionalInfoPage,
+                                                                                    TemplateVariablesChangedEvent.Handler {
 
     @Inject
     private RuleModellerPage ruleModellerPage;
@@ -62,9 +65,13 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     @Inject
     private AdditionalInfoPage<BRLActionColumnPlugin> additionalInfoPage;
 
-    private BRLColumn<IAction, BRLActionVariableColumn> editingCol;
+    private BRLActionColumn editingCol;
 
     private Boolean ruleModellerPageCompleted = Boolean.FALSE;
+
+    private HandlerRegistration registration;
+
+    private RuleModel ruleModel = null;
 
     @Override
     public String getTitle() {
@@ -84,6 +91,15 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         super.init(wizard);
 
         editingCol = newBRLActionColumn();
+        registration = presenter.getEventBus().addHandler(TemplateVariablesChangedEvent.TYPE,
+                                                          this);
+    }
+
+    @Override
+    public void onClose() {
+        super.onClose();
+
+        registration.removeHandler();
     }
 
     @Override
@@ -102,8 +118,9 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         //Ensure variables reflect (name) changes made in RuleModeller
         getDefinedVariables(this.getRuleModel());
 
-        this.editingCol.setDefinition(Arrays.asList(this.getRuleModel().rhs));
-        presenter.appendColumn((BRLActionColumn) this.editingCol);
+        editingCol.setDefinition(Arrays.asList(getRuleModel().rhs));
+
+        presenter.appendColumn(editingCol);
 
         return true;
     }
@@ -192,6 +209,12 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     @Override
     public RuleModel getRuleModel() {
+        ruleModel = Optional.ofNullable(ruleModel).orElse(newRuleModel());
+
+        return ruleModel;
+    }
+
+    private RuleModel newRuleModel() {
         final BRLRuleModel ruleModel = new BRLRuleModel(presenter.getModel());
         final List<IAction> definition = editingCol.getDefinition();
 
@@ -242,7 +265,15 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         }
     }
 
+    @Override
     public GuidedDecisionTable52.TableFormat tableFormat() {
         return presenter.getModel().getTableFormat();
+    }
+
+    @Override
+    public void onTemplateVariablesChanged(TemplateVariablesChangedEvent event) {
+        if (event.getSource() == getRuleModel()) {
+            getDefinedVariables(event.getModel());
+        }
     }
 }

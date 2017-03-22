@@ -55,6 +55,14 @@ public abstract class BaseDecisionTableColumnPlugin implements DecisionTableColu
         wizard.setFinishCommand(this::generateColumn);
     }
 
+    private void setupCloseCommand() {
+        wizard.setOnCloseCallback(this::onClose);
+    }
+
+    public void onClose() {
+        // do nothing
+    }
+
     public GuidedDecisionTableView.Presenter getPresenter() {
         return presenter;
     }

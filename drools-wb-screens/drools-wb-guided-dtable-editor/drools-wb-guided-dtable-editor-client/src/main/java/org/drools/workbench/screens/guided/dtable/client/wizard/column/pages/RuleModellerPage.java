@@ -23,12 +23,14 @@ import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.models.datamodel.rule.RuleModel;
+import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasRuleModellerPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.drools.workbench.screens.guided.rule.client.editor.RuleModeller;
 import org.drools.workbench.screens.guided.rule.client.editor.RuleModellerConfiguration;
+import org.drools.workbench.screens.guided.rule.client.editor.RuleModellerWidgetFactory;
 import org.drools.workbench.screens.guided.template.client.editor.TemplateModellerWidgetFactory;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.client.callbacks.Callback;
@@ -92,7 +94,7 @@ public class RuleModellerPage<T extends HasRuleModellerPage & DecisionTableColum
     }
 
     private boolean isReadOnly() {
-        return false;
+        return presenter.isReadOnly();
     }
 
     private EventBus eventBus() {
@@ -111,8 +113,17 @@ public class RuleModellerPage<T extends HasRuleModellerPage & DecisionTableColum
         return plugin().getRuleModellerConfiguration();
     }
 
-    private TemplateModellerWidgetFactory widgetFactory() {
-        return new TemplateModellerWidgetFactory();
+    private RuleModellerWidgetFactory widgetFactory() {
+        final GuidedDecisionTable52.TableFormat tableFormat = plugin().tableFormat();
+
+        switch (tableFormat) {
+            case EXTENDED_ENTRY:
+                return new TemplateModellerWidgetFactory();
+            case LIMITED_ENTRY:
+                return new RuleModellerWidgetFactory();
+            default:
+                throw new UnsupportedOperationException("Unsupported table format: " + tableFormat);
+        }
     }
 
     private void markAsViewed() {

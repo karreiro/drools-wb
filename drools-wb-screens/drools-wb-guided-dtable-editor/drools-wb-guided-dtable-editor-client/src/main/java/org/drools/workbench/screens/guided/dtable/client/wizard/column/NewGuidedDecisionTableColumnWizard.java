@@ -33,6 +33,7 @@ import org.uberfire.client.callbacks.Callback;
 import org.uberfire.ext.widgets.core.client.wizards.AbstractWizard;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 import org.uberfire.ext.widgets.core.client.wizards.WizardView;
+import org.uberfire.mvp.Command;
 
 /**
  * Wizard for creating a Guided Decision Table
@@ -54,6 +55,9 @@ public class NewGuidedDecisionTableColumnWizard extends AbstractWizard {
     private TranslationService translationService;
 
     private GuidedDecisionTableView.Presenter presenter;
+
+    private Command onCloseCallback = () -> {
+    };
 
     @Override
     public String getTitle() {
@@ -153,6 +157,13 @@ public class NewGuidedDecisionTableColumnWizard extends AbstractWizard {
         }
     }
 
+    @Override
+    public void close() {
+        onCloseCallback.execute();
+
+        super.close();
+    }
+
     private WizardView getView() {
         return view;
     }
@@ -167,6 +178,10 @@ public class NewGuidedDecisionTableColumnWizard extends AbstractWizard {
 
     public void setFinishCommand(final Supplier<Boolean> finishCommand) {
         this.finishCommand = finishCommand;
+    }
+
+    public void setOnCloseCallback(final Command onCloseCallback) {
+        this.onCloseCallback = onCloseCallback;
     }
 
     public GuidedDecisionTableView.Presenter getPresenter() {
