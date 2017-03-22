@@ -25,6 +25,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.ActionRetractFactC
 import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryActionRetractFactCol52;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
@@ -112,8 +113,6 @@ public class ActionRetractFactPluginTest {
 
     @Test
     public void testGenerateColumnWhenItIsNotValid() throws Exception {
-        final ActionCol52 expectedColumn = (ActionCol52) plugin.editingCol();
-
         doReturn(false).when(plugin).isValid();
 
         final Boolean result = plugin.generateColumn();
@@ -220,6 +219,51 @@ public class ActionRetractFactPluginTest {
 
         verify(plugin).setPatternToDeletePageCompleted(Boolean.TRUE);
         verify(plugin).fireChangeEvent(patternToDeletePage);
+    }
+
+    @Test
+    public void testIsValidWhenHeaderIsNull() throws Exception {
+        final String errorMessage = "YouMustEnterAColumnHeaderValueDescription";
+
+        doReturn(errorMessage).when(translationService).format(GuidedDecisionTableErraiConstants.ActionRetractFactPlugin_YouMustEnterAColumnHeaderValueDescription);
+        doReturn(null).when(editingCol).getHeader();
+        doReturn(editingCol).when(plugin).editingCol();
+
+        final boolean success = plugin.isValid();
+
+        assertFalse(success);
+        verify(plugin).showError(errorMessage);
+    }
+
+    @Test
+    public void testIsValidWhenHeaderNotUnique() throws Exception {
+        final String errorMessage = "ThatColumnNameIsAlreadyInUsePleasePickAnother";
+        final String header = "Header";
+
+        doReturn(errorMessage).when(translationService).format(GuidedDecisionTableErraiConstants.ActionRetractFactPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother);
+        doReturn(header).when(editingCol).getHeader();
+        doReturn(editingCol).when(plugin).editingCol();
+        doReturn(false).when(plugin).unique(header);
+
+        final boolean success = plugin.isValid();
+
+        assertFalse(success);
+        verify(plugin).showError(errorMessage);
+    }
+
+    @Test
+    public void testIsValidWhenItIsValid() throws Exception {
+        final String header = "Header";
+
+        doReturn(header).when(editingCol).getHeader();
+        doReturn(editingCol).when(plugin).editingCol();
+        doReturn(true).when(plugin).unique(header);
+
+        final boolean success = plugin.isValid();
+
+        assertTrue(success);
+        verify(plugin,
+               never()).showError(any());
     }
 
     private ActionCol52 actionCol52(final String header) {

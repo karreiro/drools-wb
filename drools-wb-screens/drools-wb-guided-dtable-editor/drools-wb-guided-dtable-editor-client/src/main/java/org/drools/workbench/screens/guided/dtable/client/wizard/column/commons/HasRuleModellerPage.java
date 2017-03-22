@@ -24,4 +24,8 @@ public interface HasRuleModellerPage {
     RuleModel getRuleModel();
 
     RuleModellerConfiguration getRuleModellerConfiguration();
+
+    void setRuleModellerPageAsCompleted();
+
+    Boolean isRuleModellerPageCompleted();
 }

@@ -226,4 +226,10 @@ public class GuidedDecisionTableErraiConstants {
 
     @TranslationKey(defaultValue = "")
     public static final String PatternToDeletePageView_None = "PatternToDeletePageView.None";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ActionWorkItemPlugin_YouMustEnterAColumnHeaderValueDescription = "ActionWorkItemPlugin.YouMustEnterAColumnHeaderValueDescription";
+
+    @TranslationKey(defaultValue = "")
+    public static final String ActionWorkItemPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother = "ActionWorkItemPlugin.ThatColumnNameIsAlreadyInUsePleasePickAnother";
 }

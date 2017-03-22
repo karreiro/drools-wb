@@ -19,6 +19,7 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
@@ -75,32 +76,24 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
         callback.callback(result);
     }
 
-    public AdditionalInfoPage<T> enableHideColumn() {
+    public void enableHideColumn() {
         hideColumnEnabled = true;
-
-        return this;
     }
 
-    public AdditionalInfoPage<T> enableLogicallyInsert() {
+    public void enableLogicallyInsert() {
         logicallyInsertEnabled = true;
-
-        return this;
     }
 
-    public AdditionalInfoPage<T> enableUpdateEngineWithChanges() {
+    public void enableUpdateEngineWithChanges() {
         updateEngineWithChangesEnabled = true;
-
-        return this;
     }
 
-    public AdditionalInfoPage<T> enableHeader() {
-        this.headerEnabled = true;
-
-        return this;
+    public void enableHeader() {
+        headerEnabled = true;
     }
 
     public String getHeader() {
-        return plugin().editingCol().getHeader();
+        return plugin().getHeader();
     }
 
     void setHeader(final String header) {
@@ -118,25 +111,19 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
     }
 
     void setupHideColumn() {
-        final boolean canSetupHideColumn = hideColumnEnabled;
-
-        if (canSetupHideColumn) {
+        if (hideColumnEnabled) {
             view.showHideColumn(newHideColumnCheckBox());
         }
     }
 
     void setupLogicallyInsert() {
-        final boolean canSetupLogicallyInsert = logicallyInsertEnabled;
-
-        if (canSetupLogicallyInsert) {
+        if (logicallyInsertEnabled) {
             view.showLogicallyInsert();
         }
     }
 
     void setupUpdateEngineWithChanges() {
-        final boolean canSetupUpdateEngine = updateEngineWithChangesEnabled;
-
-        if (canSetupUpdateEngine) {
+        if (updateEngineWithChangesEnabled) {
             view.showUpdateEngineWithChanges();
         }
     }
@@ -151,6 +138,14 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
 
     private boolean isHeaderCompleted() {
         return headerEnabled && !nil(getHeader());
+    }
+
+    void setInsertLogical(final Boolean value) {
+        plugin().setInsertLogical(value);
+    }
+
+    public void setUpdate(final Boolean value) {
+        plugin().setUpdate(value);
     }
 
     public interface View extends UberView<AdditionalInfoPage> {

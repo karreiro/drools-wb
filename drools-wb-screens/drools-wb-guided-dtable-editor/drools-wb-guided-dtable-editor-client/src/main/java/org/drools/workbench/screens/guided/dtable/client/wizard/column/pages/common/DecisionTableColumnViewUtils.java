@@ -25,7 +25,6 @@ public class DecisionTableColumnViewUtils {
 
     public static int getCurrentIndexFromList(final String currentValue,
                                               final ListBox list) {
-
         for (int index = 0; index < list.getItemCount(); index++) {
             final String value = list.getValue(index);
 

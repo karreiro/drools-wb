@@ -84,8 +84,7 @@ public class AdditionalInfoPageTest {
 
     @Test
     public void testIsCompleteWhenHeaderIsEnabledAndCompleted() throws Exception {
-        when(editingCol.getHeader()).thenReturn("header");
-        when(plugin.editingCol()).thenReturn(editingCol);
+        when(plugin.getHeader()).thenReturn("header");
 
         page.enableHeader();
 
@@ -94,12 +93,9 @@ public class AdditionalInfoPageTest {
 
     @Test
     public void testGetHeader() throws Exception {
-        when(plugin.editingCol()).thenReturn(editingCol);
-
         page.getHeader();
 
-        verify(plugin).editingCol();
-        verify(editingCol).getHeader();
+        verify(plugin).getHeader();
     }
 
     @Test

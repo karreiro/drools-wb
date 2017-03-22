@@ -23,5 +23,11 @@ public interface HasAdditionalInfoPage {
 
     DTColumnConfig52 editingCol();
 
+    String getHeader();
+
     void setHeader(final String header);
+
+    void setInsertLogical(final Boolean value);
+
+    void setUpdate(final Boolean value);
 }

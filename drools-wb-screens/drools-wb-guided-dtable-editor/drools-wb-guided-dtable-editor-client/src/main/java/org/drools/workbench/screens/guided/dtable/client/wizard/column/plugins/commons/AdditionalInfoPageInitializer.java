@@ -17,7 +17,7 @@
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons;
 
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionInsertFactPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionSetFactPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionRetractFactPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionWorkItemPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionWorkItemSetFieldPlugin;
@@ -36,8 +36,8 @@ public class AdditionalInfoPageInitializer {
         return page;
     }
 
-    public static AdditionalInfoPage<ActionInsertFactPlugin> init(final AdditionalInfoPage<ActionInsertFactPlugin> page,
-                                                                  final ActionInsertFactPlugin plugin) {
+    public static AdditionalInfoPage<ActionSetFactPlugin> init(final AdditionalInfoPage<ActionSetFactPlugin> page,
+                                                               final ActionSetFactPlugin plugin) {
         page.init(plugin);
         page.enableHeader();
         page.enableHideColumn();

@@ -20,20 +20,20 @@ import java.util.Set;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.models.datamodel.workitems.PortableWorkDefinition;
-import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
+import org.drools.workbench.models.guided.dtable.shared.model.ActionWorkItemCol52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasWorkItemPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.kie.workbench.common.widgets.client.workitems.WorkItemParametersWidget;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.UberView;
 
 @Dependent
-public class WorkItemPage extends BaseDecisionTableColumnPage<ConditionColumnPlugin> {
+public class WorkItemPage<T extends HasWorkItemPage & DecisionTableColumnPlugin> extends BaseDecisionTableColumnPage<T> {
 
     @Inject
     private View view;
@@ -47,7 +47,7 @@ public class WorkItemPage extends BaseDecisionTableColumnPage<ConditionColumnPlu
 
     @Override
     public void isComplete(final Callback<Boolean> callback) {
-        callback.callback(false);
+        callback.callback(plugin().isWorkItemSet());
     }
 
     @Override
@@ -65,10 +65,6 @@ public class WorkItemPage extends BaseDecisionTableColumnPage<ConditionColumnPlu
         return content;
     }
 
-    public DTColumnConfig52 getEditingCol() {
-        return plugin().editingCol();
-    }
-
     Set<PortableWorkDefinition> getWorkItems() {
         return presenter.getWorkItemDefinitions();
     }
@@ -77,21 +73,56 @@ public class WorkItemPage extends BaseDecisionTableColumnPage<ConditionColumnPlu
         return getWorkItems().size() > 0;
     }
 
+    void selectWorkItem() {
+        final String selectedWorkItem = view.getSelectedWorkItem();
+
+        plugin().setWorkItem(selectedWorkItem);
+
+        showParameters();
+    }
+
     void showParameters() {
-        view.showParameters(parametersWidget());
+        final boolean hasWorkItemDefinition = workItemDefinition() != null;
+
+        if (hasWorkItemDefinition) {
+            view.showParameters(parametersWidget());
+        } else {
+            view.hideParameters();
+        }
+    }
+
+    String currentWorkItem() {
+        final PortableWorkDefinition workItemDefinition = editingCol().getWorkItemDefinition();
+
+        if (workItemDefinition != null) {
+            return workItemDefinition.getName();
+        } else {
+            return "";
+        }
     }
 
     private WorkItemParametersWidget parametersWidget() {
-        return new WorkItemParametersWidget(presenter,
-                                            false);
+        final WorkItemParametersWidget parametersWidget = new WorkItemParametersWidget(presenter,
+                                                                                       false);
+        parametersWidget.setParameters(workItemDefinition().getParameters());
+
+        return parametersWidget;
     }
 
-    boolean isReadOnly() {
-        return presenter.isReadOnly();
+    private PortableWorkDefinition workItemDefinition() {
+        return editingCol().getWorkItemDefinition();
+    }
+
+    private ActionWorkItemCol52 editingCol() {
+        return plugin().editingCol();
     }
 
     public interface View extends UberView<WorkItemPage> {
 
         void showParameters(final WorkItemParametersWidget parametersWidget);
+
+        void hideParameters();
+
+        String getSelectedWorkItem();
     }
 }

@@ -19,6 +19,7 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.user.client.ui.Composite;
 import org.gwtbootstrap3.client.ui.CheckBox;
@@ -62,11 +63,25 @@ public class AdditionalInfoPageView extends Composite implements AdditionalInfoP
     @DataField("updateEngineWithChanges")
     private CheckBox updateEngineWithChanges;
 
+    @Inject
+    @DataField("logicallyInsert")
+    private CheckBox logicallyInsert;
+
     private AdditionalInfoPage page;
 
     @EventHandler("header")
-    public void onSelectHeader(KeyUpEvent event) {
+    public void onSelectHeader(final KeyUpEvent event) {
         page.setHeader(header.getText());
+    }
+
+    @EventHandler("logicallyInsert")
+    public void onSelectLogicallyInsert(final ChangeEvent event) {
+        page.setInsertLogical(logicallyInsert.getValue());
+    }
+
+    @EventHandler("logicallyInsert")
+    public void onSelectUpdateEngineWithChanges(final ChangeEvent event) {
+        page.setUpdate(updateEngineWithChanges.getValue());
     }
 
     @Override

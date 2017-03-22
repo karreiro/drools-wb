@@ -20,38 +20,63 @@ import java.util.function.Supplier;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import org.gwtbootstrap3.client.ui.TextBox;
-import org.gwtbootstrap3.client.ui.html.Div;
+import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
+
+import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.addWidgetToContainer;
 
 @Dependent
 @Templated
 public class ValueOptionsPageView extends Composite implements ValueOptionsPage.View {
 
     @Inject
+    @DataField("valueListGroupContainer")
+    private Div valueListGroupContainer;
+
+    @Inject
+    @DataField("cepWindowOperatorsGroupContainer")
+    private Div cepWindowOperatorsGroupContainer;
+
+    @Inject
+    @DataField("defaultValueGroupContainer")
+    private Div defaultValueGroupContainer;
+
+    @Inject
+    @DataField("limitedValueGroupContainer")
+    private Div limitedValueGroupContainer;
+
+    @Inject
+    @DataField("bindingGroupContainer")
+    private Div bindingGroupContainer;
+
+    @Inject
     @DataField("valueList")
     private TextBox valueList;
 
+    @Inject
     @DataField("cepWindowOperatorsContainer")
-    private Div cepWindowOperatorsContainer = new Div();
+    private Div cepWindowOperatorsContainer;
 
+    @Inject
     @DataField("defaultValueContainer")
-    private Div defaultValueContainer = new Div();
+    private Div defaultValueContainer;
 
+    @Inject
     @DataField("limitedValueContainer")
-    private Div limitedValueContainer = new Div();
+    private Div limitedValueContainer;
 
+    @Inject
     @DataField("bindingContainer")
-    private Div bindingContainer = new Div();
+    private Div bindingContainer;
 
-    private ValueOptionsPage page;
+    private ValueOptionsPage<?> page;
 
     @Override
     public void init(final ValueOptionsPage page) {
@@ -76,6 +101,11 @@ public class ValueOptionsPageView extends Composite implements ValueOptionsPage.
     }
 
     private void setupValueList() {
+        if (!page.isValueListEnabled()) {
+            valueListGroupContainer.setHidden(true);
+            return;
+        }
+
         if (!page.canSetupValueList()) {
             disableElement(valueList.getElement());
         }
@@ -84,24 +114,44 @@ public class ValueOptionsPageView extends Composite implements ValueOptionsPage.
     }
 
     private void setupDefaultValue() {
+        if (!page.isDefaultValueEnabled()) {
+            defaultValueGroupContainer.setHidden(true);
+            return;
+        }
+
         setupElement(page.canSetupDefaultValue(),
                      page::newDefaultValueWidget,
                      defaultValueContainer);
     }
 
     private void setupLimitedValue() {
+        if (!page.isLimitedValueEnabled()) {
+            limitedValueGroupContainer.setHidden(true);
+            return;
+        }
+
         setupElement(page.canSetupLimitedValue(),
                      page::newLimitedValueWidget,
                      limitedValueContainer);
     }
 
     private void setupBinding() {
+        if (!page.isBindingEnabled()) {
+            bindingGroupContainer.setHidden(true);
+            return;
+        }
+
         setupElement(page.canSetupBinding(),
                      page::newBindingTextBox,
                      bindingContainer);
     }
 
     private void setupCepOperators() {
+        if (!page.isCepOperatorsEnabled()) {
+            cepWindowOperatorsGroupContainer.setHidden(true);
+            return;
+        }
+
         page.isFactTypeAnEvent((isEvent) -> {
             setupElement(page.canSetupCepOperators() && isEvent,
                          page::newCEPWindowOperatorsDropdown,
@@ -122,12 +172,6 @@ public class ValueOptionsPageView extends Composite implements ValueOptionsPage.
 
         addWidgetToContainer(widget,
                              container);
-    }
-
-    private void addWidgetToContainer(final IsWidget widget,
-                                      final Div container) {
-        container.clear();
-        container.add(widget);
     }
 
     private TextBox disabledTextBox() {

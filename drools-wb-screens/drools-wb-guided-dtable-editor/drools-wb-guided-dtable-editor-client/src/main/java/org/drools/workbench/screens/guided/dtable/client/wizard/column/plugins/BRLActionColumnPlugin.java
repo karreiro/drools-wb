@@ -17,18 +17,30 @@
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.user.client.Window;
+import org.drools.workbench.models.datamodel.oracle.DataType;
 import org.drools.workbench.models.datamodel.rule.IAction;
+import org.drools.workbench.models.datamodel.rule.InterpolationVariable;
 import org.drools.workbench.models.datamodel.rule.RuleModel;
+import org.drools.workbench.models.datamodel.rule.visitors.RuleModelVisitor;
+import org.drools.workbench.models.guided.dtable.shared.model.ActionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLActionColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLActionVariableColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
+import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
+import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryBRLActionColumn;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasRuleModellerPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
@@ -38,17 +50,21 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.c
 import org.drools.workbench.screens.guided.rule.client.editor.RuleModellerConfiguration;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
+import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
+
 @Dependent
 public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin implements HasRuleModellerPage,
                                                                                     HasAdditionalInfoPage {
-
-    private BRLColumn<IAction, BRLActionVariableColumn> editingCol = new BRLActionColumn();
 
     @Inject
     private RuleModellerPage ruleModellerPage;
 
     @Inject
-    private AdditionalInfoPage additionalInfoPage;
+    private AdditionalInfoPage<BRLActionColumnPlugin> additionalInfoPage;
+
+    private BRLColumn<IAction, BRLActionVariableColumn> editingCol;
+
+    private Boolean ruleModellerPageCompleted = Boolean.FALSE;
 
     @Override
     public String getTitle() {
@@ -63,14 +79,88 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         }};
     }
 
-    private AdditionalInfoPage additionalInfoPage() {
-        return AdditionalInfoPageInitializer.init(additionalInfoPage,
-                                                  this);
+    @Override
+    public void init(final NewGuidedDecisionTableColumnWizard wizard) {
+        super.init(wizard);
+
+        editingCol = newBRLActionColumn();
     }
 
     @Override
     public Boolean generateColumn() {
+
+        if (nil(editingCol.getHeader())) {
+            Window.alert(GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnHeaderValueDescription());
+            return false;
+        }
+
+        if (!isHeaderUnique(editingCol.getHeader())) {
+            Window.alert(GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother());
+            return false;
+        }
+
+        //Ensure variables reflect (name) changes made in RuleModeller
+        getDefinedVariables(this.getRuleModel());
+
+        this.editingCol.setDefinition(Arrays.asList(this.getRuleModel().rhs));
+        presenter.appendColumn((BRLActionColumn) this.editingCol);
+
         return true;
+    }
+
+    private boolean isHeaderUnique(String header) {
+        for (ActionCol52 o : presenter.getModel().getActionCols()) {
+            if (o.getHeader().equals(header)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean getDefinedVariables(RuleModel ruleModel) {
+        Map<InterpolationVariable, Integer> ivs = new HashMap<InterpolationVariable, Integer>();
+        RuleModelVisitor rmv = new RuleModelVisitor(ivs);
+        rmv.visit(ruleModel);
+
+        //Update column and UI
+        editingCol.setChildColumns(convertInterpolationVariables(ivs));
+
+        return ivs.size() > 0;
+    }
+
+    private List<BRLActionVariableColumn> convertInterpolationVariables(Map<InterpolationVariable, Integer> ivs) {
+
+        //If there are no variables add a boolean column to specify whether the fragment should apply
+        if (ivs.isEmpty()) {
+            BRLActionVariableColumn variable = new BRLActionVariableColumn("",
+                                                                           DataType.TYPE_BOOLEAN);
+            variable.setHeader(editingCol.getHeader());
+            variable.setHideColumn(editingCol.isHideColumn());
+            List<BRLActionVariableColumn> variables = new ArrayList<BRLActionVariableColumn>();
+            variables.add(variable);
+            return variables;
+        }
+
+        //Convert to columns for use in the Decision Table
+        BRLActionVariableColumn[] variables = new BRLActionVariableColumn[ivs.size()];
+        for (Map.Entry<InterpolationVariable, Integer> me : ivs.entrySet()) {
+            InterpolationVariable iv = me.getKey();
+            int index = me.getValue();
+            BRLActionVariableColumn variable = new BRLActionVariableColumn(iv.getVarName(),
+                                                                           iv.getDataType(),
+                                                                           iv.getFactType(),
+                                                                           iv.getFactField());
+            variable.setHeader(editingCol.getHeader());
+            variable.setHideColumn(editingCol.isHideColumn());
+            variables[index] = variable;
+        }
+
+        //Convert the array into a mutable list (Arrays.toList provides an immutable list)
+        List<BRLActionVariableColumn> variableList = new ArrayList<BRLActionVariableColumn>();
+        for (BRLActionVariableColumn variable : variables) {
+            variableList.add(variable);
+        }
+        return variableList;
     }
 
     @Override
@@ -79,7 +169,25 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     }
 
     @Override
-    public void setHeader(String header) {
+    public String getHeader() {
+        return editingCol.getHeader();
+    }
+
+    @Override
+    public void setHeader(final String header) {
+        editingCol.setHeader(header);
+
+        fireChangeEvent(additionalInfoPage);
+    }
+
+    @Override
+    public void setInsertLogical(final Boolean value) {
+        // empty
+    }
+
+    @Override
+    public void setUpdate(final Boolean value) {
+        // empty
     }
 
     @Override
@@ -98,5 +206,43 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
                                              false,
                                              true,
                                              true);
+    }
+
+    @Override
+    public void setRuleModellerPageAsCompleted() {
+        if (!isRuleModellerPageCompleted()) {
+            setRuleModellerPageCompleted();
+
+            fireChangeEvent(ruleModellerPage);
+        }
+    }
+
+    private void setRuleModellerPageCompleted() {
+        this.ruleModellerPageCompleted = Boolean.TRUE;
+    }
+
+    @Override
+    public Boolean isRuleModellerPageCompleted() {
+        return ruleModellerPageCompleted;
+    }
+
+    private AdditionalInfoPage additionalInfoPage() {
+        return AdditionalInfoPageInitializer.init(additionalInfoPage,
+                                                  this);
+    }
+
+    private BRLActionColumn newBRLActionColumn() {
+        switch (tableFormat()) {
+            case EXTENDED_ENTRY:
+                return new BRLActionColumn();
+            case LIMITED_ENTRY:
+                return new LimitedEntryBRLActionColumn();
+            default:
+                throw new UnsupportedOperationException("Unsupported table format: " + tableFormat());
+        }
+    }
+
+    public GuidedDecisionTable52.TableFormat tableFormat() {
+        return presenter.getModel().getTableFormat();
     }
 }

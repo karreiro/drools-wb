@@ -26,6 +26,7 @@ import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
@@ -79,6 +80,26 @@ public class PatternPage<T extends HasPatternPage & DecisionTableColumnPlugin> e
         return presenter;
     }
 
+    public void setEditingPattern(final Pattern52 pattern52) {
+        if (pattern52 != null) {
+            pattern52.setEntryPointName(view.getEntryPointName());
+        }
+
+        plugin().setEditingPattern(pattern52);
+    }
+
+    public void disableEntryPoint() {
+        view.disableEntryPoint();
+    }
+
+    void setSelectedEditingPattern() {
+        final String selectedValue = view.getSelectedValue();
+        final String[] metadata = selectedValue.split("\\s");
+        final Pattern52 editingPattern = extractEditingPattern(metadata);
+
+        setEditingPattern(editingPattern);
+    }
+
     void forEachPattern(final BiConsumer<String, String> biConsumer) {
         final Set<String> addedBounds = new HashSet<>();
 
@@ -94,22 +115,6 @@ public class PatternPage<T extends HasPatternPage & DecisionTableColumnPlugin> e
                         addedBounds.add(pattern52.getBoundName());
                     }
                 });
-    }
-
-    void setSelectedEditingPattern() {
-        final String selectedValue = view.getSelectedValue();
-        final String[] metadata = selectedValue.split("\\s");
-        final Pattern52 editingPattern = extractEditingPattern(metadata);
-
-        setEditingPattern(editingPattern);
-    }
-
-    public void setEditingPattern(final Pattern52 pattern52) {
-        if (pattern52 != null) {
-            pattern52.setEntryPointName(view.getEntryPointName());
-        }
-
-        plugin().setEditingPattern(pattern52);
     }
 
     Pattern52 extractEditingPattern(final String[] metadata) {
@@ -128,7 +133,7 @@ public class PatternPage<T extends HasPatternPage & DecisionTableColumnPlugin> e
                     .filter(Pattern52::isNegated)
                     .filter(p -> p.getFactType().equals(factType))
                     .findFirst()
-                    .orElseThrow(IllegalStateException::new); // This should never be thrown
+                    .orElseThrow(IllegalStateException::new);
         }
     }
 
@@ -185,5 +190,7 @@ public class PatternPage<T extends HasPatternPage & DecisionTableColumnPlugin> e
         String getSelectedValue();
 
         String getEntryPointName();
+
+        void disableEntryPoint();
     }
 }

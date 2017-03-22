@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.models.datamodel.oracle.FieldAccessorsAndMutators;
@@ -80,9 +81,13 @@ public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> exten
             final AsyncPackageDataModelOracle oracle = presenter.getDataModelOracle();
 
             oracle.getFieldCompletions(factType(),
-                                       FieldAccessorsAndMutators.ACCESSOR,
+                                       getAccessor(),
                                        fieldsCallback(consumer));
         }
+    }
+
+    public FieldAccessorsAndMutators getAccessor() {
+        return plugin().getAccessor();
     }
 
     Callback<ModelField[]> fieldsCallback(Consumer<String> consumer) {
@@ -91,7 +96,7 @@ public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> exten
         return modelFields -> {
             final List<String> fieldNames = mapName(modelFields);
 
-            if (isConstraintRetValue()) {
+            if (filterEnumFields()) {
                 fieldNames
                         .forEach(consumer);
             } else {
@@ -108,8 +113,8 @@ public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> exten
         return plugin().constraintValue() == BaseSingleFieldConstraint.TYPE_PREDICATE;
     }
 
-    boolean isConstraintRetValue() {
-        return plugin().constraintValue() == BaseSingleFieldConstraint.TYPE_RET_VALUE;
+    boolean filterEnumFields() {
+        return plugin().filterEnumFields();
     }
 
     boolean hasEditingPattern() {
@@ -128,7 +133,10 @@ public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> exten
     }
 
     public String getFactField() {
-        return plugin().getFactField();
+
+        String factField = plugin().getFactField();
+        GWT.log("--->>" + factField);
+        return factField;
     }
 
     public interface View extends UberView<FieldPage> {

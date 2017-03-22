@@ -31,6 +31,7 @@ import org.jboss.errai.ui.shared.api.annotations.Templated;
 import org.kie.workbench.common.widgets.client.workitems.WorkItemParametersWidget;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.addWidgetToContainer;
+import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.getCurrentIndexFromList;
 
 @Dependent
 @Templated
@@ -47,11 +48,16 @@ public class WorkItemPageView extends Composite implements WorkItemPage.View {
     @DataField("workItemParametersContainer")
     private Div workItemParametersContainer;
 
-    private WorkItemPage page;
+    private WorkItemPage<?> page;
 
     @EventHandler("workItems")
     public void onSelectWorkItem(final ChangeEvent event) {
-        page.showParameters();
+        page.selectWorkItem();
+    }
+
+    @Override
+    public String getSelectedWorkItem() {
+        return workItems.getSelectedValue();
     }
 
     @Override
@@ -59,7 +65,6 @@ public class WorkItemPageView extends Composite implements WorkItemPage.View {
         this.page = page;
 
         setupWorkItemsList();
-        setupWorkItemParameters();
     }
 
     @Override
@@ -70,7 +75,8 @@ public class WorkItemPageView extends Composite implements WorkItemPage.View {
         workItemParametersContainer.setHidden(false);
     }
 
-    private void setupWorkItemParameters() {
+    @Override
+    public void hideParameters() {
         workItemParametersContainer.setHidden(true);
     }
 
@@ -90,11 +96,24 @@ public class WorkItemPageView extends Composite implements WorkItemPage.View {
 
     private void setupWorkItemList() {
         workItems.clear();
-        workItems.setEnabled(!page.isReadOnly());
-        workItems.addItem(translate(GuidedDecisionTableErraiConstants.WorkItemPageView_Choose));
+        workItems.addItem(translate(GuidedDecisionTableErraiConstants.WorkItemPageView_Choose), "");
 
-        page.getWorkItems().forEach(wid -> workItems.addItem(wid.getDisplayName(),
-                                                             wid.getName()));
+        page.getWorkItems().forEach(wid -> this.workItems.addItem(wid.getDisplayName(),
+                                                                  wid.getName()));
+        selectCurrentWorkItem();
+        showParameterForTheCurrentWorkItem();
+    }
+
+    private void showParameterForTheCurrentWorkItem() {
+        page.showParameters();
+    }
+
+    private void selectCurrentWorkItem() {
+        final String workItem = page.currentWorkItem();
+        final int currentValueIndex = getCurrentIndexFromList(workItem,
+                                                              workItems);
+
+        workItems.setSelectedIndex(currentValueIndex);
     }
 
     private String translate(final String key,

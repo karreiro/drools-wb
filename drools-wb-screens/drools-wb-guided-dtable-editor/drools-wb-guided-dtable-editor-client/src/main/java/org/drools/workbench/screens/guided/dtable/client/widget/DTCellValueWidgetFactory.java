@@ -511,9 +511,9 @@ public class DTCellValueWidgetFactory {
         // Wire up update handler
         lb.setEnabled(!isReadOnly);
         if (!isReadOnly) {
-            lb.addClickHandler(new ClickHandler() {
+            lb.addChangeHandler(new ChangeHandler() {
 
-                public void onClick(ClickEvent event) {
+                public void onChange(ChangeEvent event) {
                     int index = lb.getSelectedIndex();
                     if (index > -1) {
                         //Set base column value

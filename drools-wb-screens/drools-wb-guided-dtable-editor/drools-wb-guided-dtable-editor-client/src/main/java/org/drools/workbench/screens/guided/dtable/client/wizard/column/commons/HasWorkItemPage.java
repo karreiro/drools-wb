@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2017 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,13 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.commons;
 
-import org.drools.workbench.models.datamodel.oracle.FieldAccessorsAndMutators;
-import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
-import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
+import org.drools.workbench.models.guided.dtable.shared.model.ActionWorkItemCol52;
 
-public interface HasFieldPage {
+public interface HasWorkItemPage {
 
-    Pattern52 editingPattern();
+    void setWorkItem(final String workItem);
 
-    DTColumnConfig52 editingCol();
+    ActionWorkItemCol52 editingCol();
 
-    void setFactField(final String selectedValue);
-
-    String getFactField();
-
-    int constraintValue();
-
-    FieldAccessorsAndMutators getAccessor();
-
-    boolean filterEnumFields();
+    Boolean isWorkItemSet();
 }

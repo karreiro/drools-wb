@@ -21,6 +21,7 @@ import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import org.drools.workbench.models.datamodel.oracle.FieldAccessorsAndMutators;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionRetractFactCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
@@ -60,7 +61,22 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
     }
 
     @Override
+    public String getHeader() {
+        return null;
+    }
+
+    @Override
     public void setHeader(String header) {
+
+    }
+
+    @Override
+    public void setInsertLogical(Boolean value) {
+
+    }
+
+    @Override
+    public void setUpdate(Boolean value) {
 
     }
 
@@ -112,6 +128,16 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
     @Override
     public int constraintValue() {
         return 0;
+    }
+
+    @Override
+    public FieldAccessorsAndMutators getAccessor() {
+        return FieldAccessorsAndMutators.ACCESSOR;
+    }
+
+    @Override
+    public boolean filterEnumFields() {
+        return false;
     }
 
     @Override

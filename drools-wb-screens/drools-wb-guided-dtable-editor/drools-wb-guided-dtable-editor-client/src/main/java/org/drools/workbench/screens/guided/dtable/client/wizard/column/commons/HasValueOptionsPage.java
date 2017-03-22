@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Red Hat, Inc. and/or its affiliates.
+ * Copyright 2017 Red Hat, Inc. and/or its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,42 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.commons;
 
-import org.drools.workbench.models.datamodel.oracle.FieldAccessorsAndMutators;
+import com.google.gwt.user.client.ui.IsWidget;
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
+import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 
-public interface HasFieldPage {
+public interface HasValueOptionsPage {
 
-    Pattern52 editingPattern();
-
-    DTColumnConfig52 editingCol();
-
-    void setFactField(final String selectedValue);
-
-    String getFactField();
+    Boolean isValueOptionsPageCompleted();
 
     int constraintValue();
 
-    FieldAccessorsAndMutators getAccessor();
+    String getFactType();
 
-    boolean filterEnumFields();
+    String getFactField();
+
+    DTColumnConfig52 editingCol();
+
+    Pattern52 editingPattern();
+
+    void setValueOptionsPageAsCompleted();
+
+    GuidedDecisionTable52.TableFormat tableFormat();
+
+    String getValueList();
+
+    void setValueList(final String valueList);
+
+    boolean doesOperatorAcceptValueList();
+
+    IsWidget defaultValueWidget();
+
+    IsWidget limitedValueWidget();
+
+    String getBinding();
+
+    void setBinding(final String binding);
+
+    boolean doesOperatorNeedValue();
 }

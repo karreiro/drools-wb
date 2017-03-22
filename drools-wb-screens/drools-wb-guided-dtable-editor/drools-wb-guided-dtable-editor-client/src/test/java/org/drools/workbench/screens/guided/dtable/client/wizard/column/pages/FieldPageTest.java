@@ -108,22 +108,16 @@ public class FieldPageTest {
 
     @Test
     public void testIsConstraintRetValueWhenItIsTypeRetValue() throws Exception {
-        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_RET_VALUE);
+        page.filterEnumFields();
 
-        assertTrue(page.isConstraintRetValue());
-    }
-
-    @Test
-    public void testIsConstraintRetValueWhenItIsNotTypeRetValue() throws Exception {
-        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_UNDEFINED);
-
-        assertFalse(page.isConstraintRetValue());
+        verify(plugin).filterEnumFields();
     }
 
     @Test
     public void testForEachFactFieldWhenEditingPatternIsNotNull() throws Exception {
         when(pattern52.getFactType()).thenReturn("factType");
         when(plugin.editingPattern()).thenReturn(pattern52);
+        when(plugin.getAccessor()).thenReturn(FieldAccessorsAndMutators.ACCESSOR);
         when(presenter.getDataModelOracle()).thenReturn(oracle);
 
         page.forEachFactField(s -> {

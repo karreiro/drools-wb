@@ -28,9 +28,9 @@ import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTabl
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.widget.DTCellValueWidgetFactory;
-import org.drools.workbench.screens.guided.dtable.client.widget.Validator;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -46,9 +46,6 @@ import static org.mockito.Mockito.*;
 
 @RunWith(GwtMockitoTestRunner.class)
 public class ValueOptionsPageTest {
-
-    @Mock
-    private Validator validator;
 
     @Mock
     private ConditionColumnPlugin plugin;
@@ -75,18 +72,7 @@ public class ValueOptionsPageTest {
     private DTCellValueWidgetFactory factory;
 
     @InjectMocks
-    private ValueOptionsPage page = spy(new ValueOptionsPage() {
-
-        @Override
-        DTCellValueWidgetFactory factory() {
-            return factory;
-        }
-//
-//        @Override
-//        Validator validator() {
-//            return validator;
-//        }
-    });
+    private ValueOptionsPage<ConditionColumnPlugin> page = spy(new ValueOptionsPage<ConditionColumnPlugin>());
 
     @BeforeClass
     public static void staticSetup() {
@@ -112,37 +98,35 @@ public class ValueOptionsPageTest {
 
     @Test
     public void testNewDefaultValueWidget() throws Exception {
-        when(model.getTableFormat()).thenReturn(GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY);
-        when(page.factory()).thenReturn(factory);
-
         page.newDefaultValueWidget();
 
-        verify(factory).getWidget(pattern52,
-                                  editingCol,
-                                  defaultValue);
+        verify(plugin).defaultValueWidget();
     }
 
     @Test
     public void testNewLimitedValueWidget() throws Exception {
-        final LimitedEntryConditionCol52 limitedEntryConditionCol52 = mock(LimitedEntryConditionCol52.class);
-
-        when(plugin.editingCol()).thenReturn(limitedEntryConditionCol52);
-
         page.newLimitedValueWidget();
 
-        verify(factory).getWidget(pattern52,
-                                  limitedEntryConditionCol52,
-                                  limitedEntryConditionCol52.getValue());
+        verify(plugin).limitedValueWidget();
     }
 
     @Test
-    public void testCanSetupCepOperatorsWhenEditingPatternIsNotNull() throws Exception {
+    public void testCanSetupCepOperatorsWhenItIsNotEnabled() throws Exception {
+        assertFalse(page.canSetupCepOperators());
+    }
+
+    @Test
+    public void testCanSetupCepOperatorsWhenItIsEnabledAndEditingPatternIsNotNull() throws Exception {
+        page.enableCepOperators();
+
         assertTrue(page.canSetupCepOperators());
     }
 
     @Test
-    public void testCanSetupCepOperatorsWhenEditingPatternIsNull() throws Exception {
+    public void testCanSetupCepOperatorsWhenItIsEnabledAndEditingPatternIsNull() throws Exception {
         when(plugin.editingPattern()).thenReturn(null);
+
+        page.enableCepOperators();
 
         assertFalse(page.canSetupCepOperators());
     }
@@ -171,7 +155,7 @@ public class ValueOptionsPageTest {
     @Test
     public void testCanSetupDefaultValueWhenOperatorNeedsAValue() throws Exception {
         when(editingCol.getFactField()).thenReturn("factField");
-        when(validator.doesOperatorNeedValue(any())).thenReturn(false);
+        when(plugin.doesOperatorNeedValue()).thenReturn(false);
 
         assertFalse(page.canSetupDefaultValue());
     }
@@ -179,17 +163,30 @@ public class ValueOptionsPageTest {
     @Test
     public void testCanSetupDefaultValueWhenTableFormatIsNotExtendedEntry() throws Exception {
         when(editingCol.getFactField()).thenReturn("factField");
-        when(validator.doesOperatorNeedValue(any())).thenReturn(true);
+        when(plugin.doesOperatorNeedValue()).thenReturn(true);
         when(model.getTableFormat()).thenReturn(GuidedDecisionTable52.TableFormat.LIMITED_ENTRY);
 
         assertFalse(page.canSetupDefaultValue());
     }
 
     @Test
-    public void testCanSetupDefaultValueWhenCanSetup() throws Exception {
-        when(editingCol.getFactField()).thenReturn("factField");
-        when(validator.doesOperatorNeedValue(any())).thenReturn(true);
+    public void testCanSetupDefaultValueWhenItIsNotEnabled() throws Exception {
+        when(plugin.getFactField()).thenReturn("factField");
+        when(plugin.getFactType()).thenReturn("factType");
+        when(plugin.doesOperatorNeedValue()).thenReturn(true);
         when(model.getTableFormat()).thenReturn(GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY);
+
+        assertFalse(page.canSetupDefaultValue());
+    }
+
+    @Test
+    public void testCanSetupDefaultValueWhenCanSetup() throws Exception {
+        when(plugin.getFactField()).thenReturn("factField");
+        when(plugin.getFactType()).thenReturn("factType");
+        when(plugin.doesOperatorNeedValue()).thenReturn(true);
+        when(model.getTableFormat()).thenReturn(GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY);
+
+        page.enableDefaultValue();
 
         assertTrue(page.canSetupDefaultValue());
     }
@@ -218,7 +215,7 @@ public class ValueOptionsPageTest {
     @Test
     public void testCanSetupLimitedValueWhenOperatorNeedsAValue() throws Exception {
         when(plugin.editingCol()).thenReturn(new LimitedEntryConditionCol52());
-        when(validator.doesOperatorNeedValue(any())).thenReturn(false);
+        when(plugin.doesOperatorNeedValue()).thenReturn(false);
 
         assertFalse(page.canSetupLimitedValue());
     }
@@ -227,42 +224,67 @@ public class ValueOptionsPageTest {
     public void testCanSetupLimitedValueWhenTableFormatIsNotLimitedEntry() throws Exception {
         when(plugin.editingCol()).thenReturn(new LimitedEntryConditionCol52());
         when(model.getTableFormat()).thenReturn(GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY);
-        when(validator.doesOperatorNeedValue(any())).thenReturn(true);
+        when(plugin.doesOperatorNeedValue()).thenReturn(true);
 
         assertFalse(page.canSetupLimitedValue());
     }
 
     @Test
     public void testCanSetupLimitedValueWhenCanSetup() throws Exception {
-        when(plugin.editingCol()).thenReturn(new LimitedEntryConditionCol52());
+        when(plugin.getFactField()).thenReturn("factField");
+        when(plugin.getFactType()).thenReturn("factType");
         when(model.getTableFormat()).thenReturn(GuidedDecisionTable52.TableFormat.LIMITED_ENTRY);
-        when(validator.doesOperatorNeedValue(any())).thenReturn(true);
+        when(plugin.doesOperatorNeedValue()).thenReturn(true);
+
+        page.enableLimitedValue();
 
         assertTrue(page.canSetupLimitedValue());
     }
 
     @Test
-    public void testIsFactTypeAnEvent() throws Exception {
+    public void testIsFactTypeAnEventWhenCepOperatorsIsEnabled() throws Exception {
         final Callback<Boolean> callback = (b) -> {
         };
+
+        page.enableCepOperators();
 
         when(pattern52.getFactType()).thenReturn("factType");
 
         page.isFactTypeAnEvent(callback);
 
+        page.isFactTypeAnEvent(Assert::assertTrue);
         verify(oracle).isFactTypeAnEvent("factType",
                                          callback);
     }
 
     @Test
-    public void testCanSetupBindingWhenConstraintValueIsLiteral() throws Exception {
+    public void testIsFactTypeAnEventWhenCepOperatorsIsNotEnabled() throws Exception {
+        final Callback<Boolean> callback = (b) -> {
+        };
+
+        when(pattern52.getFactType()).thenReturn("factType");
+
+        page.isFactTypeAnEvent(Assert::assertFalse);
+    }
+
+    @Test
+    public void testCanSetupBindingWhenBindingIsNotEnabled() throws Exception {
+        assertFalse(page.canSetupBinding());
+    }
+
+    @Test
+    public void testCanSetupBindingWhenBindingIsEnabledAndConstraintValueIsLiteral() throws Exception {
+        page.enableBinding();
+
         when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_LITERAL);
 
         assertTrue(page.canSetupBinding());
     }
 
     @Test
-    public void testCanSetupBindingWhenConstraintValueIsNotLiteral() throws Exception {
+    public void testCanSetupBindingWhenBindingIsEnabledAndConstraintValueIsNotLiteral() throws Exception {
+        page.enableBinding();
+
         when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_PREDICATE);
 
         assertFalse(page.canSetupBinding());

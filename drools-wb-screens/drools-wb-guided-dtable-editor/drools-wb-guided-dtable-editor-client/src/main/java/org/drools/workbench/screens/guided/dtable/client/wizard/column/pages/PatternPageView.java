@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasPatternPage;
+import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
@@ -52,6 +53,10 @@ public class PatternPageView extends Composite implements PatternPage.View {
     @Inject
     @DataField("createANewFactPattern")
     private Button createANewFactPattern;
+
+    @Inject
+    @DataField("entryPointContainer")
+    private Div entryPointContainer;
 
     @Inject
     private TranslationService translationService;
@@ -96,6 +101,11 @@ public class PatternPageView extends Composite implements PatternPage.View {
     @Override
     public String getEntryPointName() {
         return entryPointName.getText();
+    }
+
+    @Override
+    public void disableEntryPoint() {
+        entryPointContainer.setHidden(true);
     }
 
     private void setupPatternList() {

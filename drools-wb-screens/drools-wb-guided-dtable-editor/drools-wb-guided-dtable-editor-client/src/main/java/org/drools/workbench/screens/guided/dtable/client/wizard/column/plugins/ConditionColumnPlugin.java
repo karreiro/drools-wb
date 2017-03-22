@@ -23,7 +23,9 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.IsWidget;
 import org.drools.workbench.models.datamodel.oracle.DataType;
+import org.drools.workbench.models.datamodel.oracle.FieldAccessorsAndMutators;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
 import org.drools.workbench.models.guided.dtable.shared.model.CompositeColumn;
@@ -33,12 +35,15 @@ import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTabl
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
+import org.drools.workbench.screens.guided.dtable.client.widget.DTCellValueWidgetFactory;
+import org.drools.workbench.screens.guided.dtable.client.widget.Validator;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.CellUtilities;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.ColumnUtilities;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasFieldPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasPatternPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasValueOptionsPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.CalculationTypePage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.FieldPage;
@@ -47,6 +52,9 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.Pat
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.ValueOptionsPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DefaultWidgetFactory;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.LimitedWidgetFactory;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ValueOptionsPageInitializer;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
@@ -55,6 +63,7 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 @Dependent
 public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin implements HasFieldPage,
                                                                                     HasPatternPage,
+                                                                                    HasValueOptionsPage,
                                                                                     HasAdditionalInfoPage {
 
     @Inject
@@ -73,7 +82,7 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     private AdditionalInfoPage<ConditionColumnPlugin> additionalInfoPage;
 
     @Inject
-    private ValueOptionsPage valueOptionsPage;
+    private ValueOptionsPage<ConditionColumnPlugin> valueOptionsPage;
 
     private Pattern52 editingPattern;
 
@@ -106,8 +115,8 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
             add(fieldPage);
             add(operatorPage);
-            add(valueOptionsPage);
-            add(additionalInfoPage());
+            add(initializedValueOptionsPage());
+            add(initializedAdditionalInfoPage());
         }};
     }
 
@@ -214,10 +223,25 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     }
 
     @Override
+    public String getHeader() {
+        return editingCol().getHeader();
+    }
+
+    @Override
     public void setHeader(final String header) {
         editingCol().setHeader(header);
 
         fireChangeEvent(additionalInfoPage);
+    }
+
+    @Override
+    public void setInsertLogical(Boolean value) {
+        // empty - this widget is not enabled
+    }
+
+    @Override
+    public void setUpdate(Boolean value) {
+        // empty - this widget is not enabled
     }
 
     @Override
@@ -239,6 +263,21 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         fireChangeEvent(valueOptionsPage);
     }
 
+    @Override
+    public String getBinding() {
+        return null;
+    }
+
+    @Override
+    public void setBinding(String binding) {
+
+    }
+
+    @Override
+    public boolean doesOperatorNeedValue() {
+        return validator().doesOperatorNeedValue(editingCol());
+    }
+
     public int constraintValue() {
         final boolean factHasEnums = presenter.getDataModelOracle().hasEnums(getFactType(),
                                                                              getFactField());
@@ -248,6 +287,53 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         }
 
         return constraintValue;
+    }
+
+    @Override
+    public FieldAccessorsAndMutators getAccessor() {
+        return FieldAccessorsAndMutators.ACCESSOR;
+    }
+
+    @Override
+    public boolean filterEnumFields() {
+        return constraintValue() == BaseSingleFieldConstraint.TYPE_RET_VALUE;
+    }
+
+    @Override
+    public GuidedDecisionTable52.TableFormat tableFormat() {
+        return presenter.getModel().getTableFormat();
+    }
+
+    @Override
+    public String getValueList() {
+        return editingCol().getValueList();
+    }
+
+    public void setValueList(final String valueList) {
+        editingCol().setValueList(valueList);
+
+        assertDefaultValue();
+
+        fireChangeEvent(valueOptionsPage);
+    }
+
+    @Override
+    public boolean doesOperatorAcceptValueList() {
+        return validator().doesOperatorAcceptValueList(editingCol());
+    }
+
+    @Override
+    public IsWidget defaultValueWidget() {
+        return new DefaultWidgetFactory<>(this).create();
+    }
+
+    @Override
+    public IsWidget limitedValueWidget() {
+        return new LimitedWidgetFactory<>(this).create();
+    }
+
+    private Validator validator() {
+        return new Validator(presenter.getModel().getConditions());
     }
 
     public void setConstraintValue(final int constraintValue) {
@@ -262,7 +348,7 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     public void setValueOptionsPageAsCompleted() {
         if (!isValueOptionsPageCompleted()) {
-            setValueOptionsPageCompleted(Boolean.TRUE);
+            setValueOptionsPageCompleted();
 
             fireChangeEvent(valueOptionsPage);
         }
@@ -270,14 +356,6 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     public Boolean isValueOptionsPageCompleted() {
         return valueOptionsPageCompleted;
-    }
-
-    public void setValueList(final String valueList) {
-        editingCol().setValueList(valueList);
-
-        assertDefaultValue();
-
-        fireChangeEvent(valueOptionsPage);
     }
 
     public String getFactType() {
@@ -292,8 +370,8 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         fireChangeEvent(valueOptionsPage);
     }
 
-    void setValueOptionsPageCompleted(final Boolean valueOptionsPageCompleted) {
-        this.valueOptionsPageCompleted = valueOptionsPageCompleted;
+    void setValueOptionsPageCompleted() {
+        this.valueOptionsPageCompleted = Boolean.TRUE;
     }
 
     boolean isHeaderNotUnique() {
@@ -352,9 +430,14 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         }
     }
 
-    private AdditionalInfoPage additionalInfoPage() {
+    private AdditionalInfoPage initializedAdditionalInfoPage() {
         return AdditionalInfoPageInitializer.init(additionalInfoPage,
                                                   this);
+    }
+
+    private ValueOptionsPage<ConditionColumnPlugin> initializedValueOptionsPage() {
+        return ValueOptionsPageInitializer.init(valueOptionsPage,
+                                                this);
     }
 
     private boolean unique(String header) {
@@ -381,9 +464,5 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     private boolean isExtendedEntryTable() {
         return tableFormat() == GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY;
-    }
-
-    private GuidedDecisionTable52.TableFormat tableFormat() {
-        return presenter.getModel().getTableFormat();
     }
 }

@@ -482,7 +482,7 @@ public class ConditionColumnPluginTest {
         plugin.setValueOptionsPageAsCompleted();
 
         verify(plugin,
-               never()).setValueOptionsPageCompleted(Boolean.TRUE);
+               never()).setValueOptionsPageCompleted();
         verify(plugin,
                never()).fireChangeEvent(valueOptionsPage);
     }
@@ -493,7 +493,7 @@ public class ConditionColumnPluginTest {
 
         plugin.setValueOptionsPageAsCompleted();
 
-        verify(plugin).setValueOptionsPageCompleted(Boolean.TRUE);
+        verify(plugin).setValueOptionsPageCompleted();
         verify(plugin).fireChangeEvent(valueOptionsPage);
     }
 

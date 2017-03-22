@@ -22,37 +22,39 @@ import javax.inject.Inject;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import org.drools.workbench.models.datamodel.oracle.DataType;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.datamodel.rule.CEPWindow;
-import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
-import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
-import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
-import org.drools.workbench.screens.guided.dtable.client.widget.DTCellValueWidgetFactory;
-import org.drools.workbench.screens.guided.dtable.client.widget.Validator;
-import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.CellUtilities;
-import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.ColumnUtilities;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasValueOptionsPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.drools.workbench.screens.guided.rule.client.editor.BindingTextBox;
 import org.drools.workbench.screens.guided.rule.client.editor.CEPWindowOperatorsDropdown;
 import org.gwtbootstrap3.client.ui.TextBox;
-import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.UberView;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
 @Dependent
-public class ValueOptionsPage extends BaseDecisionTableColumnPage<ConditionColumnPlugin> {
+public class ValueOptionsPage<T extends HasValueOptionsPage & DecisionTableColumnPlugin> extends BaseDecisionTableColumnPage<T> {
 
     @Inject
     private View view;
 
     private SimplePanel content = new SimplePanel();
+
+    private boolean valueListEnabled = false;
+
+    private boolean cepOperatorsEnabled = false;
+
+    private boolean defaultValueEnabled = false;
+
+    private boolean limitedValueEnabled = false;
+
+    private boolean bindingEnabled = false;
 
     @Override
     public void initialise() {
@@ -81,52 +83,52 @@ public class ValueOptionsPage extends BaseDecisionTableColumnPage<ConditionColum
         return content;
     }
 
+    boolean isValueListEnabled() {
+        return valueListEnabled;
+    }
+
+    boolean isCepOperatorsEnabled() {
+        return cepOperatorsEnabled;
+    }
+
+    boolean isDefaultValueEnabled() {
+        return defaultValueEnabled;
+    }
+
+    boolean isLimitedValueEnabled() {
+        return limitedValueEnabled;
+    }
+
+    boolean isBindingEnabled() {
+        return bindingEnabled;
+    }
+
+    public void enableValueList() {
+        valueListEnabled = true;
+    }
+
+    public void enableCepOperators() {
+        cepOperatorsEnabled = true;
+    }
+
+    public void enableDefaultValue() {
+        defaultValueEnabled = true;
+    }
+
+    public void enableLimitedValue() {
+        limitedValueEnabled = true;
+    }
+
+    public void enableBinding() {
+        bindingEnabled = true;
+    }
+
     IsWidget newDefaultValueWidget() {
-
-        if (editingCol().getDefaultValue() == null) {
-            editingCol().setDefaultValue(factory().makeNewValue(editingPattern(),
-                                                                editingCol()));
-        }
-
-        //Ensure the Default Value has been updated to represent the column's
-        //data-type. Legacy Default Values are all String-based and need to be
-        //coerced to the correct type
-        final DTCellValue52 defaultValue = editingCol().getDefaultValue();
-        final DataType.DataTypes dataType = columnUtilities().getDataType(editingPattern(),
-                                                                          editingCol());
-        cellUtilities().convertDTCellValueType(dataType,
-                                               defaultValue);
-
-        //Correct comma-separated Default Value if operator does not support it
-        if (!validator().doesOperatorAcceptCommaSeparatedValues(editingCol())) {
-            cellUtilities().removeCommaSeparatedValue(defaultValue);
-        }
-
-        return factory().getWidget(editingPattern(),
-                                   editingCol(),
-                                   defaultValue);
-    }
-
-    private CellUtilities cellUtilities() {
-        return new CellUtilities();
-    }
-
-    private ColumnUtilities columnUtilities() {
-        return new ColumnUtilities(presenter.getModel(),
-                                   presenter.getDataModelOracle());
+        return plugin().defaultValueWidget();
     }
 
     IsWidget newLimitedValueWidget() {
-        final LimitedEntryConditionCol52 lec = (LimitedEntryConditionCol52) editingCol();
-
-        if (lec.getValue() == null) {
-            lec.setValue(factory().makeNewValue(editingPattern(),
-                                                editingCol()));
-        }
-
-        return factory().getWidget(editingPattern(),
-                                   editingCol(),
-                                   lec.getValue());
+        return plugin().limitedValueWidget();
     }
 
     CEPWindowOperatorsDropdown newCEPWindowOperatorsDropdown() {
@@ -146,20 +148,23 @@ public class ValueOptionsPage extends BaseDecisionTableColumnPage<ConditionColum
     TextBox newBindingTextBox() {
         final BindingTextBox bindingTextBox = new BindingTextBox();
 
-        bindingTextBox.setText(editingCol().getBinding());
+        bindingTextBox.setText(plugin().getBinding());
         bindingTextBox.addChangeHandler(event -> {
-            editingCol().setBinding(bindingTextBox.getText());
+            plugin().setBinding(bindingTextBox.getText());
         });
 
         return bindingTextBox;
     }
 
     boolean canSetupCepOperators() {
-        return editingPattern() != null;
+        return isCepOperatorsEnabled() && editingPattern() != null;
     }
 
-
     boolean canSetupDefaultValue() {
+        if (!isDefaultValueEnabled()) {
+            return false;
+        }
+
         if (tableFormat() != GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY) {
             return false;
         }
@@ -168,7 +173,7 @@ public class ValueOptionsPage extends BaseDecisionTableColumnPage<ConditionColum
             return false;
         }
 
-        if (!validator().doesOperatorNeedValue(editingCol())) {
+        if (!plugin().doesOperatorNeedValue()) {
             return false;
         }
 
@@ -176,7 +181,11 @@ public class ValueOptionsPage extends BaseDecisionTableColumnPage<ConditionColum
     }
 
     boolean canSetupLimitedValue() {
-        if (tableFormat() == GuidedDecisionTable52.TableFormat.LIMITED_ENTRY) {
+        if (!isLimitedValueEnabled()) {
+            return false;
+        }
+
+        if (tableFormat() != GuidedDecisionTable52.TableFormat.LIMITED_ENTRY) {
             return false;
         }
 
@@ -184,11 +193,7 @@ public class ValueOptionsPage extends BaseDecisionTableColumnPage<ConditionColum
             return false;
         }
 
-        if (!(editingCol() instanceof LimitedEntryConditionCol52)) {
-            return false;
-        }
-
-        if (!validator().doesOperatorNeedValue(editingCol())) {
+        if (!plugin().doesOperatorNeedValue()) {
             return false;
         }
 
@@ -196,10 +201,14 @@ public class ValueOptionsPage extends BaseDecisionTableColumnPage<ConditionColum
     }
 
     boolean canSetupBinding() {
-        return plugin().constraintValue() == BaseSingleFieldConstraint.TYPE_LITERAL;
+        return isBindingEnabled() && plugin().constraintValue() == BaseSingleFieldConstraint.TYPE_LITERAL;
     }
 
     boolean canSetupValueList() {
+        if (!isValueListEnabled()) {
+            return false;
+        }
+
         if (tableFormat() != GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY) {
             return false;
         }
@@ -208,16 +217,20 @@ public class ValueOptionsPage extends BaseDecisionTableColumnPage<ConditionColum
             return false;
         }
 
-        if (!validator().doesOperatorAcceptValueList(editingCol())) {
+        if (!doesOperatorAcceptValueList()) {
             return false;
         }
 
         if (presenter.getDataModelOracle().hasEnums(editingPattern().getFactType(),
-                                                    editingCol().getFactField())) {
+                                                    plugin().getFactField())) {
             return false;
         }
 
         return true;
+    }
+
+    private boolean doesOperatorAcceptValueList() {
+        return plugin().doesOperatorAcceptValueList();
     }
 
     private boolean doesNotHaveFactTypeOrFactField() {
@@ -233,27 +246,8 @@ public class ValueOptionsPage extends BaseDecisionTableColumnPage<ConditionColum
         }
     }
 
-    DTCellValueWidgetFactory factory() {
-        final GuidedDecisionTable52 model = presenter.getModel();
-        final AsyncPackageDataModelOracle oracle = presenter.getDataModelOracle();
-        final boolean allowEmptyValues = model.getTableFormat() == GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY;
-
-        return DTCellValueWidgetFactory.getInstance(model,
-                                                    oracle,
-                                                    false,
-                                                    allowEmptyValues);
-    }
-
-    private Validator validator() {
-        return new Validator(presenter.getModel().getConditions());
-    }
-
     private GuidedDecisionTable52.TableFormat tableFormat() {
         return presenter.getModel().getTableFormat();
-    }
-
-    private ConditionCol52 editingCol() {
-        return plugin().editingCol();
     }
 
     private Pattern52 editingPattern() {
@@ -261,7 +255,7 @@ public class ValueOptionsPage extends BaseDecisionTableColumnPage<ConditionColum
     }
 
     public String getValueList() {
-        return editingCol().getValueList();
+        return plugin().getValueList();
     }
 
     public void setValueList(final String valueList) {

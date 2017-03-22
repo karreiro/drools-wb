@@ -51,7 +51,7 @@ public class RuleModellerPage<T extends HasRuleModellerPage & DecisionTableColum
 
     @Override
     public void isComplete(final Callback<Boolean> callback) {
-        callback.callback(false);
+        callback.callback(plugin().isRuleModellerPageCompleted());
     }
 
     @Override
@@ -62,6 +62,8 @@ public class RuleModellerPage<T extends HasRuleModellerPage & DecisionTableColum
     @Override
     public void prepareView() {
         view.init(this);
+
+        markAsViewed();
     }
 
     @Override
@@ -71,18 +73,26 @@ public class RuleModellerPage<T extends HasRuleModellerPage & DecisionTableColum
 
     RuleModeller ruleModeller() {
         if (ruleModeller == null) {
-            ruleModeller = new RuleModeller(ruleModel(),
-                                            oracle(),
-                                            widgetFactory(),
-                                            configuration(),
-                                            eventBus(),
-                                            readOnly());
+            ruleModeller = newRuleModeller();
         }
         return ruleModeller;
     }
 
-    private boolean readOnly() {
-        return presenter.isReadOnly();
+    private RuleModeller newRuleModeller() {
+        final RuleModeller ruleModeller = new RuleModeller(ruleModel(),
+                                                           oracle(),
+                                                           widgetFactory(),
+                                                           configuration(),
+                                                           eventBus(),
+                                                           isReadOnly());
+
+        presenter.getPackageParentRuleNames(ruleModeller::setRuleNamesForPackage);
+
+        return ruleModeller;
+    }
+
+    private boolean isReadOnly() {
+        return false;
     }
 
     private EventBus eventBus() {
@@ -103,6 +113,10 @@ public class RuleModellerPage<T extends HasRuleModellerPage & DecisionTableColum
 
     private TemplateModellerWidgetFactory widgetFactory() {
         return new TemplateModellerWidgetFactory();
+    }
+
+    private void markAsViewed() {
+        plugin().setRuleModellerPageAsCompleted();
     }
 
     public interface View extends UberView<RuleModellerPage> {

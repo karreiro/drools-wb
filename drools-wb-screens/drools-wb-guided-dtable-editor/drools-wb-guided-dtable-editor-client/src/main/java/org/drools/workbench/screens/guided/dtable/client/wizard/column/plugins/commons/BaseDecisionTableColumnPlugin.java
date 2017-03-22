@@ -55,6 +55,10 @@ public abstract class BaseDecisionTableColumnPlugin implements DecisionTableColu
         wizard.setFinishCommand(this::generateColumn);
     }
 
+    public GuidedDecisionTableView.Presenter getPresenter() {
+        return presenter;
+    }
+
     @Override
     public String getIdentifier() {
         return getClass().getSimpleName();

@@ -204,11 +204,13 @@ public class PatternPageTest {
                      pattern);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testExtractEditingPatternWithoutBoundPatterns() {
         final String[] metadata = new String[]{"Applicant", "$a", "false"};
 
-        page.extractEditingPattern(metadata);
+        final Pattern52 pattern52 = page.extractEditingPattern(metadata);
+
+        assertNull(pattern52);
     }
 
     @Test

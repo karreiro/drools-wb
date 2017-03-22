@@ -93,10 +93,25 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
     }
 
     @Override
+    public String getHeader() {
+        return null;
+    }
+
+    @Override
     public void setHeader(final String header) {
         editingCol().setHeader(header);
 
         fireChangeEvent(additionalInfoPage);
+    }
+
+    @Override
+    public void setInsertLogical(Boolean value) {
+
+    }
+
+    @Override
+    public void setUpdate(Boolean value) {
+
     }
 
     public boolean unique(final String header) {
@@ -153,6 +168,10 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
         patternToDeletePageCompleted = completed;
     }
 
+    void showError(final String message) {
+        Window.alert(message);
+    }
+
     private AdditionalInfoPage additionalInfoPage() {
         return AdditionalInfoPageInitializer.init(additionalInfoPage,
                                                   this);
@@ -164,10 +183,6 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
 
     private LimitedEntryActionRetractFactCol52 getLimitedEntryActionRetractFactCol52() {
         return (LimitedEntryActionRetractFactCol52) editingCol();
-    }
-
-    private void showError(final String message) {
-        Window.alert(message);
     }
 
     private ActionRetractFactCol52 newActionRetractFactColumn() {

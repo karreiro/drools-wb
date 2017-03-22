@@ -50,6 +50,8 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
     @Inject
     private AdditionalInfoPage additionalInfoPage;
 
+    private Boolean ruleModellerPageCompleted = Boolean.FALSE;
+
     @Override
     public String getTitle() {
         return translate(GuidedDecisionTableErraiConstants.BRLConditionColumnPlugin_AddConditionBRL);
@@ -79,7 +81,22 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
     }
 
     @Override
+    public String getHeader() {
+        return null;
+    }
+
+    @Override
     public void setHeader(String header) {
+
+    }
+
+    @Override
+    public void setInsertLogical(Boolean value) {
+
+    }
+
+    @Override
+    public void setUpdate(Boolean value) {
 
     }
 
@@ -99,5 +116,23 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
                                              true,
                                              true,
                                              true);
+    }
+
+    @Override
+    public void setRuleModellerPageAsCompleted() {
+        if (!isRuleModellerPageCompleted()) {
+            setRuleModellerPageCompleted();
+
+            fireChangeEvent(ruleModellerPage);
+        }
+    }
+
+    private void setRuleModellerPageCompleted() {
+        this.ruleModellerPageCompleted = Boolean.TRUE;
+    }
+
+    @Override
+    public Boolean isRuleModellerPageCompleted() {
+        return ruleModellerPageCompleted;
     }
 }

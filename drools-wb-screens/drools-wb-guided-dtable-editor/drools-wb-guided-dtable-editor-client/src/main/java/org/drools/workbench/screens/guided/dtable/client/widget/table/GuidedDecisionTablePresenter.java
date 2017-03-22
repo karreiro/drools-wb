@@ -314,8 +314,8 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
                            final boolean isReadOnly) {
         final GuidedDecisionTable52 model = content.getModel();
         final PackageDataModelOracleBaselinePayload dataModel = content.getDataModel();
-        workItemDefinitions = content.getWorkItemDefinitions();
 
+        this.workItemDefinitions = content.getWorkItemDefinitions();
         this.currentPath = path;
         this.placeRequest = placeRequest;
         this.model = model;
