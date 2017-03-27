@@ -16,19 +16,22 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.function.BiConsumer;
 
 import com.google.gwt.junit.GWTMockUtilities;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.drools.workbench.models.datamodel.workitems.PortableWorkDefinition;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionWorkItemCol52;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionWorkItemPlugin;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.kie.workbench.common.widgets.client.workitems.WorkItemParametersWidget;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -50,6 +53,12 @@ public class WorkItemPageTest {
     @Mock
     private ActionWorkItemCol52 editingCol;
 
+    @Mock
+    private SimplePanel content;
+
+    @Mock
+    private TranslationService translationService;
+
     @InjectMocks
     private WorkItemPage<ActionWorkItemPlugin> page = spy(new WorkItemPage<ActionWorkItemPlugin>());
 
@@ -60,61 +69,71 @@ public class WorkItemPageTest {
     }
 
     @Test
-    public void testGetWorkItems() throws Exception {
-        page.getWorkItems();
+    public void testIsCompleteWhenWorkItemIsSet() {
+        when(plugin.isWorkItemSet()).thenReturn(true);
 
-        verify(presenter).getWorkItemDefinitions();
+        page.isComplete(Assert::assertTrue);
     }
 
     @Test
-    public void testHasWorkItemsWhenItHasMoreThanZeroWorkItems() throws Exception {
-        final HashSet<PortableWorkDefinition> workItemDefinitions = new HashSet<PortableWorkDefinition>() {{
-            add(mock(PortableWorkDefinition.class));
-        }};
+    public void testIsCompleteWhenWorkItemIsNotSet() {
+        when(plugin.isWorkItemSet()).thenReturn(false);
 
-        when(presenter.getWorkItemDefinitions()).thenReturn(workItemDefinitions);
-
-        final boolean result = page.hasWorkItems();
-
-        assertTrue(result);
+        page.isComplete(Assert::assertFalse);
     }
 
     @Test
-    public void testHasWorkItemsWhenItHasZeroWorkItems() throws Exception {
-        when(presenter.getWorkItemDefinitions()).thenReturn(Collections.emptySet());
+    public void testEnableParameters() {
+        page.enableParameters();
 
-        final boolean result = page.hasWorkItems();
-
-        assertFalse(result);
+        assertTrue(page.isParametersEnabled());
     }
 
     @Test
-    public void testSelectWorkItem() throws Exception {
-        final String selectedValue = "selectedValue";
+    public void testForEachWorkItem() {
+        final BiConsumer<String, String> biConsumer = (displayName, name) -> {
+        };
 
-        when(plugin.editingCol()).thenReturn(editingCol);
-        when(view.getSelectedWorkItem()).thenReturn(selectedValue);
+        page.forEachWorkItem(biConsumer);
+
+        verify(plugin).forEachWorkItem(biConsumer);
+    }
+
+    @Test
+    public void testHasWorkItemsWhenItIsFalse() {
+        when(view.workItemsCount()).thenReturn(1);
+
+        final boolean hasWorkItems = page.hasWorkItems();
+
+        assertFalse(hasWorkItems);
+    }
+
+    @Test
+    public void testHasWorkItemsWhenItIsTrue() {
+        when(view.workItemsCount()).thenReturn(2);
+
+        final boolean hasWorkItems = page.hasWorkItems();
+
+        assertTrue(hasWorkItems);
+    }
+
+    @Test
+    public void testSelectWorkItem() {
+        final String workItem = "workItem";
+
+        when(view.getSelectedWorkItem()).thenReturn(workItem);
 
         page.selectWorkItem();
 
-        verify(plugin).setWorkItem(selectedValue);
+        verify(plugin).setWorkItem(workItem);
         verify(page).showParameters();
     }
 
     @Test
-    public void testShowParametersWhenItHasWorkItemDefinition() throws Exception {
-        when(editingCol.getWorkItemDefinition()).thenReturn(mock(PortableWorkDefinition.class));
-        when(plugin.editingCol()).thenReturn(editingCol);
+    public void testShowParametersWhenParametersAreNotEnabled() {
+        final PortableWorkDefinition workDefinition = mock(PortableWorkDefinition.class);
 
-        page.showParameters();
-
-        verify(view).showParameters(any(WorkItemParametersWidget.class));
-    }
-
-    @Test
-    public void testShowParametersWhenItDoesNotHaveWorkItemDefinition() throws Exception {
-        when(editingCol.getWorkItemDefinition()).thenReturn(null);
-        when(plugin.editingCol()).thenReturn(editingCol);
+        when(plugin.getWorkItemDefinition()).thenReturn(workDefinition);
 
         page.showParameters();
 
@@ -122,28 +141,73 @@ public class WorkItemPageTest {
     }
 
     @Test
-    public void testCurrentWorkItemWhenItHasWorkItemDefinition() throws Exception {
-        final PortableWorkDefinition workDefinition = mock(PortableWorkDefinition.class);
-        final String workDefinitionName = "workDefinitionName";
+    public void testShowParametersWhenItDoesNotHaveWorkItemDefinition() {
+        when(plugin.getWorkItemDefinition()).thenReturn(null);
 
-        when(workDefinition.getName()).thenReturn(workDefinitionName);
-        when(editingCol.getWorkItemDefinition()).thenReturn(workDefinition);
-        when(plugin.editingCol()).thenReturn(editingCol);
+        page.enableParameters();
+        page.showParameters();
 
-        final String currentWorkItem = page.currentWorkItem();
-
-        assertEquals(workDefinitionName,
-                     currentWorkItem);
+        verify(view).hideParameters();
     }
 
     @Test
-    public void testCurrentWorkItemWhenItDoesNotHaveWorkItemDefinition() throws Exception {
-        when(editingCol.getWorkItemDefinition()).thenReturn(null);
-        when(plugin.editingCol()).thenReturn(editingCol);
+    public void testShowParametersWhenItHasWorkItemDefinitionParametersAreEnabled() {
+        final PortableWorkDefinition workDefinition = mock(PortableWorkDefinition.class);
 
-        final String currentWorkItem = page.currentWorkItem();
+        when(plugin.getWorkItemDefinition()).thenReturn(workDefinition);
 
-        assertEquals("",
-                     currentWorkItem);
+        page.enableParameters();
+        page.showParameters();
+
+        verify(view).showParameters(any());
+    }
+
+    @Test
+    public void testCurrentWorkItem() {
+        final String expectedWorkItem = "workItem";
+
+        when(plugin.getWorkItem()).thenReturn(expectedWorkItem);
+
+        final String actualWorkItem = page.currentWorkItem();
+
+        verify(plugin).getWorkItem();
+        assertEquals(expectedWorkItem,
+                     actualWorkItem);
+    }
+
+    @Test
+    public void testInitialise() throws Exception {
+        page.initialise();
+
+        verify(content).setWidget(view);
+    }
+
+    @Test
+    public void testGetTitle() throws Exception {
+        final String errorKey = GuidedDecisionTableErraiConstants.WorkItemPage_WorkItem;
+        final String errorMessage = "Title";
+
+        when(translationService.format(errorKey)).thenReturn(errorMessage);
+
+        final String title = page.getTitle();
+
+        assertEquals(errorMessage,
+                     title);
+    }
+
+    @Test
+    public void testPrepareView() throws Exception {
+        page.prepareView();
+
+        verify(view).init(page);
+        verify(page).markAsViewed();
+    }
+
+    @Test
+    public void testAsWidget() {
+        final Widget contentWidget = page.asWidget();
+
+        assertEquals(contentWidget,
+                     content);
     }
 }

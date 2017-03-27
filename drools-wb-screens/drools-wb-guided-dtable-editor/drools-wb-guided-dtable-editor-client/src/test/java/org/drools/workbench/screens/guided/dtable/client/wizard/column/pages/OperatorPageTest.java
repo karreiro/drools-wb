@@ -21,6 +21,8 @@ import java.util.List;
 
 import com.google.gwt.junit.GWTMockUtilities;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwtmockito.GwtMockito;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import com.google.gwtmockito.fakes.FakeProvider;
@@ -37,6 +39,7 @@ import org.drools.workbench.screens.guided.rule.client.resources.css.GuidedRuleE
 import org.drools.workbench.screens.guided.rule.client.resources.images.GuidedRuleEditorImages;
 import org.gwtbootstrap3.client.ui.ListBox;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -81,10 +84,14 @@ public class OperatorPageTest {
     @Mock
     private ConditionCol52 editingCol;
 
+    @Mock
+    private OperatorPage.View view;
+
+    @Mock
+    private SimplePanel content;
+
     @InjectMocks
-    private OperatorPage page = spy(new OperatorPage() {{
-        presenter = OperatorPageTest.this.presenter;
-    }});
+    private OperatorPage page = spy(new OperatorPage());
 
     @BeforeClass
     public static void setupPreferences() {
@@ -94,6 +101,7 @@ public class OperatorPageTest {
 
     @Before
     public void setup() {
+        when(plugin.editingCol()).thenReturn(editingCol);
         when(page.plugin()).thenReturn(plugin);
     }
 
@@ -232,6 +240,81 @@ public class OperatorPageTest {
         verify(oracle).getOperatorCompletions(eq("factType"),
                                               eq("factField"),
                                               any());
+    }
+
+    @Test
+    public void testInitialise() throws Exception {
+        page.initialise();
+
+        verify(content).setWidget(view);
+    }
+
+    @Test
+    public void testGetTitle() throws Exception {
+        final String errorKey = GuidedDecisionTableErraiConstants.OperatorPage_Operator;
+        final String errorMessage = "Title";
+
+        when(translationService.format(errorKey)).thenReturn(errorMessage);
+
+        final String title = page.getTitle();
+
+        assertEquals(errorMessage,
+                     title);
+    }
+
+    @Test
+    public void testPrepareView() throws Exception {
+        page.prepareView();
+
+        verify(view).init(page);
+    }
+
+    @Test
+    public void testAsWidget() {
+        final Widget contentWidget = page.asWidget();
+
+        assertEquals(contentWidget,
+                     content);
+    }
+
+    @Test
+    public void testIsCompleteWhenFactFieldIsNull() {
+        when(editingCol.getOperator()).thenReturn("operator");
+        when(plugin.getFactField()).thenReturn(null);
+
+        page.isComplete(Assert::assertFalse);
+    }
+
+    @Test
+    public void testIsCompleteWhenOperatorIsNull() {
+        when(editingCol.getOperator()).thenReturn(null);
+        when(plugin.getFactField()).thenReturn("factType");
+
+        page.isComplete(Assert::assertFalse);
+    }
+
+    @Test
+    public void testIsCompleteWhenFactFieldAndOperatorAreNotNull() {
+        when(editingCol.getOperator()).thenReturn("operator");
+        when(plugin.getFactField()).thenReturn("factType");
+
+        page.isComplete(Assert::assertTrue);
+    }
+
+    @Test
+    public void testSetOperator() {
+        final String operator = "operator";
+
+        page.setOperator(operator);
+
+        verify(plugin).setOperator(operator);
+    }
+
+    @Test
+    public void testNewListBox() {
+        final ListBox listBox = page.newListBox();
+
+        assertNotNull(listBox);
     }
 
     private void spyOperatorsDropdown() {

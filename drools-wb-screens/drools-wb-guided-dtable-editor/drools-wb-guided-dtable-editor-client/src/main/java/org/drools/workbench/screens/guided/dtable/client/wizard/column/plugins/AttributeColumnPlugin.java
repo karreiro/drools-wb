@@ -25,6 +25,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.AttributeCol52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AttributeColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 @Dependent
@@ -70,5 +71,10 @@ public class AttributeColumnPlugin extends BaseDecisionTableColumnPlugin {
         this.attribute = attribute;
 
         fireChangeEvent(page);
+    }
+
+    @Override
+    public Type getType() {
+        return Type.ADVANCED;
     }
 }

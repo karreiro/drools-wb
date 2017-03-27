@@ -18,6 +18,7 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -25,9 +26,9 @@ import javax.inject.Inject;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.UberView;
 
@@ -38,6 +39,8 @@ import org.uberfire.client.mvp.UberView;
 public class SummaryPage extends BaseDecisionTableColumnPage {
 
     private SimplePanel content = new SimplePanel();
+
+    private Boolean includeAdvanced = Boolean.FALSE;
 
     @Inject
     private Instance<BaseDecisionTableColumnPlugin> plugins;
@@ -53,11 +56,6 @@ public class SummaryPage extends BaseDecisionTableColumnPage {
     @Override
     public void isComplete(final Callback<Boolean> callback) {
         callback.callback(true);
-    }
-
-    @Override
-    public void init(final NewGuidedDecisionTableColumnWizard wizard) {
-        super.init(wizard);
     }
 
     @Override
@@ -85,7 +83,7 @@ public class SummaryPage extends BaseDecisionTableColumnPage {
         wizard.start(plugin);
     }
 
-    private BaseDecisionTableColumnPlugin findPluginByIdentifier(final String selectedItemText) {
+    BaseDecisionTableColumnPlugin findPluginByIdentifier(final String selectedItemText) {
         for (BaseDecisionTableColumnPlugin plugin : this.plugins) {
             if (plugin.getIdentifier().equals(selectedItemText)) {
                 return plugin;
@@ -95,7 +93,14 @@ public class SummaryPage extends BaseDecisionTableColumnPage {
         throw new UnsupportedOperationException("The plugin " + selectedItemText + " does not have an implementation.");
     }
 
-    public List<BaseDecisionTableColumnPlugin> pluginsSortedByTitle() {
+    List<BaseDecisionTableColumnPlugin> pluginsByCategory() {
+        return pluginsSortedByTitle()
+                .stream()
+                .filter(plugin -> includeAdvanced || plugin.getType() == DecisionTableColumnPlugin.Type.BASIC)
+                .collect(Collectors.toList());
+    }
+
+    List<BaseDecisionTableColumnPlugin> pluginsSortedByTitle() {
         final List<BaseDecisionTableColumnPlugin> plugins = plugins();
 
         plugins.sort((p1, p2) -> p1.getTitle().compareTo(p2.getTitle()));
@@ -103,10 +108,14 @@ public class SummaryPage extends BaseDecisionTableColumnPage {
         return plugins;
     }
 
-    public List<BaseDecisionTableColumnPlugin> plugins() {
+    List<BaseDecisionTableColumnPlugin> plugins() {
         return new ArrayList<BaseDecisionTableColumnPlugin>() {{
             plugins.forEach(this::add);
         }};
+    }
+
+    void setIncludeAdvanced(final Boolean includeAdvanced) {
+        this.includeAdvanced = includeAdvanced;
     }
 
     public interface View extends UberView<SummaryPage> {

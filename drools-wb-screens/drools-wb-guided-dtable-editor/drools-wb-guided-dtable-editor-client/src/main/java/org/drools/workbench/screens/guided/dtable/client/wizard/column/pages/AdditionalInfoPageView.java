@@ -79,7 +79,7 @@ public class AdditionalInfoPageView extends Composite implements AdditionalInfoP
         page.setInsertLogical(logicallyInsert.getValue());
     }
 
-    @EventHandler("logicallyInsert")
+    @EventHandler("updateEngineWithChanges")
     public void onSelectUpdateEngineWithChanges(final ChangeEvent event) {
         page.setUpdate(updateEngineWithChanges.getValue());
     }

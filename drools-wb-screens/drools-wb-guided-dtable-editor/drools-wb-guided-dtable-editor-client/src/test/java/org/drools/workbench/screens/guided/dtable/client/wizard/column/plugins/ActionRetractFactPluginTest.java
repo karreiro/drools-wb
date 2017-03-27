@@ -266,6 +266,26 @@ public class ActionRetractFactPluginTest {
                never()).showError(any());
     }
 
+    @Test
+    public void testGetTitle() {
+        final String errorKey = GuidedDecisionTableErraiConstants.ActionRetractFactPlugin_DeleteAnExistingFact;
+        final String errorMessage = "Title";
+
+        when(translationService.format(errorKey)).thenReturn(errorMessage);
+
+        final String title = plugin.getTitle();
+
+        assertEquals(errorMessage,
+                     title);
+    }
+
+    @Test
+    public void testGetHeader() {
+        plugin.getHeader();
+
+        verify(editingCol).getHeader();
+    }
+
     private ActionCol52 actionCol52(final String header) {
         return new ActionCol52() {{
             setHeader(header);

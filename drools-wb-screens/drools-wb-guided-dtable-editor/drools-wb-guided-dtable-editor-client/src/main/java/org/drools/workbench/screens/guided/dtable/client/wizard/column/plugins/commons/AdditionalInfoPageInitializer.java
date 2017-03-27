@@ -29,7 +29,7 @@ public class AdditionalInfoPageInitializer {
 
     public static AdditionalInfoPage<ActionRetractFactPlugin> init(final AdditionalInfoPage<ActionRetractFactPlugin> page,
                                                                    final ActionRetractFactPlugin plugin) {
-        page.init(plugin);
+        page.setPlugin(plugin);
         page.enableHeader();
         page.enableHideColumn();
 
@@ -38,17 +38,18 @@ public class AdditionalInfoPageInitializer {
 
     public static AdditionalInfoPage<ActionSetFactPlugin> init(final AdditionalInfoPage<ActionSetFactPlugin> page,
                                                                final ActionSetFactPlugin plugin) {
-        page.init(plugin);
+        page.setPlugin(plugin);
         page.enableHeader();
         page.enableHideColumn();
         page.enableLogicallyInsert();
+        page.enableUpdateEngineWithChanges();
 
         return page;
     }
 
     public static AdditionalInfoPage<ConditionColumnPlugin> init(final AdditionalInfoPage<ConditionColumnPlugin> page,
                                                                  final ConditionColumnPlugin plugin) {
-        page.init(plugin);
+        page.setPlugin(plugin);
         page.enableHeader();
         page.enableHideColumn();
 
@@ -57,7 +58,7 @@ public class AdditionalInfoPageInitializer {
 
     public static AdditionalInfoPage<ActionWorkItemPlugin> init(final AdditionalInfoPage<ActionWorkItemPlugin> page,
                                                                 final ActionWorkItemPlugin plugin) {
-        page.init(plugin);
+        page.setPlugin(plugin);
         page.enableHeader();
         page.enableHideColumn();
 
@@ -67,8 +68,9 @@ public class AdditionalInfoPageInitializer {
     public static AdditionalInfoPage<ActionWorkItemSetFieldPlugin> init(final AdditionalInfoPage<ActionWorkItemSetFieldPlugin> page,
                                                                         final ActionWorkItemSetFieldPlugin plugin) {
 
-        page.init(plugin);
+        page.setPlugin(plugin);
         page.enableHeader();
+        page.enableLogicallyInsert();
         page.enableUpdateEngineWithChanges();
         page.enableHideColumn();
 
@@ -77,7 +79,7 @@ public class AdditionalInfoPageInitializer {
 
     public static AdditionalInfoPage<BRLConditionColumnPlugin> init(final AdditionalInfoPage<BRLConditionColumnPlugin> page,
                                                                     final BRLConditionColumnPlugin plugin) {
-        page.init(plugin);
+        page.setPlugin(plugin);
         page.enableHeader();
         page.enableHideColumn();
 
@@ -86,7 +88,7 @@ public class AdditionalInfoPageInitializer {
 
     public static AdditionalInfoPage<BRLActionColumnPlugin> init(final AdditionalInfoPage<BRLActionColumnPlugin> page,
                                                                  final BRLActionColumnPlugin plugin) {
-        page.init(plugin);
+        page.setPlugin(plugin);
         page.enableHeader();
         page.enableHideColumn();
 

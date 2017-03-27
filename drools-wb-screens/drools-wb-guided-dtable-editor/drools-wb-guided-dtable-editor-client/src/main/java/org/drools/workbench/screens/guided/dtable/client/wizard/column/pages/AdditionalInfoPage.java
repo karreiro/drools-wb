@@ -19,7 +19,6 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
@@ -71,9 +70,7 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
 
     @Override
     public void isComplete(final Callback<Boolean> callback) {
-        final boolean result = isHeaderCompleted() && isLogicallyInsertCompleted() && isUpdateEngineWithChangesCompleted();
-
-        callback.callback(result);
+        callback.callback(isHeaderCompleted());
     }
 
     public void enableHideColumn() {
@@ -117,23 +114,15 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
     }
 
     void setupLogicallyInsert() {
-        if (logicallyInsertEnabled) {
+        if (logicallyInsertEnabled && plugin().showLogicallyInsert()) {
             view.showLogicallyInsert();
         }
     }
 
     void setupUpdateEngineWithChanges() {
-        if (updateEngineWithChangesEnabled) {
+        if (updateEngineWithChangesEnabled && plugin().showUpdateEngineWithChanges()) {
             view.showUpdateEngineWithChanges();
         }
-    }
-
-    private boolean isUpdateEngineWithChangesCompleted() {
-        return true;
-    }
-
-    private boolean isLogicallyInsertCompleted() {
-        return true;
     }
 
     private boolean isHeaderCompleted() {

@@ -17,12 +17,12 @@
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
@@ -43,6 +43,10 @@ public class SummaryPageView extends Composite implements SummaryPage.View {
     @DataField("pluginsList")
     private ListBox pluginsList;
 
+    @Inject
+    @DataField("includeAdvanced")
+    private CheckBox includeAdvanced;
+
     @Override
     public void init(final SummaryPage page) {
         this.page = page;
@@ -55,59 +59,33 @@ public class SummaryPageView extends Composite implements SummaryPage.View {
         openSelectedPlugin();
     }
 
+    @EventHandler("includeAdvanced")
+    public void onSelectIncludeAdvanced(final ChangeEvent event) {
+        page.setIncludeAdvanced(includeAdvanced.getValue());
+
+        setupPlugins();
+    }
+
     private void setupPlugins() {
         loadPluginList();
         setupPluginList();
     }
 
     private void openSelectedPlugin() {
-        page.openPage(pluginsList.getSelectedValue());
+        final String selectedValue = pluginsList.getSelectedValue();
+
+        page.openPage(selectedValue);
     }
 
     private void loadPluginList() {
-        final String separator = "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -";
-
-        final Predicate<BaseDecisionTableColumnPlugin> metaDataOrAttribute = plugin -> {
-            return plugin.getIdentifier().contains("MetaData") || plugin.getIdentifier().contains("Attribute");
-        };
-        final Predicate<BaseDecisionTableColumnPlugin> condition = plugin -> {
-            return plugin.getIdentifier().contains("Condition");
-        };
-        final Predicate<BaseDecisionTableColumnPlugin> others = plugin -> {
-            return !plugin.getIdentifier().contains("MetaData") && !plugin.getIdentifier().contains("Attribute") && !plugin.getIdentifier().contains("Condition");
-        };
+        final List<BaseDecisionTableColumnPlugin> plugins = page.pluginsByCategory();
 
         pluginsList.clear();
 
-        for (BaseDecisionTableColumnPlugin plugin : plugins(metaDataOrAttribute)) {
+        for (final BaseDecisionTableColumnPlugin plugin : plugins) {
             pluginsList.addItem(plugin.getTitle(),
                                 plugin.getIdentifier());
         }
-
-        pluginsList.addItem(separator,
-                            "");
-
-        for (BaseDecisionTableColumnPlugin plugin : plugins(condition)) {
-            pluginsList.addItem(plugin.getTitle(),
-                                plugin.getIdentifier());
-        }
-
-        pluginsList.addItem(separator,
-                            "");
-
-        for (BaseDecisionTableColumnPlugin plugin : plugins(others)) {
-            pluginsList.addItem(plugin.getTitle(),
-                                plugin.getIdentifier());
-        }
-    }
-
-    private List<BaseDecisionTableColumnPlugin> plugins(final Predicate<BaseDecisionTableColumnPlugin> baseDecisionTableColumnPluginPredicate) {
-        final List<BaseDecisionTableColumnPlugin> plugins = page.pluginsSortedByTitle();
-
-        return plugins
-                .stream()
-                .filter(baseDecisionTableColumnPluginPredicate)
-                .collect(Collectors.toList());
     }
 
     private void setupPluginList() {
@@ -116,6 +94,7 @@ public class SummaryPageView extends Composite implements SummaryPage.View {
     }
 
     private int selectedPlugin() {
+        GWT.log("========> " + page.plugin());
         final DecisionTableColumnPlugin plugin = page.plugin();
 
         if (plugin != null) {

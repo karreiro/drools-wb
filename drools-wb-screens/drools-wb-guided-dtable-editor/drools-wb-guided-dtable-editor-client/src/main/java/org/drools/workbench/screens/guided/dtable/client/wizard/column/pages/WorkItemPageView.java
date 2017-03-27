@@ -80,10 +80,15 @@ public class WorkItemPageView extends Composite implements WorkItemPage.View {
         workItemParametersContainer.setHidden(true);
     }
 
+    @Override
+    public int workItemsCount() {
+        return workItems.getItemCount();
+    }
+
     private void setupWorkItemsList() {
-        if (page.hasWorkItems()) {
-            setupWorkItemList();
-        } else {
+        setupWorkItemList();
+
+        if (!page.hasWorkItems()) {
             setupEmptyWorkItemList();
         }
     }
@@ -96,10 +101,13 @@ public class WorkItemPageView extends Composite implements WorkItemPage.View {
 
     private void setupWorkItemList() {
         workItems.clear();
-        workItems.addItem(translate(GuidedDecisionTableErraiConstants.WorkItemPageView_Choose), "");
+        workItems.setEnabled(true);
+        workItems.addItem(translate(GuidedDecisionTableErraiConstants.WorkItemPageView_Choose),
+                          "");
 
-        page.getWorkItems().forEach(wid -> this.workItems.addItem(wid.getDisplayName(),
-                                                                  wid.getName()));
+        page.forEachWorkItem((displayName, name) -> this.workItems.addItem(displayName,
+                                                                           name));
+
         selectCurrentWorkItem();
         showParameterForTheCurrentWorkItem();
     }

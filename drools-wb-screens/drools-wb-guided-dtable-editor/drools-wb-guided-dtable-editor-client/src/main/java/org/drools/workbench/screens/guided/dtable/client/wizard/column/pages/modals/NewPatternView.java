@@ -63,6 +63,10 @@ public class NewPatternView implements NewPatternPresenter.View,
     private CheckBox negatePatternMatch;
 
     @Inject
+    @DataField("negatePatternContainer")
+    private Div negatePatternContainer;
+
+    @Inject
     private TranslationService translationService;
 
     private NewPatternPresenter presenter;
@@ -91,6 +95,7 @@ public class NewPatternView implements NewPatternPresenter.View,
         binding.setText("");
         binding.setEnabled(true);
         negatePatternMatch.setValue(false);
+        negatePatternContainer.setHidden(false);
     }
 
     @Override
@@ -111,6 +116,11 @@ public class NewPatternView implements NewPatternPresenter.View,
     @Override
     public void showError(final String errorMessage) {
         Window.alert(errorMessage);
+    }
+
+    @Override
+    public void disableNegatedPattern() {
+        negatePatternContainer.setHidden(true);
     }
 
     @EventHandler("binding")

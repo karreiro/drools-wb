@@ -21,11 +21,11 @@ import java.util.List;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
-import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.PatternPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Before;
 import org.junit.Test;
@@ -119,7 +119,7 @@ public class NewPatternPresenterTest {
 
     @Test
     public void testAddPatternWhenPatternIsValid() throws Exception {
-        final Pattern52 pattern52 = mock(Pattern52.class);
+        final PatternWrapper pattern52 = mock(PatternWrapper.class);
 
         doReturn("Applicant").when(view).getSelectedFactType();
         doReturn("app").when(view).getBindingText();
@@ -137,8 +137,7 @@ public class NewPatternPresenterTest {
 
     @Test
     public void testAddPatternWhenIsNegatePatternMatch() throws Exception {
-
-        final Pattern52 pattern52 = mock(Pattern52.class);
+        final PatternWrapper pattern52 = mock(PatternWrapper.class);
 
         doReturn("").when(view).getSelectedFactType();
         doReturn("").when(view).getBindingText();
@@ -163,7 +162,7 @@ public class NewPatternPresenterTest {
         presenter.addPattern();
 
         verify(patternPage,
-               never()).setEditingPattern(any(Pattern52.class));
+               never()).setEditingPattern(any(PatternWrapper.class));
         verify(patternPage,
                never()).prepareView();
         verify(view,
@@ -181,7 +180,7 @@ public class NewPatternPresenterTest {
         presenter.addPattern();
 
         verify(patternPage,
-               never()).setEditingPattern(any(Pattern52.class));
+               never()).setEditingPattern(any(PatternWrapper.class));
         verify(patternPage,
                never()).prepareView();
         verify(view,
@@ -201,7 +200,7 @@ public class NewPatternPresenterTest {
         presenter.addPattern();
 
         verify(patternPage,
-               never()).setEditingPattern(any(Pattern52.class));
+               never()).setEditingPattern(any(PatternWrapper.class));
         verify(patternPage,
                never()).prepareView();
         verify(view,
@@ -216,7 +215,7 @@ public class NewPatternPresenterTest {
         when(view.getBindingText()).thenReturn("app");
         when(view.isNegatePatternMatch()).thenReturn(false);
 
-        final Pattern52 pattern52 = presenter.pattern52();
+        final PatternWrapper pattern52 = presenter.pattern52();
 
         assertEquals("Applicant",
                      pattern52.getFactType());

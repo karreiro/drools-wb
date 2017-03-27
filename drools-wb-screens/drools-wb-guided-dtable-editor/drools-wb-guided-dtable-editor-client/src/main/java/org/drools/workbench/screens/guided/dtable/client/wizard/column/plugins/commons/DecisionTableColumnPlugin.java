@@ -32,4 +32,11 @@ public interface DecisionTableColumnPlugin {
     Boolean generateColumn();
 
     String getIdentifier();
+
+    Type getType();
+
+    enum Type {
+        BASIC,
+        ADVANCED
+    }
 }

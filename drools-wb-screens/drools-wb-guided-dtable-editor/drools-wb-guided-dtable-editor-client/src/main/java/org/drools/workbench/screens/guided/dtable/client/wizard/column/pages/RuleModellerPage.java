@@ -109,7 +109,7 @@ public class RuleModellerPage<T extends HasRuleModellerPage & DecisionTableColum
         return plugin().getRuleModel();
     }
 
-    private RuleModellerConfiguration configuration() {
+    RuleModellerConfiguration configuration() {
         return plugin().getRuleModellerConfiguration();
     }
 
@@ -126,7 +126,7 @@ public class RuleModellerPage<T extends HasRuleModellerPage & DecisionTableColum
         }
     }
 
-    private void markAsViewed() {
+    void markAsViewed() {
         plugin().setRuleModellerPageAsCompleted();
     }
 

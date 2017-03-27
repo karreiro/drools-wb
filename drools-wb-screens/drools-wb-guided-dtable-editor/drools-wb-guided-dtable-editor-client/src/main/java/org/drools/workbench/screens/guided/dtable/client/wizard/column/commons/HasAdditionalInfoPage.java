@@ -30,4 +30,8 @@ public interface HasAdditionalInfoPage {
     void setInsertLogical(final Boolean value);
 
     void setUpdate(final Boolean value);
+
+    boolean showUpdateEngineWithChanges();
+
+    boolean showLogicallyInsert();
 }

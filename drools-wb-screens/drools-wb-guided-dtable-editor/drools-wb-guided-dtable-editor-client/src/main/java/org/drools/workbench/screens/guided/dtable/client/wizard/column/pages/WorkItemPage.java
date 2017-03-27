@@ -16,14 +16,13 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
-import java.util.Set;
+import java.util.function.BiConsumer;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.models.datamodel.workitems.PortableWorkDefinition;
-import org.drools.workbench.models.guided.dtable.shared.model.ActionWorkItemCol52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasWorkItemPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
@@ -39,6 +38,8 @@ public class WorkItemPage<T extends HasWorkItemPage & DecisionTableColumnPlugin>
     private View view;
 
     private SimplePanel content = new SimplePanel();
+
+    private boolean parametersEnabled = false;
 
     @Override
     public String getTitle() {
@@ -58,6 +59,8 @@ public class WorkItemPage<T extends HasWorkItemPage & DecisionTableColumnPlugin>
     @Override
     public void prepareView() {
         view.init(this);
+
+        markAsViewed();
     }
 
     @Override
@@ -65,12 +68,16 @@ public class WorkItemPage<T extends HasWorkItemPage & DecisionTableColumnPlugin>
         return content;
     }
 
-    Set<PortableWorkDefinition> getWorkItems() {
-        return presenter.getWorkItemDefinitions();
+    public void enableParameters() {
+        parametersEnabled = true;
+    }
+
+    void forEachWorkItem(final BiConsumer<String, String> biConsumer) {
+        plugin().forEachWorkItem(biConsumer);
     }
 
     boolean hasWorkItems() {
-        return getWorkItems().size() > 0;
+        return view.workItemsCount() > 1;
     }
 
     void selectWorkItem() {
@@ -84,7 +91,7 @@ public class WorkItemPage<T extends HasWorkItemPage & DecisionTableColumnPlugin>
     void showParameters() {
         final boolean hasWorkItemDefinition = workItemDefinition() != null;
 
-        if (hasWorkItemDefinition) {
+        if (isParametersEnabled() && hasWorkItemDefinition) {
             view.showParameters(parametersWidget());
         } else {
             view.hideParameters();
@@ -92,13 +99,11 @@ public class WorkItemPage<T extends HasWorkItemPage & DecisionTableColumnPlugin>
     }
 
     String currentWorkItem() {
-        final PortableWorkDefinition workItemDefinition = editingCol().getWorkItemDefinition();
+        return plugin.getWorkItem();
+    }
 
-        if (workItemDefinition != null) {
-            return workItemDefinition.getName();
-        } else {
-            return "";
-        }
+    boolean isParametersEnabled() {
+        return parametersEnabled;
     }
 
     private WorkItemParametersWidget parametersWidget() {
@@ -110,11 +115,11 @@ public class WorkItemPage<T extends HasWorkItemPage & DecisionTableColumnPlugin>
     }
 
     private PortableWorkDefinition workItemDefinition() {
-        return editingCol().getWorkItemDefinition();
+        return plugin().getWorkItemDefinition();
     }
 
-    private ActionWorkItemCol52 editingCol() {
-        return plugin().editingCol();
+    void markAsViewed() {
+        plugin().setWorkItemPageAsCompleted();
     }
 
     public interface View extends UberView<WorkItemPage> {
@@ -124,5 +129,7 @@ public class WorkItemPage<T extends HasWorkItemPage & DecisionTableColumnPlugin>
         void hideParameters();
 
         String getSelectedWorkItem();
+
+        int workItemsCount();
     }
 }

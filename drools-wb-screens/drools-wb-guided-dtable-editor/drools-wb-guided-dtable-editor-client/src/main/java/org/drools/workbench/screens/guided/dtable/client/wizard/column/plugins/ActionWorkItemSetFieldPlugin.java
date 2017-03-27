@@ -17,33 +17,64 @@
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.user.client.Window;
 import org.drools.workbench.models.datamodel.oracle.FieldAccessorsAndMutators;
-import org.drools.workbench.models.guided.dtable.shared.model.ActionRetractFactCol52;
-import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
+import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
+import org.drools.workbench.models.datamodel.workitems.PortableParameterDefinition;
+import org.drools.workbench.models.datamodel.workitems.PortableWorkDefinition;
+import org.drools.workbench.models.guided.dtable.shared.model.ActionCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.ActionInsertFactCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.ActionWorkItemCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
+import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasFieldPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasPatternPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasWorkItemPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.FieldPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.PatternPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.WorkItemPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionWorkItemInsertWrapper;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionWorkItemSetWrapper;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionWorkItemWrapper;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
+import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
+import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
+
 @Dependent
-public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin implements HasPatternPage,
-                                                                                           HasFieldPage,
+public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin implements HasFieldPage,
+                                                                                           HasPatternPage,
+                                                                                           HasWorkItemPage,
                                                                                            HasAdditionalInfoPage {
 
+    private Map<String, WorkItemParameter> workItems = new HashMap<>();
+
+    private String selectedWorkItemKey;
+
+    private ActionWorkItemWrapper editingWrapper;
+
     @Inject
-    private PatternPage factPatternsPage;
+    private PatternPage patternPage;
 
     @Inject
     private FieldPage fieldPage;
@@ -54,30 +85,140 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
     @Inject
     private WorkItemPage workItemPage;
 
+    private PatternWrapper patternWrapper;
+
+    private Boolean workItemPageCompleted = Boolean.FALSE;
+
     @Override
-    public DTColumnConfig52 editingCol() {
-        //TMP
-        return new ActionRetractFactCol52();
+    public String getWorkItem() {
+        return selectedWorkItemKey;
     }
 
     @Override
-    public String getHeader() {
+    public void setWorkItem(final String workItemKey) {
+        final WorkItemParameter workItemParameter = workItems.get(workItemKey);
+        final PortableWorkDefinition workDefinition = workItemParameter.getWorkDefinition();
+        final PortableParameterDefinition parameterDefinition = workItemParameter.getWorkParameterDefinition();
+
+        selectedWorkItemKey = workItemKey;
+
+        editingWrapper().setWorkItemName(workDefinition.getName());
+        editingWrapper().setWorkItemResultParameterName(parameterDefinition.getName());
+        editingWrapper().setParameterClassName(parameterDefinition.getClassName());
+
+        fireChangeEvent(workItemPage);
+    }
+
+    private boolean acceptParameterType(final PortableParameterDefinition ppd) {
+        final AsyncPackageDataModelOracle oracle = presenter.getDataModelOracle();
+
+        if (nil(editingWrapper().getFactField())) {
+            return false;
+        }
+        if (nil(ppd.getClassName())) {
+            return false;
+        }
+
+        final String fieldClassName = oracle.getFieldClassName(patternWrapper().getFactType(),
+                                                               editingWrapper().getFactField());
+        return fieldClassName.equals(ppd.getClassName());
+    }
+
+    @Override
+    public ActionCol52 editingCol() {
+        return editingWrapper().getActionCol52();
+    }
+
+    @Override
+    public Boolean isWorkItemSet() {
+        return isWorkItemPageCompleted();
+    }
+
+    @Override
+    public PortableWorkDefinition getWorkItemDefinition() {
         return null;
     }
 
     @Override
-    public void setHeader(String header) {
+    public void forEachWorkItem(BiConsumer<String, String> biConsumer) {
+        workItems.clear();
 
+        actionWorkItems().forEach(actionCol52 -> {
+            final PortableWorkDefinition workItemDefinition = ((ActionWorkItemCol52) actionCol52).getWorkItemDefinition();
+
+            for (final PortableParameterDefinition parameterDefinition : workItemDefinition.getResults()) {
+                if (acceptParameterType(parameterDefinition)) {
+                    final String name = workItemDefinition.getName() + " - " + parameterDefinition.getName();
+                    final String key = workItemDefinition.getDisplayName() + "" + parameterDefinition.getName();
+
+                    biConsumer.accept(name,
+                                      key);
+
+                    workItems.put(key,
+                                  new WorkItemParameter(workItemDefinition,
+                                                        parameterDefinition));
+                }
+            }
+        });
     }
 
     @Override
-    public void setInsertLogical(Boolean value) {
+    public void setWorkItemPageAsCompleted() {
+        if (!isWorkItemPageCompleted()) {
+            setWorkItemPageCompleted();
 
+            fireChangeEvent(workItemPage);
+        }
+    }
+
+    private Boolean isWorkItemPageCompleted() {
+        return workItemPageCompleted;
+    }
+
+    private void setWorkItemPageCompleted() {
+        this.workItemPageCompleted = Boolean.TRUE;
+    }
+
+    private List<ActionCol52> actionWorkItems() {
+        return model()
+                .getActionCols()
+                .stream()
+                .filter(actionCol52 -> actionCol52 instanceof ActionWorkItemCol52)
+                .collect(Collectors.toList());
+    }
+
+    private GuidedDecisionTable52 model() {
+        return presenter.getModel();
+    }
+
+    private ActionWorkItemWrapper editingWrapper() {
+        return Optional.ofNullable(editingWrapper).orElse(getEmptyColumn());
+    }
+
+    private ActionWorkItemWrapper getEmptyColumn() {
+        return ActionWorkItemWrapper.EMPTY_COLUMN;
     }
 
     @Override
-    public void setUpdate(Boolean value) {
+    public String getHeader() {
+        return editingWrapper().getHeader();
+    }
 
+    @Override
+    public void setHeader(final String header) {
+        editingWrapper().setHeader(header);
+
+        fireChangeEvent(additionalInfoPage);
+    }
+
+    @Override
+    public void setInsertLogical(final Boolean isInsertLogical) {
+        editingWrapper().setInsertLogical(isInsertLogical);
+    }
+
+    @Override
+    public void setUpdate(final Boolean isUpdate) {
+        editingWrapper().setUpdate(isUpdate);
     }
 
     @Override
@@ -88,46 +229,108 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
     @Override
     public List<WizardPage> getPages() {
         return new ArrayList<WizardPage>() {{
-            add(factPatternsPage);
+            add(initializedPatternPage());
             add(fieldPage);
             add(workItemPage);
-            add(additionalInfoPage());
+            add(initializedAdditionalInfoPage());
         }};
-    }
-
-    private AdditionalInfoPage additionalInfoPage() {
-        return AdditionalInfoPageInitializer.init(additionalInfoPage,
-                                                  this);
     }
 
     @Override
     public Boolean generateColumn() {
+
+        if (!isFactPatternValid()) {
+            Window.alert(GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnFact());
+            return false;
+        }
+
+        if (nil(editingWrapper().getFactField())) {
+            Window.alert(GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnField());
+            return false;
+        }
+        if (nil(editingWrapper().getHeader())) {
+            Window.alert(GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnHeaderValueDescription());
+            return false;
+        }
+
+        if (!unique(editingWrapper().getHeader())) {
+            Window.alert(GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother());
+            return false;
+        }
+
+        // Pass new\modified column back for handling
+        presenter.appendColumn(editingWrapper().getActionCol52());
+
+        return true;
+    }
+
+    private boolean isFactPatternValid() {
+        if (isNewFactPattern()) {
+            return !nil(editingWrapper().getFactType());
+        } else {
+            return !nil(editingWrapper().getBoundName());
+        }
+    }
+
+    private boolean unique(String header) {
+        for (ActionCol52 o : model().getActionCols()) {
+            if (o.getHeader().equals(header)) {
+                return false;
+            }
+        }
         return true;
     }
 
     @Override
-    public Pattern52 editingPattern() {
-        return null;
+    public PatternWrapper patternWrapper() {
+        return Optional.ofNullable(patternWrapper).orElse(new PatternWrapper());
     }
 
     @Override
-    public void setEditingPattern(final Pattern52 editingPattern) {
+    public void setEditingPattern(final PatternWrapper patternWrapper) {
+        this.patternWrapper = patternWrapper;
 
+        editingWrapper().setFactField(null);
+        editingWrapper().setFactType(null);
+        editingWrapper().setBoundName(null);
+        editingWrapper().setType(null);
+
+        fireChangeEvent(patternPage);
+        fireChangeEvent(fieldPage);
+        fireChangeEvent(additionalInfoPage);
     }
 
     @Override
     public String getEntryPointName() {
-        return null;
+        return "";
     }
 
     @Override
-    public void setEntryPointName(String entryPointName) {
+    public void setEntryPointName(final String entryPointName) {
+        // empty
+    }
 
+    @Override
+    public List<PatternWrapper> getPatterns() {
+        final Set<PatternWrapper> patterns = new HashSet<>();
+
+        for (ActionCol52 actionCol52 : model().getActionCols()) {
+            if (actionCol52 instanceof ActionInsertFactCol52) {
+                patterns.add(new PatternWrapper((ActionInsertFactCol52) actionCol52));
+            }
+        }
+
+        // TODO
+        for (Pattern52 pattern52 : model().getPatterns()) {
+            patterns.add(new PatternWrapper(pattern52));
+        }
+
+        return new ArrayList<>(patterns);
     }
 
     @Override
     public int constraintValue() {
-        return 0;
+        return BaseSingleFieldConstraint.TYPE_UNDEFINED;
     }
 
     @Override
@@ -142,11 +345,83 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
 
     @Override
     public String getFactField() {
-        return null;
+        return editingWrapper().getFactField();
     }
 
     @Override
     public void setFactField(final String selectedValue) {
 
+        if (isNewFactPattern()) {
+            editingWrapper = new ActionWorkItemInsertWrapper(this);
+        } else {
+            editingWrapper = new ActionWorkItemSetWrapper(this);
+        }
+
+        String factType = patternWrapper().getFactType();
+
+        editingWrapper().setFactField(selectedValue);
+        editingWrapper().setFactType(factType);
+        editingWrapper().setBoundName(patternWrapper().getBoundName());
+        editingWrapper().setType(oracle().getFieldType(editingWrapper().getFactType(),
+                                                       editingWrapper().getFactField()));
+
+        fireChangeEvent(fieldPage);
+    }
+
+    private AsyncPackageDataModelOracle oracle() {
+        return presenter.getDataModelOracle();
+    }
+
+    @Override
+    public boolean showUpdateEngineWithChanges() {
+        return !isNewFactPattern();
+    }
+
+    @Override
+    public boolean showLogicallyInsert() {
+        return isNewFactPattern();
+    }
+
+    private boolean isNewFactPattern() {
+        final BRLRuleModel validator = new BRLRuleModel(model());
+
+        return !validator.isVariableNameUsed(patternWrapper().getBoundName());
+    }
+
+    PatternPage initializedPatternPage() {
+        patternPage.disableEntryPoint();
+        patternPage.disableNegatedPatterns();
+
+        return patternPage;
+    }
+
+    AdditionalInfoPage initializedAdditionalInfoPage() {
+        return AdditionalInfoPageInitializer.init(additionalInfoPage,
+                                                  this);
+    }
+
+    private static class WorkItemParameter {
+
+        private PortableWorkDefinition workDefinition;
+        private PortableParameterDefinition workParameterDefinition;
+
+        WorkItemParameter(final PortableWorkDefinition workDefinition,
+                          final PortableParameterDefinition workParameterDefinition) {
+            this.workDefinition = workDefinition;
+            this.workParameterDefinition = workParameterDefinition;
+        }
+
+        PortableWorkDefinition getWorkDefinition() {
+            return workDefinition;
+        }
+
+        PortableParameterDefinition getWorkParameterDefinition() {
+            return workParameterDefinition;
+        }
+    }
+
+    @Override
+    public Type getType() {
+        return Type.ADVANCED;
     }
 }

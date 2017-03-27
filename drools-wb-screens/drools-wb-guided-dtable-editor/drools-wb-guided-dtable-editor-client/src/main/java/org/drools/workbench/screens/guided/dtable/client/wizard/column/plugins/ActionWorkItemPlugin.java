@@ -18,10 +18,10 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import org.drools.workbench.models.datamodel.workitems.PortableWorkDefinition;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionCol52;
@@ -35,6 +35,7 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.Add
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.WorkItemPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
@@ -59,7 +60,7 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
     @Override
     public List<WizardPage> getPages() {
         return new ArrayList<WizardPage>() {{
-            add(workItemPage);
+            add(workItemPage());
             add(additionalInfoPage());
         }};
     }
@@ -72,11 +73,22 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
     }
 
     @Override
+    public String getWorkItem() {
+        final boolean hasWorkItemDefinition = getWorkItemDefinition() != null;
+
+        if (hasWorkItemDefinition) {
+            return getWorkItemDefinition().getName();
+        } else {
+            return "";
+        }
+    }
+
+    @Override
     public void setWorkItem(final String workItem) {
         if (!nil(workItem)) {
-            editingCol().setWorkItemDefinition(findWorkItemDefinition(workItem));
+            editingCol.setWorkItemDefinition(findWorkItemDefinition(workItem));
         } else {
-            editingCol().setWorkItemDefinition(null);
+            editingCol.setWorkItemDefinition(null);
         }
 
         fireChangeEvent(workItemPage);
@@ -89,12 +101,7 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
 
     @Override
     public String getHeader() {
-        return null;
-    }
-
-    @Override
-    public Boolean isWorkItemSet() {
-        return editingCol().getWorkItemDefinition() != null;
+        return editingCol().getHeader();
     }
 
     @Override
@@ -105,13 +112,46 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
     }
 
     @Override
-    public void setInsertLogical(Boolean value) {
-
+    public Boolean isWorkItemSet() {
+        return editingCol.getWorkItemDefinition() != null;
     }
 
     @Override
-    public void setUpdate(Boolean value) {
+    public PortableWorkDefinition getWorkItemDefinition() {
+        return editingCol().getWorkItemDefinition();
+    }
 
+    @Override
+    public void forEachWorkItem(final BiConsumer<String, String> biConsumer) {
+        presenter
+                .getWorkItemDefinitions()
+                .forEach(workDefinition -> biConsumer.accept(workDefinition.getDisplayName(),
+                                                             workDefinition.getName()));
+    }
+
+    @Override
+    public void setWorkItemPageAsCompleted() {
+        // empty
+    }
+
+    @Override
+    public void setInsertLogical(final Boolean value) {
+        // empty
+    }
+
+    @Override
+    public void setUpdate(final Boolean value) {
+        // empty
+    }
+
+    @Override
+    public boolean showUpdateEngineWithChanges() {
+        return false;
+    }
+
+    @Override
+    public boolean showLogicallyInsert() {
+        return false;
     }
 
     PortableWorkDefinition findWorkItemDefinition(final String workItem) {
@@ -122,11 +162,6 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
                 .filter(a -> a.getName().equals(workItem))
                 .findFirst()
                 .orElseThrow(IllegalStateException::new);
-    }
-
-    private AdditionalInfoPage additionalInfoPage() {
-        return AdditionalInfoPageInitializer.init(additionalInfoPage,
-                                                  this);
     }
 
     @Override
@@ -167,5 +202,21 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
             }
         }
         return true;
+    }
+
+    WizardPage workItemPage() {
+        workItemPage.enableParameters();
+
+        return workItemPage;
+    }
+
+    AdditionalInfoPage additionalInfoPage() {
+        return AdditionalInfoPageInitializer.init(additionalInfoPage,
+                                                  this);
+    }
+
+    @Override
+    public Type getType() {
+        return Type.ADVANCED;
     }
 }

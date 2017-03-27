@@ -108,6 +108,8 @@ public class ValueOptionsPageView extends Composite implements ValueOptionsPage.
 
         if (!page.canSetupValueList()) {
             disableElement(valueList.getElement());
+        } else {
+            enableElement(valueList.getElement());
         }
 
         valueList.setText(page.getValueList());
@@ -183,5 +185,9 @@ public class ValueOptionsPageView extends Composite implements ValueOptionsPage.
     private void disableElement(final Element element) {
         element.setAttribute("disabled",
                              "disabled");
+    }
+
+    private void enableElement(final Element element) {
+        element.removeAttribute("disabled");
     }
 }

@@ -232,4 +232,16 @@ public class GuidedDecisionTableErraiConstants {
 
     @TranslationKey(defaultValue = "")
     public static final String ActionWorkItemPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother = "ActionWorkItemPlugin.ThatColumnNameIsAlreadyInUsePleasePickAnother";
+
+    @TranslationKey(defaultValue = "")
+    public static final String BRLActionColumnPlugin_YouMustEnterAColumnHeaderValueDescription = "BRLActionColumnPlugin.YouMustEnterAColumnHeaderValueDescription";
+
+    @TranslationKey(defaultValue = "")
+    public static final String BRLActionColumnPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother = "BRLActionColumnPlugin.ThatColumnNameIsAlreadyInUsePleasePickAnother";
+
+    @TranslationKey(defaultValue = "")
+    public static final String BRLConditionColumnPlugin_YouMustEnterAColumnHeaderValueDescription = "BRLConditionColumnPlugin.YouMustEnterAColumnHeaderValueDescription";
+
+    @TranslationKey(defaultValue = "")
+    public static final String BRLConditionColumnPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother = "BRLConditionColumnPlugin.ThatColumnNameIsAlreadyInUsePleasePickAnother";
 }

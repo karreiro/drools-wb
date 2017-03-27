@@ -25,12 +25,14 @@ import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTabl
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.CalculationTypePage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.FieldPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.OperatorPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.PatternPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.ValueOptionsPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,6 +85,9 @@ public class ConditionColumnPluginTest {
 
     @Mock
     private AsyncPackageDataModelOracle oracle;
+
+    @Mock
+    private NewGuidedDecisionTableColumnWizard wizard;
 
     @InjectMocks
     private ConditionColumnPlugin plugin = spy(new ConditionColumnPlugin());
@@ -251,14 +256,16 @@ public class ConditionColumnPluginTest {
 
     @Test
     public void testAppendColumn() throws Exception {
-        final Pattern52 editingPattern = mock(Pattern52.class);
+        final PatternWrapper patternWrapper = mock(PatternWrapper.class);
+        final Pattern52 pattern52 = mock(Pattern52.class);
 
         doReturn(editingCol).when(plugin).editingCol();
-        doReturn(editingPattern).when(plugin).editingPattern();
+        doReturn(patternWrapper).when(plugin).patternWrapper();
+        doReturn(pattern52).when(plugin).editingPattern();
 
         plugin.appendColumn();
 
-        verify(presenter).appendColumn(editingPattern,
+        verify(presenter).appendColumn(pattern52,
                                        editingCol);
     }
 
@@ -290,9 +297,9 @@ public class ConditionColumnPluginTest {
 
     @Test
     public void testGetEditingPattern() throws Exception {
-        final Pattern52 editingPattern = mock(Pattern52.class);
+        final PatternWrapper patternWrapper = mock(PatternWrapper.class);
 
-        plugin.setEditingPattern(editingPattern);
+        plugin.setEditingPattern(patternWrapper);
 
         verify(plugin).setupDefaultValues();
         verify(plugin).fireChangeEvent(patternPage);
@@ -305,7 +312,7 @@ public class ConditionColumnPluginTest {
 
     @Test
     public void testGetEntryPointNameWhenEditingPatternIsNull() throws Exception {
-        doReturn(null).when(plugin).editingPattern();
+        doReturn(null).when(plugin).patternWrapper();
 
         final String entryPointName = plugin.getEntryPointName();
 
@@ -315,10 +322,10 @@ public class ConditionColumnPluginTest {
 
     @Test
     public void testGetEntryPointNameWhenEditingPatternIsNotNull() throws Exception {
-        final Pattern52 pattern52 = mock(Pattern52.class);
+        final PatternWrapper pattern = mock(PatternWrapper.class);
 
-        doReturn("EntryPointName").when(pattern52).getEntryPointName();
-        doReturn(pattern52).when(plugin).editingPattern();
+        doReturn("EntryPointName").when(pattern).getEntryPointName();
+        doReturn(pattern).when(plugin).patternWrapper();
 
         final String entryPointName = plugin.getEntryPointName();
 
@@ -328,18 +335,21 @@ public class ConditionColumnPluginTest {
 
     @Test
     public void testSetEntryPointName() throws Exception {
-        final Pattern52 pattern52 = mock(Pattern52.class);
+        final PatternWrapper pattern = mock(PatternWrapper.class);
 
-        doReturn(pattern52).when(plugin).editingPattern();
+        doReturn(pattern).when(plugin).patternWrapper();
 
         plugin.setEntryPointName("EntryPointName");
 
-        verify(pattern52).setEntryPointName("EntryPointName");
+        verify(pattern).setEntryPointName("EntryPointName");
     }
 
     @Test
     public void testEditingColWhenEditingPatternIsNull() throws Exception {
-        doReturn(null).when(plugin).editingPattern();
+        final PatternWrapper pattern = mock(PatternWrapper.class);
+
+        doReturn("").when(pattern).getFactType();
+        doReturn(pattern).when(plugin).patternWrapper();
 
         plugin.editingCol();
 
@@ -348,9 +358,10 @@ public class ConditionColumnPluginTest {
 
     @Test
     public void testEditingColWhenEditingPatternIsNotNull() throws Exception {
-        final Pattern52 pattern52 = mock(Pattern52.class);
+        final PatternWrapper pattern = mock(PatternWrapper.class);
 
-        doReturn(pattern52).when(plugin).editingPattern();
+        doReturn("factType").when(pattern).getFactType();
+        doReturn(pattern).when(plugin).patternWrapper();
 
         plugin.editingCol();
 
@@ -372,11 +383,11 @@ public class ConditionColumnPluginTest {
 
     @Test
     public void testGetFactType() throws Exception {
-        final Pattern52 pattern52 = mock(Pattern52.class);
+        final PatternWrapper pattern = mock(PatternWrapper.class);
         final String expectedFactType = "FactType";
 
-        doReturn(expectedFactType).when(pattern52).getFactType();
-        doReturn(pattern52).when(plugin).editingPattern();
+        doReturn(expectedFactType).when(pattern).getFactType();
+        doReturn(pattern).when(plugin).patternWrapper();
 
         final String factType = plugin.getFactType();
 
@@ -398,12 +409,12 @@ public class ConditionColumnPluginTest {
 
     @Test
     public void testSetFactField() throws Exception {
-        final Pattern52 pattern52 = mock(Pattern52.class);
+        final PatternWrapper pattern = mock(PatternWrapper.class);
 
         doReturn("FactField").when(editingCol).getFactField();
         doReturn(editingCol).when(plugin).editingCol();
-        doReturn("FactType").when(pattern52).getFactType();
-        doReturn(pattern52).when(plugin).editingPattern();
+        doReturn("FactType").when(pattern).getFactType();
+        doReturn(pattern).when(plugin).patternWrapper();
         doReturn(oracle).when(presenter).getDataModelOracle();
 
         plugin.setFactField("FactField");
@@ -500,10 +511,10 @@ public class ConditionColumnPluginTest {
     @Test
     public void testSetValueList() throws Exception {
         final String valueList = "valueList";
-        final Pattern52 pattern52 = mock(Pattern52.class);
+        final PatternWrapper pattern = mock(PatternWrapper.class);
 
-        doReturn("FactType").when(pattern52).getFactType();
-        doReturn(pattern52).when(plugin).editingPattern();
+        doReturn("FactType").when(pattern).getFactType();
+        doReturn(pattern).when(plugin).patternWrapper();
         doReturn(oracle).when(presenter).getDataModelOracle();
 
         plugin.setValueList(valueList);
@@ -511,5 +522,28 @@ public class ConditionColumnPluginTest {
         verify(editingCol).setValueList(valueList);
         verify(plugin).assertDefaultValue();
         verify(plugin).fireChangeEvent(valueOptionsPage);
+    }
+
+    @Test
+    public void testGetTitle() {
+        final String errorKey = GuidedDecisionTableErraiConstants.ConditionColumnPlugin_AddNewConditionSimpleColumn;
+        final String errorMessage = "Title";
+
+        when(translationService.format(errorKey)).thenReturn(errorMessage);
+
+        final String title = plugin.getTitle();
+
+        assertEquals(errorMessage,
+                     title);
+    }
+
+    @Test
+    public void testInit() {
+        doReturn(GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY).when(model).getTableFormat();
+        doReturn(model).when(plugin).model();
+
+        plugin.init(wizard);
+
+        verify(plugin).setupDefaultValues();
     }
 }

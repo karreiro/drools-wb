@@ -53,6 +53,19 @@ public class AttributeColumnPluginTest {
     private AttributeColumnPlugin plugin = new AttributeColumnPlugin();
 
     @Test
+    public void testGetTitle() {
+        final String errorKey = GuidedDecisionTableErraiConstants.AttributeColumnPlugin_AddNewAttributeColumn;
+        final String errorMessage = "Title";
+
+        when(translationService.format(errorKey)).thenReturn(errorMessage);
+
+        final String title = plugin.getTitle();
+
+        assertEquals(errorMessage,
+                     title);
+    }
+
+    @Test
     public void testGetPages() throws Exception {
         assertEquals(1,
                      plugin.getPages().size());

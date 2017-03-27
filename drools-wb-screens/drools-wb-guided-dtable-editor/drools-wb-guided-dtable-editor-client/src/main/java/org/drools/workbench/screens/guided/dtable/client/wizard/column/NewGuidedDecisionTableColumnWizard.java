@@ -126,28 +126,27 @@ public class NewGuidedDecisionTableColumnWizard extends AbstractWizard {
     }
 
     public void start(final BaseDecisionTableColumnPlugin plugin) {
-//        this.pages = new ArrayList<WizardPage>() {{
-//            add( summaryPage );
-//            addAll( plugin.getPages() );
-//        }};
-//
-//        plugin.init( this );
-//
-//        super.start();
-
         plugin.init(this);
 
-        this.pages = new ArrayList<WizardPage>() {{
-            add(summaryPage);
-            addAll(plugin.getPages());
-        }};
-
-        for (WizardPage page : this.pages) {
-            ((BaseDecisionTableColumnPage) page).init(this);
-            ((BaseDecisionTableColumnPage) page).init(plugin);
-        }
+        loadPages(plugin);
+        initPages(plugin);
 
         super.start();
+    }
+
+    private void initPages(final BaseDecisionTableColumnPlugin plugin) {
+        for (final WizardPage page : pages) {
+            final BaseDecisionTableColumnPage tableColumnPage = (BaseDecisionTableColumnPage) page;
+
+            tableColumnPage.init(this);
+            tableColumnPage.setPlugin(plugin);
+        }
+    }
+
+    private void loadPages(final BaseDecisionTableColumnPlugin plugin) {
+        pages.clear();
+        pages.add(summaryPage);
+        pages.addAll(plugin.getPages());
     }
 
     @Override

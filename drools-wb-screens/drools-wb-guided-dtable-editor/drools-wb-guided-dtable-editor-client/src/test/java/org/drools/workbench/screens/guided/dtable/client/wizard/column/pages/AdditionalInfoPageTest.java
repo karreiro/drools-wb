@@ -20,10 +20,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gwt.junit.GWTMockUtilities;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 import org.gwtbootstrap3.client.ui.CheckBox;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -47,6 +51,12 @@ public class AdditionalInfoPageTest {
 
     @Mock
     private AdditionalInfoPage.View view;
+
+    @Mock
+    private SimplePanel content;
+
+    @Mock
+    private TranslationService translationService;
 
     @InjectMocks
     private AdditionalInfoPage<ConditionColumnPlugin> page = spy(new AdditionalInfoPage<>());
@@ -118,7 +128,7 @@ public class AdditionalInfoPageTest {
     }
 
     @Test
-    public void testSetupHeaderWhenHeaderIsEnabled() throws Exception {
+    public void testSetupHeaderWhenItIsEnabled() throws Exception {
         page.enableHeader();
 
         page.setupHeader();
@@ -127,7 +137,7 @@ public class AdditionalInfoPageTest {
     }
 
     @Test
-    public void testSetupHeaderWhenHeaderIsNotEnabled() throws Exception {
+    public void testSetupHeaderWhenItIsNotEnabled() throws Exception {
         page.setupHeader();
 
         verify(view,
@@ -135,7 +145,7 @@ public class AdditionalInfoPageTest {
     }
 
     @Test
-    public void testSetupHideColumnWhenHideColumnIsEnabled() throws Exception {
+    public void testSetupHideColumnWhenItIsEnabled() throws Exception {
         when(plugin.editingCol()).thenReturn(editingCol);
 
         page.enableHideColumn();
@@ -145,10 +155,121 @@ public class AdditionalInfoPageTest {
     }
 
     @Test
-    public void testSetupHideColumnWhenHideColumnIsNotEnabled() throws Exception {
+    public void testSetupHideColumnWhenItIsNotEnabled() throws Exception {
         page.setupHideColumn();
 
         verify(view,
                never()).showHideColumn(any(CheckBox.class));
+    }
+
+    @Test
+    public void testSetupLogicallyInsertWhenItIsEnabledAndItShouldBeShown() throws Exception {
+        when(plugin.showLogicallyInsert()).thenReturn(true);
+
+        page.enableLogicallyInsert();
+        page.setupLogicallyInsert();
+
+        verify(view).showLogicallyInsert();
+    }
+
+    @Test
+    public void testSetupLogicallyInsertWhenItIsEnabledAndItShouldNotBeShown() throws Exception {
+        when(plugin.showLogicallyInsert()).thenReturn(false);
+
+        page.enableLogicallyInsert();
+        page.setupLogicallyInsert();
+
+        verify(view,
+               never()).showLogicallyInsert();
+    }
+
+    @Test
+    public void testSetupLogicallyInsertWhenItIsNotEnabled() throws Exception {
+        page.setupLogicallyInsert();
+
+        verify(view,
+               never()).showLogicallyInsert();
+    }
+
+    @Test
+    public void testSetupUpdateEngineWithChangesWhenItIsEnabledAndItShouldBeShown() throws Exception {
+        when(plugin.showUpdateEngineWithChanges()).thenReturn(true);
+
+        page.enableUpdateEngineWithChanges();
+        page.setupUpdateEngineWithChanges();
+
+        verify(view).showUpdateEngineWithChanges();
+    }
+
+    @Test
+    public void testSetupUpdateEngineWithChangesWhenItIsEnabledAndItShouldNotBeShown() throws Exception {
+        when(plugin.showUpdateEngineWithChanges()).thenReturn(false);
+
+        page.enableUpdateEngineWithChanges();
+        page.setupUpdateEngineWithChanges();
+
+        verify(view,
+               never()).showUpdateEngineWithChanges();
+    }
+
+    @Test
+    public void testSetupUpdateEngineWithChangesWhenItIsNotEnabled() throws Exception {
+        page.setupUpdateEngineWithChanges();
+
+        verify(view,
+               never()).showUpdateEngineWithChanges();
+    }
+
+    @Test
+    public void testSetInsertLogical() throws Exception {
+        final Boolean value = Boolean.TRUE;
+
+        page.setInsertLogical(value);
+
+        verify(plugin).setInsertLogical(value);
+    }
+
+    @Test
+    public void testUpdate() throws Exception {
+        final Boolean value = Boolean.TRUE;
+
+        page.setUpdate(value);
+
+        verify(plugin).setUpdate(value);
+    }
+
+    @Test
+    public void testInitialise() throws Exception {
+        page.initialise();
+
+        verify(content).setWidget(view);
+    }
+
+    @Test
+    public void testGetTitle() throws Exception {
+        final String errorKey = GuidedDecisionTableErraiConstants.AdditionalInfoPage_AdditionalInfo;
+        final String errorMessage = "Title";
+
+        when(translationService.format(errorKey)).thenReturn(errorMessage);
+
+        final String title = page.getTitle();
+
+        assertEquals(errorMessage,
+                     title);
+    }
+
+    @Test
+    public void testPrepareView() throws Exception {
+        page.prepareView();
+
+        verify(view).init(page);
+    }
+
+    @Test
+    public void testAsWidget() {
+        final Widget contentWidget = page.asWidget();
+
+        assertEquals(contentWidget,
+                     content);
     }
 }

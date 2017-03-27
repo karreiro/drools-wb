@@ -16,13 +16,24 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.commons;
 
-import org.drools.workbench.models.guided.dtable.shared.model.ActionWorkItemCol52;
+import java.util.function.BiConsumer;
+
+import org.drools.workbench.models.datamodel.workitems.PortableWorkDefinition;
+import org.drools.workbench.models.guided.dtable.shared.model.ActionCol52;
 
 public interface HasWorkItemPage {
 
+    String getWorkItem();
+
     void setWorkItem(final String workItem);
 
-    ActionWorkItemCol52 editingCol();
+    ActionCol52 editingCol();
 
     Boolean isWorkItemSet();
+
+    PortableWorkDefinition getWorkItemDefinition();
+
+    void forEachWorkItem(final BiConsumer<String, String> biConsumer);
+
+    void setWorkItemPageAsCompleted();
 }

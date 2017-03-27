@@ -32,15 +32,12 @@ import org.drools.workbench.models.datamodel.rule.IPattern;
 import org.drools.workbench.models.datamodel.rule.InterpolationVariable;
 import org.drools.workbench.models.datamodel.rule.RuleModel;
 import org.drools.workbench.models.datamodel.rule.visitors.RuleModelVisitor;
-import org.drools.workbench.models.guided.dtable.shared.model.BRLColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLConditionColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLConditionVariableColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
 import org.drools.workbench.models.guided.dtable.shared.model.CompositeColumn;
-import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryBRLConditionColumn;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
@@ -49,6 +46,7 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.Add
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.RuleModellerPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.drools.workbench.screens.guided.rule.client.editor.RuleModellerConfiguration;
 import org.drools.workbench.screens.guided.rule.client.editor.events.TemplateVariablesChangedEvent;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
@@ -60,13 +58,13 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
                                                                                        HasAdditionalInfoPage,
                                                                                        TemplateVariablesChangedEvent.Handler {
 
-    private BRLColumn<IPattern, BRLConditionVariableColumn> editingCol;
-
     @Inject
     private RuleModellerPage ruleModellerPage;
 
     @Inject
     private AdditionalInfoPage additionalInfoPage;
+
+    private BRLConditionColumn editingCol;
 
     private Boolean ruleModellerPageCompleted = Boolean.FALSE;
 
@@ -78,16 +76,15 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
     public void init(final NewGuidedDecisionTableColumnWizard wizard) {
         super.init(wizard);
 
-        editingCol = newBRLCondition();
-        registration = presenter.getEventBus().addHandler(TemplateVariablesChangedEvent.TYPE,
-                                                          this);
+        setupEditingCol();
+        setupRuleModellerEvents();
     }
 
     @Override
     public void onClose() {
         super.onClose();
 
-        registration.removeHandler();
+        teardownRuleModellerEvents();
     }
 
     @Override
@@ -105,27 +102,30 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
 
     @Override
     public Boolean generateColumn() {
-
         if (nil(editingCol.getHeader())) {
-            Window.alert(GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnHeaderValueDescription());
+            Window.alert(translate(GuidedDecisionTableErraiConstants.BRLConditionColumnPlugin_YouMustEnterAColumnHeaderValueDescription));
             return false;
         }
 
         if (!isHeaderUnique(editingCol.getHeader())) {
-            Window.alert(GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother());
+            Window.alert(translate(GuidedDecisionTableErraiConstants.BRLConditionColumnPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother));
             return false;
         }
 
-        //Ensure variables reflect (name) changes made in RuleModeller
-        getDefinedVariables(this.getRuleModel());
+        getDefinedVariables(getRuleModel());
 
-        this.editingCol.setDefinition(Arrays.asList(this.getRuleModel().lhs));
-        presenter.appendColumn((BRLConditionColumn) this.editingCol);
+        editingCol.setDefinition(Arrays.asList(getRuleModel().lhs));
+        presenter.appendColumn(editingCol);
 
         return true;
     }
 
-    protected boolean isHeaderUnique(String header) {
+    @Override
+    public Type getType() {
+        return Type.ADVANCED;
+    }
+
+    boolean isHeaderUnique(String header) {
         for (CompositeColumn<?> cc : presenter.getModel().getConditions()) {
             for (int iChild = 0; iChild < cc.getChildColumns().size(); iChild++) {
                 if (cc.getChildColumns().get(iChild).getHeader().equals(header)) {
@@ -136,7 +136,7 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
         return true;
     }
 
-    private boolean getDefinedVariables(RuleModel ruleModel) {
+    boolean getDefinedVariables(RuleModel ruleModel) {
         Map<InterpolationVariable, Integer> ivs = new HashMap<InterpolationVariable, Integer>();
         RuleModelVisitor rmv = new RuleModelVisitor(ivs);
         rmv.visit(ruleModel);
@@ -183,8 +183,8 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
     }
 
     @Override
-    public DTColumnConfig52 editingCol() {
-        return (DTColumnConfig52) editingCol;
+    public BRLConditionColumn editingCol() {
+        return editingCol;
     }
 
     @Override
@@ -207,6 +207,16 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
     @Override
     public void setUpdate(Boolean value) {
         // empty
+    }
+
+    @Override
+    public boolean showUpdateEngineWithChanges() {
+        return false;
+    }
+
+    @Override
+    public boolean showLogicallyInsert() {
+        return false;
     }
 
     @Override
@@ -242,7 +252,20 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
         }
     }
 
-    private void setRuleModellerPageCompleted() {
+    void setupEditingCol() {
+        editingCol = newBRLCondition();
+    }
+
+    void setupRuleModellerEvents() {
+        registration = presenter.getEventBus().addHandler(TemplateVariablesChangedEvent.TYPE,
+                                                          this);
+    }
+
+    void teardownRuleModellerEvents() {
+        registration.removeHandler();
+    }
+
+    void setRuleModellerPageCompleted() {
         this.ruleModellerPageCompleted = Boolean.TRUE;
     }
 
@@ -251,7 +274,7 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
         return ruleModellerPageCompleted;
     }
 
-    private BRLColumn<IPattern, BRLConditionVariableColumn> newBRLCondition() {
+    private BRLConditionColumn newBRLCondition() {
         switch (tableFormat()) {
             case EXTENDED_ENTRY:
                 return new BRLConditionColumn();

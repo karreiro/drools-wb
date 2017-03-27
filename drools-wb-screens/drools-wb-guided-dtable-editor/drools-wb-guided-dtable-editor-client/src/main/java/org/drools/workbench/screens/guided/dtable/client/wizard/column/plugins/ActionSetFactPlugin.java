@@ -17,8 +17,10 @@
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -31,7 +33,6 @@ import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasFieldPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasPatternPage;
@@ -40,11 +41,15 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.Add
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.FieldPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.PatternPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.ValueOptionsPage;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionColumnWrapper;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionInsertFactWrapper;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionSetFactWrapper;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionWrapper;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DefaultWidgetFactory;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.LimitedWidgetFactory;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ValueOptionsPageInitializer;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
@@ -71,9 +76,11 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
 
     private Boolean valueOptionsPageCompleted = Boolean.FALSE;
 
-    private Pattern52 editingPattern;
+    private ActionWrapper editingWrapper;
 
-    private ActionColumnWrapper editingWrapper;
+    private PatternWrapper patternWrapper;
+
+    private Pattern52 editingPattern = new Pattern52();
 
     @Override
     public String getTitle() {
@@ -91,40 +98,42 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
     }
 
     @Override
-    public void init(final NewGuidedDecisionTableColumnWizard wizard) {
-        super.init(wizard);
-    }
-
-    @Override
     public Boolean generateColumn() {
-        final ActionCol52 editingCol = editingWrapper().getActionCol52();
+        final ActionWrapper actionWrapper = editingWrapper();
 
-        if (!isValidFactType()) {
-            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_YouMustEnterAColumnPattern));
-            return false;
-        }
-        if (!isValidFactField()) {
-            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_YouMustEnterAColumnField));
-            return false;
-        }
-        if (nil(editingCol.getHeader())) {
-            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_YouMustEnterAColumnHeaderValueDescription));
+        if (!isValid(actionWrapper)) {
             return false;
         }
 
-        if (!unique(editingCol.getHeader())) {
-            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother));
-            return false;
-        }
-
-        presenter.appendColumn(editingCol);
+        presenter.appendColumn(actionWrapper.getActionCol52());
 
         return true;
     }
 
-    @Override
-    public Pattern52 editingPattern() {
-        return editingPattern;
+    boolean isValid(final ActionWrapper editingWrapper) {
+        final ActionCol52 actionCol52 = editingWrapper.getActionCol52();
+
+        if (nil(getFactType())) {
+            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_YouMustEnterAColumnPattern));
+            return false;
+        }
+
+        if (nil(getFactField())) {
+            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_YouMustEnterAColumnField));
+            return false;
+        }
+
+        if (nil(actionCol52.getHeader())) {
+            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_YouMustEnterAColumnHeaderValueDescription));
+            return false;
+        }
+
+        if (!unique(actionCol52.getHeader())) {
+            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother));
+            return false;
+        }
+
+        return true;
     }
 
     @Override
@@ -136,7 +145,7 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
         }
     }
 
-    private void setValueOptionsPageCompleted() {
+    void setValueOptionsPageCompleted() {
         this.valueOptionsPageCompleted = Boolean.TRUE;
     }
 
@@ -146,8 +155,13 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
     }
 
     @Override
-    public void setEditingPattern(final Pattern52 editingPattern) {
-        this.editingPattern = editingPattern;
+    public PatternWrapper patternWrapper() {
+        return Optional.ofNullable(patternWrapper).orElse(new PatternWrapper());
+    }
+
+    @Override
+    public void setEditingPattern(final PatternWrapper patternWrapper) {
+        this.patternWrapper = patternWrapper;
 
         editingWrapper().setFactField(null);
         editingWrapper().setFactType(null);
@@ -161,12 +175,22 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
 
     @Override
     public String getEntryPointName() {
-        return ""; // TODO
+        return "";
     }
 
     @Override
     public void setEntryPointName(final String entryPointName) {
-        // TODO
+    }
+
+    @Override
+    public List<PatternWrapper> getPatterns() {
+        final Set<PatternWrapper> patterns = new HashSet<>();
+
+        for (Pattern52 pattern52 : presenter.getModel().getPatterns()) {
+            patterns.add(new PatternWrapper(pattern52));
+        }
+
+        return new ArrayList<>(patterns);
     }
 
     @Override
@@ -196,20 +220,38 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
 
     @Override
     public void setFactField(final String selectedValue) {
-
         if (isNewFactPattern()) {
-            editingWrapper = new ActionColumnWrapper.ActionInsertFact(this);
+            editingWrapper = newActionInsertFactWrapper();
         } else {
-            editingWrapper = new ActionColumnWrapper.ActionSetField(this);
+            editingWrapper = newActionSetFactWrapper();
         }
 
         editingWrapper.setFactField(selectedValue);
-        editingWrapper.setFactType(editingPattern.getFactType());
-        editingWrapper.setBoundName(editingPattern.getFactType());
-        editingWrapper.setType(oracle().getFieldType(editingWrapper.getFactType(),
-                                                     editingWrapper.getFactField()));
+        editingWrapper.setFactType(patternWrapper().getFactType());
+        editingWrapper.setBoundName(patternWrapper().getBoundName());
+        String fieldType = oracle().getFieldType(editingWrapper.getFactType(),
+                                                 editingWrapper.getFactField());
+        editingWrapper.setType(fieldType);
 
         fireChangeEvent(fieldPage);
+    }
+
+    ActionSetFactWrapper newActionSetFactWrapper() {
+        return new ActionSetFactWrapper(this);
+    }
+
+    ActionInsertFactWrapper newActionInsertFactWrapper() {
+        return new ActionInsertFactWrapper(this);
+    }
+
+    @Override
+    public Pattern52 editingPattern() {
+        editingPattern.setFactType(patternWrapper().getFactType());
+        editingPattern.setBoundName(patternWrapper().getBoundName());
+        editingPattern.setNegated(patternWrapper().isNegated());
+        editingPattern.setEntryPointName(patternWrapper().getEntryPointName());
+
+        return editingPattern;
     }
 
     @Override
@@ -237,6 +279,16 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
     @Override
     public void setUpdate(final Boolean value) {
         editingWrapper().setUpdate(value);
+    }
+
+    @Override
+    public boolean showUpdateEngineWithChanges() {
+        return !isNewFactPattern();
+    }
+
+    @Override
+    public boolean showLogicallyInsert() {
+        return isNewFactPattern();
     }
 
     @Override
@@ -284,10 +336,6 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
         return new LimitedWidgetFactory<>(this).create();
     }
 
-    private ActionColumnWrapper editingWrapper() {
-        return Optional.ofNullable(editingWrapper).orElse(ActionColumnWrapper.emptyColumn());
-    }
-
     private boolean unique(final String header) {
         for (final ActionCol52 o : presenter.getModel().getActionCols()) {
             if (o.getHeader().equals(header)) {
@@ -298,15 +346,7 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
         return true;
     }
 
-    private boolean isValidFactType() {
-        return !nil(getFactType());
-    }
-
-    private boolean isValidFactField() {
-        return !nil(getFactField());
-    }
-
-    private boolean isNewFactPattern() {
+    boolean isNewFactPattern() {
         final BRLRuleModel validator = new BRLRuleModel(presenter.getModel());
 
         return !validator.isVariableNameUsed(getBinding());
@@ -314,6 +354,10 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
 
     private AsyncPackageDataModelOracle oracle() {
         return presenter.getDataModelOracle();
+    }
+
+    ActionWrapper editingWrapper() {
+        return Optional.ofNullable(editingWrapper).orElse(ActionWrapper.EMPTY_COLUMN);
     }
 
     PatternPage initializedPatternPage() {
@@ -330,5 +374,10 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
     ValueOptionsPage<ActionSetFactPlugin> initializedValueOptionsPage() {
         return ValueOptionsPageInitializer.init(valueOptionsPage,
                                                 this);
+    }
+
+    @Override
+    public Type getType() {
+        return Type.BASIC;
     }
 }

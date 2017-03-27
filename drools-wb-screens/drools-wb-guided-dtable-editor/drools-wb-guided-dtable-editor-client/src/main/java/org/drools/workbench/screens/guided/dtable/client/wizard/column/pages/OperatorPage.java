@@ -83,7 +83,7 @@ public class OperatorPage extends BaseDecisionTableColumnPage<ConditionColumnPlu
         return editingCol().getOperator();
     }
 
-    private void setOperator(final String selectedValue) {
+    void setOperator(final String selectedValue) {
         plugin().setOperator(selectedValue);
     }
 

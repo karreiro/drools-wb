@@ -16,18 +16,34 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import com.google.gwtmockito.WithClassesToStub;
+import org.drools.workbench.models.datamodel.oracle.FieldAccessorsAndMutators;
+import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
+import org.drools.workbench.models.guided.dtable.shared.model.ActionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
+import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.FieldPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.PatternPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.ValueOptionsPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionInsertFactWrapper;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionSetFactWrapper;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionWrapper;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DefaultWidgetFactory;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.LimitedWidgetFactory;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
@@ -38,6 +54,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(GwtMockitoTestRunner.class)
+@WithClassesToStub({DefaultWidgetFactory.class, LimitedWidgetFactory.class})
 public class ActionSetFactPluginTest {
 
     @Mock
@@ -59,13 +76,29 @@ public class ActionSetFactPluginTest {
     private TranslationService translationService;
 
     @Mock
+    private NewGuidedDecisionTableColumnWizard wizard;
+
+    @Mock
     private EventSourceMock<WizardPageStatusChangeEvent> changeEvent;
 
     @InjectMocks
     private ActionSetFactPlugin plugin = spy(new ActionSetFactPlugin());
 
     @Test
-    public void testGetPages() throws Exception {
+    public void testGetTitle() {
+        final String errorKey = GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_SetTheValueOfAField;
+        final String errorMessage = "Title";
+
+        when(translationService.format(errorKey)).thenReturn(errorMessage);
+
+        final String title = plugin.getTitle();
+
+        assertEquals(errorMessage,
+                     title);
+    }
+
+    @Test
+    public void testGetPages() {
         doReturn(GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY).when(plugin).tableFormat();
 
         final List<WizardPage> pages = plugin.getPages();
@@ -75,7 +108,499 @@ public class ActionSetFactPluginTest {
     }
 
     @Test
-    public void testInitializedPatternPage() throws Exception {
+    public void testGenerateColumnWhenItIsValid() {
+        final ActionCol52 actionCol52 = mock(ActionCol52.class);
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+
+        doReturn(actionCol52).when(actionWrapper).getActionCol52();
+        doReturn(actionWrapper).when(plugin).editingWrapper();
+        doReturn(true).when(plugin).isValid(any());
+
+        final Boolean success = plugin.generateColumn();
+
+        assertTrue(success);
+        verify(presenter).appendColumn(actionCol52);
+    }
+
+    @Test
+    public void testGenerateColumnWhenItIsNotValid() {
+        doReturn(false).when(plugin).isValid(any());
+
+        final Boolean success = plugin.generateColumn();
+
+        assertFalse(success);
+        verify(presenter,
+               never()).appendColumn(any(ActionCol52.class));
+    }
+
+    @Test
+    public void testIsValidWhenFactTypeIsBlank() {
+        final ActionCol52 actionCol52 = mock(ActionCol52.class);
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+        final String errorKey = GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_YouMustEnterAColumnPattern;
+
+        when(actionWrapper.getFactType()).thenReturn("");
+        when(actionWrapper.getActionCol52()).thenReturn(actionCol52);
+
+        final boolean valid = plugin.isValid(actionWrapper);
+
+        assertFalse(valid);
+        verify(translationService).format(errorKey);
+    }
+
+    @Test
+    public void testIsValidWhenFactFieldIsBlank() {
+        final ActionCol52 actionCol52 = mock(ActionCol52.class);
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+        final String errorKey = GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_YouMustEnterAColumnField;
+
+        when(actionWrapper.getFactField()).thenReturn("");
+        when(actionWrapper.getFactType()).thenReturn("factType");
+        when(actionWrapper.getActionCol52()).thenReturn(actionCol52);
+        when(plugin.editingWrapper()).thenReturn(actionWrapper);
+
+        final boolean valid = plugin.isValid(actionWrapper);
+
+        assertFalse(valid);
+        verify(translationService).format(errorKey);
+    }
+
+    @Test
+    public void testIsValidWhenHeaderIsBlank() {
+        final ActionCol52 actionCol52 = mock(ActionCol52.class);
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+        final String errorKey = GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_YouMustEnterAColumnHeaderValueDescription;
+
+        when(actionCol52.getHeader()).thenReturn("");
+        when(actionWrapper.getFactField()).thenReturn("factField");
+        when(actionWrapper.getFactType()).thenReturn("factType");
+        when(actionWrapper.getActionCol52()).thenReturn(actionCol52);
+        when(plugin.editingWrapper()).thenReturn(actionWrapper);
+
+        final boolean valid = plugin.isValid(actionWrapper);
+
+        assertFalse(valid);
+        verify(translationService).format(errorKey);
+    }
+
+    @Test
+    public void testIsValidWhenHeaderIsNotUnique() {
+        final ActionCol52 newActionCol52 = mock(ActionCol52.class);
+        final ActionCol52 oldActionCol52 = mock(ActionCol52.class);
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+        final GuidedDecisionTable52 model = mock(GuidedDecisionTable52.class);
+        final String errorKey = GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother;
+        final ArrayList<ActionCol52> actionCol52s = new ArrayList<ActionCol52>() {{
+            add(oldActionCol52);
+        }};
+
+        when(oldActionCol52.getHeader()).thenReturn("header");
+        when(model.getActionCols()).thenReturn(actionCol52s);
+        when(presenter.getModel()).thenReturn(model);
+        when(newActionCol52.getHeader()).thenReturn("header");
+        when(actionWrapper.getFactField()).thenReturn("factField");
+        when(actionWrapper.getFactType()).thenReturn("factType");
+        when(actionWrapper.getActionCol52()).thenReturn(newActionCol52);
+        when(plugin.editingWrapper()).thenReturn(actionWrapper);
+
+        final boolean valid = plugin.isValid(actionWrapper);
+
+        assertFalse(valid);
+        verify(translationService).format(errorKey);
+    }
+
+    @Test
+    public void testIsValidWhenItIsValid() {
+        final ActionCol52 actionCol52 = mock(ActionCol52.class);
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+        final GuidedDecisionTable52 model = mock(GuidedDecisionTable52.class);
+        final ArrayList<ActionCol52> actionCol52s = new ArrayList<>();
+
+        when(model.getActionCols()).thenReturn(actionCol52s);
+        when(presenter.getModel()).thenReturn(model);
+        when(actionCol52.getHeader()).thenReturn("header");
+        when(actionWrapper.getFactField()).thenReturn("factField");
+        when(actionWrapper.getFactType()).thenReturn("factType");
+        when(actionWrapper.getActionCol52()).thenReturn(actionCol52);
+        when(plugin.editingWrapper()).thenReturn(actionWrapper);
+
+        final boolean valid = plugin.isValid(actionWrapper);
+
+        assertTrue(valid);
+        verify(translationService,
+               never()).format(any());
+    }
+
+    @Test
+    public void testSetValueOptionsPageAsCompletedWhenItIsCompleted() throws Exception {
+        doReturn(true).when(plugin).isValueOptionsPageCompleted();
+
+        plugin.setValueOptionsPageAsCompleted();
+
+        verify(plugin,
+               never()).setValueOptionsPageCompleted();
+        verify(plugin,
+               never()).fireChangeEvent(valueOptionsPage);
+    }
+
+    @Test
+    public void testSetValueOptionsPageAsCompletedWhenItIsNotCompleted() throws Exception {
+        doReturn(false).when(plugin).isValueOptionsPageCompleted();
+
+        plugin.setValueOptionsPageAsCompleted();
+
+        verify(plugin).setValueOptionsPageCompleted();
+        verify(plugin).fireChangeEvent(valueOptionsPage);
+    }
+
+    @Test
+    public void testSetEditingPattern() {
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+        final PatternWrapper patternWrapper = mock(PatternWrapper.class);
+
+        when(plugin.editingWrapper()).thenReturn(actionWrapper);
+
+        plugin.setEditingPattern(patternWrapper);
+
+        verify(actionWrapper).setFactField(null);
+        verify(actionWrapper).setFactType(null);
+        verify(actionWrapper).setBoundName(null);
+        verify(actionWrapper).setType(null);
+
+        verify(plugin).fireChangeEvent(patternPage);
+        verify(plugin).fireChangeEvent(fieldPage);
+        verify(plugin).fireChangeEvent(additionalInfoPage);
+    }
+
+    @Test
+    public void testGetPatterns() {
+        final GuidedDecisionTable52 model = mock(GuidedDecisionTable52.class);
+        final ArrayList<Pattern52> fakePatterns = new ArrayList<Pattern52>() {{
+            add(fakePattern("factType",
+                            "boundName",
+                            true));
+        }};
+
+        when(model.getPatterns()).thenReturn(fakePatterns);
+        when(presenter.getModel()).thenReturn(model);
+
+        final List<PatternWrapper> patterns = plugin.getPatterns();
+        final PatternWrapper firstPattern = patterns.get(0);
+
+        assertNotNull(firstPattern);
+        assertEquals("factType",
+                     firstPattern.getFactType());
+        assertEquals("boundName",
+                     firstPattern.getBoundName());
+        assertEquals(true,
+                     firstPattern.isNegated());
+        assertEquals(1,
+                     patterns.size());
+    }
+
+    @Test
+    public void testConstraintValue() {
+        final int expectedConstraintValue = BaseSingleFieldConstraint.TYPE_UNDEFINED;
+        final int actualConstraintValue = plugin.constraintValue();
+
+        assertEquals(expectedConstraintValue,
+                     actualConstraintValue);
+    }
+
+    @Test
+    public void testGetFactType() {
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+        final String expectedFactType = "factType";
+
+        when(actionWrapper.getFactType()).thenReturn(expectedFactType);
+        when(plugin.editingWrapper()).thenReturn(actionWrapper);
+
+        final String actualFactType = plugin.getFactType();
+
+        verify(actionWrapper).getFactType();
+        assertEquals(expectedFactType,
+                     actualFactType);
+    }
+
+    @Test
+    public void testGetAccessor() {
+        final FieldAccessorsAndMutators expectedAccessor = FieldAccessorsAndMutators.MUTATOR;
+        final FieldAccessorsAndMutators actualAccessor = plugin.getAccessor();
+
+        assertEquals(expectedAccessor,
+                     actualAccessor);
+    }
+
+    @Test
+    public void testFilterEnumFields() {
+        assertFalse(plugin.filterEnumFields());
+    }
+
+    @Test
+    public void testGetFactField() {
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+        final String expectedFactField = "factField";
+
+        when(actionWrapper.getFactField()).thenReturn(expectedFactField);
+        when(plugin.editingWrapper()).thenReturn(actionWrapper);
+
+        final String actualFactField = plugin.getFactField();
+
+        verify(actionWrapper).getFactField();
+        assertEquals(expectedFactField,
+                     actualFactField);
+    }
+
+    @Test
+    public void testSetFactFieldWhenFactPatternIsNew() {
+        final AsyncPackageDataModelOracle oracle = mock(AsyncPackageDataModelOracle.class);
+        final ActionInsertFactWrapper actionWrapper = mock(ActionInsertFactWrapper.class);
+        final PatternWrapper patternWrapper = mock(PatternWrapper.class);
+
+        doReturn(true).when(plugin).isNewFactPattern();
+        doReturn(actionWrapper).when(plugin).newActionInsertFactWrapper();
+
+        doReturn(oracle).when(presenter).getDataModelOracle();
+        doReturn("type").when(oracle).getFieldType(any(),
+                                                   any());
+
+        doReturn("factType").when(patternWrapper).getFactType();
+        doReturn("boundName").when(patternWrapper).getBoundName();
+        doReturn(patternWrapper).when(plugin).patternWrapper();
+
+        plugin.setFactField("selectedValue");
+
+        verify(actionWrapper).setFactField(eq("selectedValue"));
+        verify(actionWrapper).setFactType(eq("factType"));
+        verify(actionWrapper).setBoundName(eq("boundName"));
+        verify(actionWrapper).setType(eq("type"));
+        verify(plugin).fireChangeEvent(fieldPage);
+    }
+
+    @Test
+    public void testSetFactFieldWhenFactPatternIsNotNew() {
+        final AsyncPackageDataModelOracle oracle = mock(AsyncPackageDataModelOracle.class);
+        final ActionSetFactWrapper actionWrapper = mock(ActionSetFactWrapper.class);
+        final PatternWrapper patternWrapper = mock(PatternWrapper.class);
+
+        doReturn(false).when(plugin).isNewFactPattern();
+        doReturn(actionWrapper).when(plugin).newActionSetFactWrapper();
+
+        doReturn(oracle).when(presenter).getDataModelOracle();
+        doReturn("type").when(oracle).getFieldType(any(),
+                                                   any());
+
+        doReturn("factType").when(patternWrapper).getFactType();
+        doReturn("boundName").when(patternWrapper).getBoundName();
+        doReturn(patternWrapper).when(plugin).patternWrapper();
+
+        plugin.setFactField("selectedValue");
+
+        verify(actionWrapper).setFactField(eq("selectedValue"));
+        verify(actionWrapper).setFactType(eq("factType"));
+        verify(actionWrapper).setBoundName(eq("boundName"));
+        verify(actionWrapper).setType(eq("type"));
+        verify(plugin).fireChangeEvent(fieldPage);
+    }
+
+    @Test
+    public void testEditingPattern() {
+        final PatternWrapper patternWrapper = mock(PatternWrapper.class);
+
+        doReturn(patternWrapper).when(plugin).patternWrapper();
+
+        when(patternWrapper.getFactType()).thenReturn("factType");
+        when(patternWrapper.getBoundName()).thenReturn("boundName");
+        when(patternWrapper.isNegated()).thenReturn(false);
+        when(patternWrapper.getEntryPointName()).thenReturn("entryPoint");
+
+        final Pattern52 pattern52 = plugin.editingPattern();
+
+        assertEquals("factType",
+                     pattern52.getFactType());
+        assertEquals("boundName",
+                     pattern52.getBoundName());
+        assertEquals(false,
+                     pattern52.isNegated());
+        assertEquals("entryPoint",
+                     pattern52.getEntryPointName());
+    }
+
+    @Test
+    public void testEditingCol() {
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+
+        doReturn(actionWrapper).when(plugin).editingWrapper();
+
+        plugin.editingCol();
+
+        verify(actionWrapper).getActionCol52();
+    }
+
+    @Test
+    public void testGetHeader() {
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+
+        doReturn(actionWrapper).when(plugin).editingWrapper();
+
+        plugin.getHeader();
+
+        verify(actionWrapper).getHeader();
+    }
+
+    @Test
+    public void testSetHeader() {
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+        final String header = "header";
+
+        doReturn(actionWrapper).when(plugin).editingWrapper();
+
+        plugin.setHeader(header);
+
+        verify(actionWrapper).setHeader(header);
+        verify(plugin).fireChangeEvent(additionalInfoPage);
+    }
+
+    @Test
+    public void testSetInsertLogical() {
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+        final boolean insertLogical = false;
+
+        doReturn(actionWrapper).when(plugin).editingWrapper();
+
+        plugin.setInsertLogical(insertLogical);
+
+        verify(actionWrapper).setInsertLogical(insertLogical);
+    }
+
+    @Test
+    public void testSetUpdate() {
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+        final boolean update = false;
+
+        doReturn(actionWrapper).when(plugin).editingWrapper();
+
+        plugin.setUpdate(update);
+
+        verify(actionWrapper).setUpdate(update);
+    }
+
+    @Test
+    public void testShowUpdateEngineWithChangesWhenFactPatternIsNew() {
+        doReturn(true).when(plugin).isNewFactPattern();
+
+        final boolean showUpdateEngineWithChanges = plugin.showUpdateEngineWithChanges();
+
+        assertEquals(false,
+                     showUpdateEngineWithChanges);
+    }
+
+    @Test
+    public void testShowUpdateEngineWithChangesWhenFactPatternIsNotNew() {
+        doReturn(false).when(plugin).isNewFactPattern();
+
+        final boolean showUpdateEngineWithChanges = plugin.showUpdateEngineWithChanges();
+
+        assertEquals(true,
+                     showUpdateEngineWithChanges);
+    }
+
+    @Test
+    public void testShowLogicallyInsertWhenFactPatternIsNew() {
+        doReturn(true).when(plugin).isNewFactPattern();
+
+        final boolean showLogicallyInsert = plugin.showLogicallyInsert();
+
+        assertEquals(true,
+                     showLogicallyInsert);
+    }
+
+    @Test
+    public void testShowLogicallyInsertWhenFactPatternIsNotNew() {
+        doReturn(false).when(plugin).isNewFactPattern();
+
+        final boolean showLogicallyInsert = plugin.showLogicallyInsert();
+
+        assertEquals(false,
+                     showLogicallyInsert);
+    }
+
+    @Test
+    public void testGetValueList() {
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+
+        doReturn(actionWrapper).when(plugin).editingWrapper();
+
+        plugin.getValueList();
+
+        verify(actionWrapper).getValueList();
+    }
+
+    @Test
+    public void testSetValueList() {
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+        final String valueList = "valueList";
+
+        doReturn(actionWrapper).when(plugin).editingWrapper();
+
+        plugin.setValueList(valueList);
+
+        verify(actionWrapper).setValueList(valueList);
+    }
+
+    @Test
+    public void testGetBinding() {
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+
+        doReturn(actionWrapper).when(plugin).editingWrapper();
+
+        plugin.getBinding();
+
+        verify(actionWrapper).getBoundName();
+    }
+
+    @Test
+    public void testSetBinding() {
+        final ActionWrapper actionWrapper = mock(ActionWrapper.class);
+        final String binding = "binding";
+
+        doReturn(actionWrapper).when(plugin).editingWrapper();
+
+        plugin.setBinding(binding);
+
+        verify(actionWrapper).setBoundName(binding);
+    }
+
+    @Test
+    public void testTableFormat() {
+        final GuidedDecisionTable52.TableFormat expectedTableFormat = GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY;
+        final GuidedDecisionTable52 model = mock(GuidedDecisionTable52.class);
+
+        when(model.getTableFormat()).thenReturn(expectedTableFormat);
+        when(presenter.getModel()).thenReturn(model);
+
+        final GuidedDecisionTable52.TableFormat actualTableFormat = plugin.tableFormat();
+
+        assertEquals(expectedTableFormat,
+                     actualTableFormat);
+    }
+
+    @Test
+    public void testDefaultValueWidget() {
+        final IsWidget defaultWidget = plugin.defaultValueWidget();
+
+        assertNotNull(defaultWidget);
+    }
+
+    @Test
+    public void testLimitedValueWidget() {
+        final IsWidget limitedValueWidget = plugin.limitedValueWidget();
+
+        assertNotNull(limitedValueWidget);
+    }
+
+    @Test
+    public void testInitializedPatternPage() {
         plugin.initializedPatternPage();
 
         verify(patternPage).disableEntryPoint();
@@ -85,22 +610,10 @@ public class ActionSetFactPluginTest {
     public void testInitializedAdditionalInfoPage() throws Exception {
         plugin.initializedAdditionalInfoPage();
 
-        verify(additionalInfoPage).init(plugin);
+        verify(additionalInfoPage).setPlugin(plugin);
         verify(additionalInfoPage).enableHeader();
         verify(additionalInfoPage).enableHideColumn();
         verify(additionalInfoPage).enableLogicallyInsert();
-    }
-
-    @Test
-    public void testInitializedValueOptionsPageWhenTableIsAnExtendedEntry() throws Exception {
-        doReturn(GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY).when(plugin).tableFormat();
-
-        plugin.initializedValueOptionsPage();
-
-        verify(valueOptionsPage).init(plugin);
-        verify(valueOptionsPage).enableValueList();
-        verify(valueOptionsPage).enableDefaultValue();
-        verify(valueOptionsPage).enableBinding();
     }
 
     @Test
@@ -109,143 +622,18 @@ public class ActionSetFactPluginTest {
 
         plugin.initializedValueOptionsPage();
 
-        verify(valueOptionsPage).init(plugin);
+        verify(valueOptionsPage).setPlugin(plugin);
         verify(valueOptionsPage).enableLimitedValue();
         verify(valueOptionsPage).enableBinding();
     }
 
-    @Test
-    public void testGenerateColumn() throws Exception {
-//        plugin.generateColumn();
-    }
-
-    @Test
-    public void testEditingPattern() throws Exception {
-//        plugin.editingPattern();
-    }
-
-    @Test
-    public void testSetValueOptionsPageAsCompleted() throws Exception {
-//        plugin.setRuleModellerPageAsCompleted();
-    }
-
-    @Test
-    public void testIsValueOptionsPageCompleted() throws Exception {
-//        plugin.isValueOptionsPageCompleted();
-    }
-
-    @Test
-    public void testSetEditingPattern() throws Exception {
-//        plugin.setEditingPattern(null);
-    }
-
-    @Test
-    public void testGetEntryPointName() throws Exception {
-//        plugin.getEntryPointName();
-    }
-
-    @Test
-    public void testSetEntryPointName() throws Exception {
-//        plugin.setEntryPointName("");
-    }
-
-    @Test
-    public void testConstraintValue() throws Exception {
-//        plugin.constraintValue();
-    }
-
-    @Test
-    public void testGetFactType() throws Exception {
-//        plugin.getFactType();
-    }
-
-    @Test
-    public void testGetAccessor() throws Exception {
-//        plugin.getAccessor();
-    }
-
-    @Test
-    public void testFilterEnumFields() throws Exception {
-//        plugin.filterEnumFields();
-    }
-
-    @Test
-    public void testGetFactField() throws Exception {
-//        plugin.getFactField();
-    }
-
-    @Test
-    public void testSetFactField() throws Exception {
-//        plugin.setFactField("");
-    }
-
-    @Test
-    public void testEditingCol() throws Exception {
-//        plugin.editingCol();
-    }
-
-    @Test
-    public void testGetHeader() throws Exception {
-//        plugin.getHeader();
-    }
-
-    @Test
-    public void testSetHeader() throws Exception {
-//        plugin.setHeader("");
-    }
-
-    @Test
-    public void testSetInsertLogical() throws Exception {
-//        plugin.setInsertLogical(true);
-    }
-
-    @Test
-    public void testSetUpdate() throws Exception {
-//        plugin.setUpdate(true);
-    }
-
-    @Test
-    public void testGetValueList() throws Exception {
-//        plugin.getValueList();
-    }
-
-    @Test
-    public void testSetValueList() throws Exception {
-//        plugin.setValueList("");
-    }
-
-    @Test
-    public void testGetBinding() throws Exception {
-//        plugin.getBinding();
-    }
-
-    @Test
-    public void testSetBinding() throws Exception {
-//        plugin.setBinding("");
-    }
-
-    @Test
-    public void testTableFormat() throws Exception {
-//        plugin.tableFormat();
-    }
-
-    @Test
-    public void testDoesOperatorNeedValue() throws Exception {
-//        plugin.doesOperatorNeedValue();
-    }
-
-    @Test
-    public void testDoesOperatorAcceptValueList() throws Exception {
-//        plugin.doesOperatorAcceptValueList();
-    }
-
-    @Test
-    public void testDefaultValueWidget() throws Exception {
-//        plugin.defaultValueWidget();
-    }
-
-    @Test
-    public void testLimitedValueWidget() throws Exception {
-//        plugin.limitedValueWidget();
+    private Pattern52 fakePattern(final String factType,
+                                  final String boundName,
+                                  final boolean negated) {
+        return new Pattern52() {{
+            setFactType(factType);
+            setBoundName(boundName);
+            setNegated(negated);
+        }};
     }
 }

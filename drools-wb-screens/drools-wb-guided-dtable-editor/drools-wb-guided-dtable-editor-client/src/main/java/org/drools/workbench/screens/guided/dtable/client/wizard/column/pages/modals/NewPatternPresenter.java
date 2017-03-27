@@ -24,10 +24,10 @@ import javax.inject.Inject;
 
 import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
-import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasPatternPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.PatternPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.client.mvp.UberElement;
@@ -55,6 +55,11 @@ public class NewPatternPresenter {
 
     public void show() {
         view.clear();
+
+        if (!patternPage.isNegatedPatternEnabled()) {
+            view.disableNegatedPattern();
+        }
+
         view.show();
     }
 
@@ -90,14 +95,10 @@ public class NewPatternPresenter {
         return !brlRuleModel.isVariableNameUsed(binding);
     }
 
-    Pattern52 pattern52() {
-        final Pattern52 editingPattern = new Pattern52();
-
-        editingPattern.setFactType(factType());
-        editingPattern.setBoundName(factName());
-        editingPattern.setNegated(isNegatePatternMatch());
-
-        return editingPattern;
+    PatternWrapper pattern52() {
+        return new PatternWrapper(factType(),
+                                  factName(),
+                                  isNegatePatternMatch());
     }
 
     private void updatePatternPageView() {
@@ -166,5 +167,7 @@ public class NewPatternPresenter {
         String getBindingText();
 
         void showError(String errorMessage);
+
+        void disableNegatedPattern();
     }
 }

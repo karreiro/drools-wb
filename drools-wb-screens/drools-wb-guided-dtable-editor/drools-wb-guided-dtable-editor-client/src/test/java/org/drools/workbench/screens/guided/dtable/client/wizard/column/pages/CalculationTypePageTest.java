@@ -16,15 +16,23 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
+import com.google.gwt.junit.GWTMockUtilities;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(GwtMockitoTestRunner.class)
@@ -33,12 +41,26 @@ public class CalculationTypePageTest {
     @Mock
     private ConditionColumnPlugin plugin;
 
-    private CalculationTypePage page;
+    @Mock
+    private CalculationTypePage.View view;
+
+    @Mock
+    private SimplePanel content;
+
+    @Mock
+    private TranslationService translationService;
+
+    @InjectMocks
+    private CalculationTypePage page = spy(new CalculationTypePage());
+
+    @BeforeClass
+    public static void setupPreferences() {
+        // Prevent runtime GWT.create() error at 'content = new SimplePanel()'
+        GWTMockUtilities.disarm();
+    }
 
     @Before
     public void setup() {
-        page = spy(new CalculationTypePage());
-
         when(page.plugin()).thenReturn(plugin);
     }
 
@@ -68,5 +90,40 @@ public class CalculationTypePageTest {
         when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_UNDEFINED);
 
         page.isComplete(Assert::assertFalse);
+    }
+
+    @Test
+    public void testInitialise() throws Exception {
+        page.initialise();
+
+        verify(content).setWidget(view);
+    }
+
+    @Test
+    public void testGetTitle() throws Exception {
+        final String errorKey = GuidedDecisionTableErraiConstants.CalculationTypePage_CalculationType;
+        final String errorMessage = "Title";
+
+        when(translationService.format(errorKey)).thenReturn(errorMessage);
+
+        final String title = page.getTitle();
+
+        assertEquals(errorMessage,
+                     title);
+    }
+
+    @Test
+    public void testPrepareView() throws Exception {
+        page.prepareView();
+
+        verify(view).init(page);
+    }
+
+    @Test
+    public void testAsWidget() {
+        final Widget contentWidget = page.asWidget();
+
+        assertEquals(contentWidget,
+                     content);
     }
 }

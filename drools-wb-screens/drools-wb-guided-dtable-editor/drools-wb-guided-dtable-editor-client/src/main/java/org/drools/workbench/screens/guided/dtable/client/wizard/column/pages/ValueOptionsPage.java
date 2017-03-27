@@ -221,7 +221,7 @@ public class ValueOptionsPage<T extends HasValueOptionsPage & DecisionTableColum
             return false;
         }
 
-        if (presenter.getDataModelOracle().hasEnums(editingPattern().getFactType(),
+        if (presenter.getDataModelOracle().hasEnums(factType(),
                                                     plugin().getFactField())) {
             return false;
         }
@@ -239,7 +239,7 @@ public class ValueOptionsPage<T extends HasValueOptionsPage & DecisionTableColum
 
     void isFactTypeAnEvent(final Callback<Boolean> callback) {
         if (canSetupCepOperators()) {
-            presenter.getDataModelOracle().isFactTypeAnEvent(editingPattern().getFactType(),
+            presenter.getDataModelOracle().isFactTypeAnEvent(factType(),
                                                              callback);
         } else {
             callback.callback(false);
@@ -252,6 +252,14 @@ public class ValueOptionsPage<T extends HasValueOptionsPage & DecisionTableColum
 
     private Pattern52 editingPattern() {
         return plugin().editingPattern();
+    }
+
+    private String factType() {
+        if (editingPattern() != null) {
+            return editingPattern().getFactType();
+        }
+
+        return "";
     }
 
     public String getValueList() {

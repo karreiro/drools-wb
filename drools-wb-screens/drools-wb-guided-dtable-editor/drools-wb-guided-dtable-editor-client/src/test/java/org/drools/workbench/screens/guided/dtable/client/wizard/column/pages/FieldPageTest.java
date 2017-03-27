@@ -19,20 +19,27 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gwt.junit.GWTMockUtilities;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.drools.workbench.models.datamodel.oracle.FieldAccessorsAndMutators;
 import org.drools.workbench.models.datamodel.oracle.ModelField;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
-import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.uberfire.client.callbacks.Callback;
 
@@ -52,7 +59,7 @@ public class FieldPageTest {
     private AsyncPackageDataModelOracle oracle;
 
     @Mock
-    private Pattern52 pattern52;
+    private PatternWrapper pattern52;
 
     @Mock
     private ConditionCol52 editingCol;
@@ -60,14 +67,26 @@ public class FieldPageTest {
     @Mock
     private GuidedDecisionTable52 model;
 
-    private FieldPage<ConditionColumnPlugin> page;
+    @Mock
+    private FieldPage.View view;
+
+    @Mock
+    private SimplePanel content;
+
+    @Mock
+    private TranslationService translationService;
+
+    @InjectMocks
+    private FieldPage<ConditionColumnPlugin> page = spy(new FieldPage<ConditionColumnPlugin>());
+
+    @BeforeClass
+    public static void setupPreferences() {
+        // Prevent runtime GWT.create() error at 'content = new SimplePanel()'
+        GWTMockUtilities.disarm();
+    }
 
     @Before
     public void setup() {
-        page = spy(new FieldPage<ConditionColumnPlugin>() {{
-            presenter = FieldPageTest.this.presenter;
-        }});
-
         when(page.plugin()).thenReturn(plugin);
     }
 
@@ -93,15 +112,17 @@ public class FieldPageTest {
     }
 
     @Test
-    public void testHasEditingPatternWhenEditingPatternIsNotNull() throws Exception {
-        when(plugin.editingPattern()).thenReturn(pattern52);
+    public void testHasEditingPatternWhenFactPatternIsNotNull() throws Exception {
+        when(pattern52.getFactType()).thenReturn("factType");
+        when(plugin.patternWrapper()).thenReturn(pattern52);
 
         assertTrue(page.hasEditingPattern());
     }
 
     @Test
-    public void testHasEditingPatternWhenEditingPatternIsNull() throws Exception {
-        when(plugin.editingPattern()).thenReturn(null);
+    public void testHasEditingPatternWhenFactPatternIsNull() throws Exception {
+        when(pattern52.getFactType()).thenReturn("");
+        when(plugin.patternWrapper()).thenReturn(pattern52);
 
         assertFalse(page.hasEditingPattern());
     }
@@ -116,7 +137,7 @@ public class FieldPageTest {
     @Test
     public void testForEachFactFieldWhenEditingPatternIsNotNull() throws Exception {
         when(pattern52.getFactType()).thenReturn("factType");
-        when(plugin.editingPattern()).thenReturn(pattern52);
+        when(plugin.patternWrapper()).thenReturn(pattern52);
         when(plugin.getAccessor()).thenReturn(FieldAccessorsAndMutators.ACCESSOR);
         when(presenter.getDataModelOracle()).thenReturn(oracle);
 
@@ -130,7 +151,7 @@ public class FieldPageTest {
 
     @Test
     public void testForEachFactFieldWhenEditingPatternIsNull() throws Exception {
-        when(plugin.editingPattern()).thenReturn(null);
+        when(plugin.patternWrapper()).thenReturn(pattern52);
         when(presenter.getDataModelOracle()).thenReturn(oracle);
 
         page.forEachFactField(s -> {
@@ -144,10 +165,47 @@ public class FieldPageTest {
 
     @Test
     public void testFieldsCallbackWhenConstraintIsRetValue() throws Exception {
-        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_RET_VALUE);
+        final ConditionColumnPlugin plugin = spy(new ConditionColumnPlugin());
+
+        doReturn(BaseSingleFieldConstraint.TYPE_RET_VALUE).when(plugin).constraintValue();
+
+        when(page.plugin()).thenReturn(plugin);
         when(pattern52.getFactType()).thenReturn("factType");
-        when(plugin.editingPattern()).thenReturn(pattern52);
+        when(plugin.patternWrapper()).thenReturn(pattern52);
         when(presenter.getDataModelOracle()).thenReturn(oracle);
+        when(oracle.hasEnums("factType",
+                             "modelField2")).thenReturn(true);
+
+        final List<String> expected = new ArrayList<String>() {{
+            add("modelField1");
+            add("modelField3");
+        }};
+
+        final List<String> result = new ArrayList<>();
+
+        final ModelField[] modelFields = new ModelField[]{
+                modelField("modelField1"),
+                modelField("modelField2"),
+                modelField("modelField3")
+        };
+
+        final Callback<ModelField[]> fieldsCallback = page.fieldsCallback(result::add);
+
+        fieldsCallback.callback(modelFields);
+
+        assertEquals(expected,
+                     result);
+    }
+
+    @Test
+    public void testFieldsCallbackWhenConstraintIsNotRetValue() throws Exception {
+        doReturn(BaseSingleFieldConstraint.TYPE_LITERAL).when(plugin).constraintValue();
+
+        when(pattern52.getFactType()).thenReturn("factType");
+        when(plugin.patternWrapper()).thenReturn(pattern52);
+        when(presenter.getDataModelOracle()).thenReturn(oracle);
+        when(oracle.hasEnums("factType",
+                             "modelField2")).thenReturn(true);
 
         final List<String> expected = new ArrayList<String>() {{
             add("modelField1");
@@ -172,16 +230,18 @@ public class FieldPageTest {
     }
 
     @Test
-    public void testFieldsCallbackWhenConstraintIsNotRetValue() throws Exception {
-        when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_LITERAL);
+    public void testFieldsCallbackWhenConstraintIsRetValueButItDoesNotHaveEnums() throws Exception {
+        doReturn(BaseSingleFieldConstraint.TYPE_RET_VALUE).when(plugin).constraintValue();
+
         when(pattern52.getFactType()).thenReturn("factType");
-        when(plugin.editingPattern()).thenReturn(pattern52);
+        when(plugin.patternWrapper()).thenReturn(pattern52);
         when(presenter.getDataModelOracle()).thenReturn(oracle);
         when(oracle.hasEnums("factType",
-                             "modelField2")).thenReturn(true);
+                             "modelField2")).thenReturn(false);
 
         final List<String> expected = new ArrayList<String>() {{
             add("modelField1");
+            add("modelField2");
             add("modelField3");
         }};
 
@@ -223,6 +283,48 @@ public class FieldPageTest {
         when(plugin.getFactField()).thenReturn(null);
 
         page.isComplete(Assert::assertTrue);
+    }
+
+    @Test
+    public void testGetFactField() {
+        page.getFactField();
+
+        verify(plugin).getFactField();
+    }
+
+    @Test
+    public void testInitialise() throws Exception {
+        page.initialise();
+
+        verify(content).setWidget(view);
+    }
+
+    @Test
+    public void testGetTitle() throws Exception {
+        final String errorKey = GuidedDecisionTableErraiConstants.FieldPage_Field;
+        final String errorMessage = "Title";
+
+        when(translationService.format(errorKey)).thenReturn(errorMessage);
+
+        final String title = page.getTitle();
+
+        assertEquals(errorMessage,
+                     title);
+    }
+
+    @Test
+    public void testPrepareView() throws Exception {
+        page.prepareView();
+
+        verify(view).init(page);
+    }
+
+    @Test
+    public void testAsWidget() {
+        final Widget contentWidget = page.asWidget();
+
+        assertEquals(contentWidget,
+                     content);
     }
 
     private ModelField modelField(final String name) {

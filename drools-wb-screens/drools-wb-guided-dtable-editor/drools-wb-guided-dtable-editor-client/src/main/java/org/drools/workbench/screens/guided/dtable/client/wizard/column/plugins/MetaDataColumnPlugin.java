@@ -25,6 +25,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.MetadataCol52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.MetaDataColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
@@ -58,6 +59,11 @@ public class MetaDataColumnPlugin extends BaseDecisionTableColumnPlugin {
         presenter.appendColumn(metadataColumn());
 
         return true;
+    }
+
+    @Override
+    public Type getType() {
+        return Type.ADVANCED;
     }
 
     boolean isValidMetadata() {

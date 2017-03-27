@@ -24,7 +24,7 @@ public class ValueOptionsPageInitializer {
 
     public static ValueOptionsPage<ActionSetFactPlugin> init(final ValueOptionsPage<ActionSetFactPlugin> page,
                                                              final ActionSetFactPlugin plugin) {
-        page.init(plugin);
+        page.setPlugin(plugin);
 
         switch (plugin.tableFormat()) {
             case EXTENDED_ENTRY:
@@ -43,7 +43,7 @@ public class ValueOptionsPageInitializer {
 
     public static ValueOptionsPage<ConditionColumnPlugin> init(final ValueOptionsPage<ConditionColumnPlugin> page,
                                                                final ConditionColumnPlugin plugin) {
-        page.init(plugin);
+        page.setPlugin(plugin);
 
         switch (plugin.tableFormat()) {
             case EXTENDED_ENTRY:

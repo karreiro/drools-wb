@@ -17,6 +17,7 @@
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 
 import org.drools.workbench.models.guided.dtable.shared.model.MetadataCol52;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.MetaDataColumnPage;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
@@ -50,6 +51,19 @@ public class MetaDataColumnPluginTest {
 
     @InjectMocks
     private MetaDataColumnPlugin plugin = new MetaDataColumnPlugin();
+
+    @Test
+    public void testGetTitle() {
+        final String errorKey = GuidedDecisionTableErraiConstants.MetaDataColumnPlugin_AddNewMetadata;
+        final String errorMessage = "Title";
+
+        when(translationService.format(errorKey)).thenReturn(errorMessage);
+
+        final String title = plugin.getTitle();
+
+        assertEquals(errorMessage,
+                     title);
+    }
 
     @Test
     public void testGetPages() throws Exception {

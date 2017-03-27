@@ -36,6 +36,7 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.Add
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.PatternToDeletePage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
@@ -94,7 +95,7 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
 
     @Override
     public String getHeader() {
-        return null;
+        return editingCol().getHeader();
     }
 
     @Override
@@ -105,13 +106,23 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
     }
 
     @Override
-    public void setInsertLogical(Boolean value) {
-
+    public void setInsertLogical(final Boolean value) {
+        // empty
     }
 
     @Override
-    public void setUpdate(Boolean value) {
+    public void setUpdate(final Boolean value) {
+        // empty
+    }
 
+    @Override
+    public boolean showUpdateEngineWithChanges() {
+        return false;
+    }
+
+    @Override
+    public boolean showLogicallyInsert() {
+        return false;
     }
 
     public boolean unique(final String header) {
@@ -222,5 +233,10 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
 
     private GuidedDecisionTable52.TableFormat tableFormat() {
         return presenter.getModel().getTableFormat();
+    }
+
+    @Override
+    public Type getType() {
+        return Type.BASIC;
     }
 }

@@ -20,18 +20,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.junit.GWTMockUtilities;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
-import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.modals.NewPatternPresenter;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -40,6 +45,9 @@ import static org.mockito.Mockito.*;
 
 @RunWith(GwtMockitoTestRunner.class)
 public class PatternPageTest {
+
+    @Captor
+    private ArgumentCaptor<PatternWrapper> patternWrapperArgumentCaptor;
 
     @Mock
     private PatternPage.View view;
@@ -59,6 +67,9 @@ public class PatternPageTest {
     @InjectMocks
     private PatternPage<ConditionColumnPlugin> page = spy(new PatternPage<ConditionColumnPlugin>());
 
+    @Mock
+    private SimplePanel content;
+
     private GuidedDecisionTable52 model;
 
     @BeforeClass
@@ -77,7 +88,7 @@ public class PatternPageTest {
 
     @Test
     public void testForEachPatternValues() throws Exception {
-        when(model.getPatterns()).thenReturn(fakePatterns());
+        when(plugin.getPatterns()).thenReturn(fakePatterns());
 
         final List<String> patternValues = new ArrayList<>();
 
@@ -91,8 +102,7 @@ public class PatternPageTest {
 
     @Test
     public void testForEachPatternNames() throws Exception {
-        when(model.getPatterns()).thenReturn(fakePatterns());
-        when(translationService.format(GuidedDecisionTableErraiConstants.PatternPage_NegatedPattern)).thenReturn("Not");
+        when(plugin.getPatterns()).thenReturn(fakePatterns());
 
         final List<String> patternNames = new ArrayList<>();
 
@@ -100,41 +110,43 @@ public class PatternPageTest {
 
         assertEquals("factType1 [boundName1]",
                      patternNames.get(0));
-        assertEquals("Not factType2 [boundName2]",
+        assertEquals("negatedPattern factType2 [boundName2]",
                      patternNames.get(1));
     }
 
     @Test
     public void testSetSelectedEditingPattern() throws Exception {
-        when(model.getPatterns()).thenReturn(fakePatterns());
-
-        final Pattern52 pattern = newPattern("factType1",
-                                             "boundName1",
-                                             false);
-
-        when(model.getConditionPattern(eq("boundName1"))).thenReturn(pattern);
-        when(view.getSelectedValue()).thenReturn("factType1 boundName1 false");
+        when(view.getSelectedValue()).thenReturn("factType boundName false");
 
         page.setSelectedEditingPattern();
 
-        verify(page).setEditingPattern(pattern);
+        verify(page).setEditingPattern(patternWrapperArgumentCaptor.capture());
+
+        final PatternWrapper pattern = patternWrapperArgumentCaptor.getValue();
+
+        assertEquals("factType",
+                     pattern.getFactType());
+        assertEquals("boundName",
+                     pattern.getBoundName());
+        assertFalse(pattern.isNegated());
     }
 
     @Test
     public void testSetEditingPattern() throws Exception {
-        final Pattern52 pattern = newPattern("factType1",
-                                             "boundName1",
-                                             false);
+        when(view.getEntryPointName()).thenReturn("entryPoint");
+
+        final PatternWrapper pattern = spy(newPattern("factType1",
+                                                      "boundName1",
+                                                      false));
 
         page.setEditingPattern(pattern);
 
+        verify(pattern).setEntryPointName("entryPoint");
         verify(plugin).setEditingPattern(pattern);
     }
 
     @Test
     public void testShowNewPatternModal() throws Exception {
-        when(model.getPatterns()).thenReturn(fakePatterns());
-
         page.showNewPatternModal();
 
         verify(newPatternPresenter).show();
@@ -142,22 +154,21 @@ public class PatternPageTest {
 
     @Test
     public void testCurrentPatternNameWhenTheCurrentPatternIsNotNull() throws Exception {
-        when(translationService.format(GuidedDecisionTableErraiConstants.PatternPage_NegatedPattern)).thenReturn("Not");
-        when(model.getPatterns()).thenReturn(fakePatterns());
-        when(plugin.editingPattern()).thenReturn(newPattern("factType3",
+        when(plugin.getPatterns()).thenReturn(fakePatterns());
+        when(plugin.patternWrapper()).thenReturn(newPattern("factType3",
                                                             "boundName3",
                                                             true));
 
         final String patternName = page.currentPatternName();
 
-        assertEquals("Not factType3 [boundName3]",
+        assertEquals("negatedPattern factType3 [boundName3]",
                      patternName);
     }
 
     @Test
     public void testCurrentPatternNameWhenTheCurrentPatternIsNull() throws Exception {
-        when(model.getPatterns()).thenReturn(fakePatterns());
-        when(plugin.editingPattern()).thenReturn(null);
+        when(plugin.getPatterns()).thenReturn(fakePatterns());
+        when(plugin.patternWrapper()).thenReturn(null);
 
         final String patternName = page.currentPatternName();
 
@@ -167,8 +178,8 @@ public class PatternPageTest {
 
     @Test
     public void testCurrentPatternValueWhenTheCurrentPatternIsNotNull() throws Exception {
-        when(model.getPatterns()).thenReturn(fakePatterns());
-        when(plugin.editingPattern()).thenReturn(newPattern("factType3",
+        when(plugin.getPatterns()).thenReturn(fakePatterns());
+        when(plugin.patternWrapper()).thenReturn(newPattern("factType3",
                                                             "boundName3",
                                                             true));
 
@@ -180,7 +191,7 @@ public class PatternPageTest {
 
     @Test
     public void testCurrentPatternValueWhenTheCurrentPatternIsNull() throws Exception {
-        when(plugin.editingPattern()).thenReturn(null);
+        when(plugin.patternWrapper()).thenReturn(null);
 
         final String patternValue = page.currentPatternValue();
 
@@ -189,58 +200,10 @@ public class PatternPageTest {
     }
 
     @Test
-    public void testExtractEditingPatternWithBoundPatterns() {
-        final String[] metadata = new String[]{"Applicant", "$a", "false"};
-        final Pattern52 expectedPattern = newPattern("Applicant",
-                                                     "$a",
-                                                     false);
-
-        model.getConditions().add(expectedPattern);
-
-        final Pattern52 pattern = page.extractEditingPattern(metadata);
-
-        assertNotNull(pattern);
-        assertEquals(expectedPattern,
-                     pattern);
-    }
-
-    @Test
-    public void testExtractEditingPatternWithoutBoundPatterns() {
-        final String[] metadata = new String[]{"Applicant", "$a", "false"};
-
-        final Pattern52 pattern52 = page.extractEditingPattern(metadata);
-
-        assertNull(pattern52);
-    }
-
-    @Test
-    public void testExtractEditingPatternWithNotPatterns() {
-        final String[] metadata = new String[]{"Applicant", "", "true"};
-        final Pattern52 pattern52 = newPattern("Applicant",
-                                               "",
-                                               true);
-
-        model.getConditions().add(pattern52);
-
-        final Pattern52 pattern = page.extractEditingPattern(metadata);
-
-        assertNotNull(pattern);
-        assertEquals(pattern52,
-                     pattern);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void testExtractEditingPatternWithoutNotPatterns() {
-        final String[] metadata = new String[]{"Applicant", "", "true"};
-
-        page.extractEditingPattern(metadata);
-    }
-
-    @Test
     public void testGetPatternsWhenCurrentPatternIsNull() {
-        when(model.getPatterns()).thenReturn(fakePatterns());
+        when(plugin.getPatterns()).thenReturn(fakePatterns());
 
-        final List<Pattern52> patterns = page.getPatterns();
+        final List<PatternWrapper> patterns = page.getPatterns();
 
         assertEquals(2,
                      patterns.size());
@@ -248,19 +211,129 @@ public class PatternPageTest {
 
     @Test
     public void testGetPatternsWhenCurrentPatternIsNotNull() {
-        when(model.getPatterns()).thenReturn(fakePatterns());
-        when(plugin.editingPattern()).thenReturn(newPattern("factType3",
+        when(plugin.getPatterns()).thenReturn(fakePatterns());
+        when(plugin.patternWrapper()).thenReturn(newPattern("factType3",
                                                             "boundName3",
                                                             true));
 
-        final List<Pattern52> patterns = page.getPatterns();
+        final List<PatternWrapper> patterns = page.getPatterns();
 
         assertEquals(3,
                      patterns.size());
     }
 
-    private List<Pattern52> fakePatterns() {
-        return new ArrayList<Pattern52>() {{
+    @Test
+    public void testGetPatternsWhenNegatedPatternsAreNotEnabled() {
+        page.disableNegatedPatterns();
+
+        when(plugin.getPatterns()).thenReturn(fakePatterns());
+
+        final List<PatternWrapper> patterns = page.getPatterns();
+
+        assertEquals(1,
+                     patterns.size());
+    }
+
+    @Test
+    public void testInitialise() throws Exception {
+        page.initialise();
+
+        verify(newPatternPresenter).init(page);
+        verify(content).setWidget(view);
+    }
+
+    @Test
+    public void testGetTitle() throws Exception {
+        final String errorKey = GuidedDecisionTableErraiConstants.PatternPage_Pattern;
+        final String errorMessage = "Title";
+
+        when(translationService.format(errorKey)).thenReturn(errorMessage);
+
+        final String title = page.getTitle();
+
+        assertEquals(errorMessage,
+                     title);
+    }
+
+    @Test
+    public void testPrepareView() throws Exception {
+        page.prepareView();
+
+        verify(view).init(page);
+    }
+
+    @Test
+    public void testAsWidget() {
+        final Widget contentWidget = page.asWidget();
+
+        assertEquals(contentWidget,
+                     content);
+    }
+
+    @Test
+    public void testIsCompleteWhenPatternIsSet() {
+        when(plugin.patternWrapper()).thenReturn(newPattern("factType",
+                                                            "",
+                                                            false));
+
+        page.isComplete(Assert::assertTrue);
+    }
+
+    @Test
+    public void testIsCompleteWhenPatternIsNotSet() {
+        when(plugin.patternWrapper()).thenReturn(newPattern("",
+                                                            "",
+                                                            false));
+
+        page.isComplete(Assert::assertFalse);
+    }
+
+    @Test
+    public void testPresenter() {
+        assertEquals(presenter,
+                     page.presenter());
+    }
+
+    @Test
+    public void testDisableNegatedPatterns() {
+        page.disableNegatedPatterns();
+
+        assertFalse(page.isNegatedPatternEnabled());
+    }
+
+    @Test
+    public void testDisableEntryPoint() {
+        page.disableEntryPoint();
+
+        verify(view).disableEntryPoint();
+    }
+
+    @Test
+    public void testGetEntryPointName() {
+        final String expectedEntryPoint = "entryPoint";
+
+        when(plugin.getEntryPointName()).thenReturn(expectedEntryPoint);
+
+        final String actualEntryPoint = page.getEntryPointName();
+
+        verify(plugin).getEntryPointName();
+        assertEquals(expectedEntryPoint,
+                     actualEntryPoint);
+    }
+
+    @Test
+    public void testSetEntryPoint() {
+        final String entryPoint = "entryPoint";
+
+        when(view.getEntryPointName()).thenReturn(entryPoint);
+
+        page.setEntryPoint();
+
+        verify(plugin).setEntryPointName(entryPoint);
+    }
+
+    private List<PatternWrapper> fakePatterns() {
+        return new ArrayList<PatternWrapper>() {{
             add(newPattern("factType1",
                            "boundName1",
                            false));
@@ -270,13 +343,11 @@ public class PatternPageTest {
         }};
     }
 
-    private Pattern52 newPattern(final String factType,
-                                 final String boundName,
-                                 final boolean negated) {
-        return new Pattern52() {{
-            setFactType(factType);
-            setBoundName(boundName);
-            setNegated(negated);
-        }};
+    private PatternWrapper newPattern(final String factType,
+                                      final String boundName,
+                                      final boolean negated) {
+        return new PatternWrapper(factType,
+                                  boundName,
+                                  negated);
     }
 }

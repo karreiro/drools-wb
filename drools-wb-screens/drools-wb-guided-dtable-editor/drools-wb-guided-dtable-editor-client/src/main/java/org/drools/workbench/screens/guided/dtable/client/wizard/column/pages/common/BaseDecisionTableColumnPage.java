@@ -35,8 +35,6 @@ public abstract class BaseDecisionTableColumnPage<T extends DecisionTableColumnP
     @Inject
     private TranslationService translationService;
 
-    // TODO {karreiro} - remove this two methods (init)
-
     public void init(final NewGuidedDecisionTableColumnWizard wizard) {
         this.wizard = wizard;
         this.presenter = wizard.getPresenter();
@@ -44,7 +42,7 @@ public abstract class BaseDecisionTableColumnPage<T extends DecisionTableColumnP
         initialise();
     }
 
-    public void init(final T plugin) {
+    public void setPlugin(final T plugin) {
         this.plugin = plugin;
     }
 
@@ -53,7 +51,7 @@ public abstract class BaseDecisionTableColumnPage<T extends DecisionTableColumnP
     }
 
     protected String translate(final String key,
-                               Object... args) {
+                               final Object... args) {
         return translationService.format(key,
                                          args);
     }

@@ -18,7 +18,10 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -35,7 +38,6 @@ import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTabl
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
-import org.drools.workbench.screens.guided.dtable.client.widget.DTCellValueWidgetFactory;
 import org.drools.workbench.screens.guided.dtable.client.widget.Validator;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.CellUtilities;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.ColumnUtilities;
@@ -52,8 +54,10 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.Pat
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.ValueOptionsPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DefaultWidgetFactory;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.LimitedWidgetFactory;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ValueOptionsPageInitializer;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
@@ -66,6 +70,8 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
                                                                                     HasValueOptionsPage,
                                                                                     HasAdditionalInfoPage {
 
+    private static final Pattern52 EMPTY_PATTERN = new Pattern52();
+
     @Inject
     private PatternPage<ConditionColumnPlugin> patternPage;
 
@@ -73,7 +79,7 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     private CalculationTypePage calculationTypePage;
 
     @Inject
-    private FieldPage fieldPage;
+    private FieldPage<ConditionColumnPlugin> fieldPage;
 
     @Inject
     private OperatorPage operatorPage;
@@ -84,13 +90,15 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     @Inject
     private ValueOptionsPage<ConditionColumnPlugin> valueOptionsPage;
 
-    private Pattern52 editingPattern;
+    private PatternWrapper patternWrapper;
 
     private ConditionCol52 editingCol;
 
     private int constraintValue;
 
     private Boolean valueOptionsPageCompleted;
+
+    private Pattern52 editingPattern = EMPTY_PATTERN;
 
     @Override
     public String getTitle() {
@@ -132,9 +140,42 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         return true;
     }
 
+    @Override
+    public Type getType() {
+        return Type.BASIC;
+    }
+
     void appendColumn() {
         presenter.appendColumn(editingPattern(),
                                editingCol());
+    }
+
+    public Pattern52 editingPattern() {
+        editingPattern.setFactType(patternWrapper().getFactType());
+        editingPattern.setBoundName(patternWrapper().getBoundName());
+        editingPattern.setNegated(patternWrapper().isNegated());
+        editingPattern.setEntryPointName(patternWrapper().getEntryPointName());
+
+        return editingPattern;
+    }
+
+    private Pattern52 extractEditingPattern(final PatternWrapper patternWrapper) {
+        final String factType = patternWrapper().getFactType();
+        final String boundName = patternWrapper().getBoundName();
+        final Optional<Pattern52> pattern;
+
+        if (!patternWrapper().isNegated()) {
+            pattern = Optional.ofNullable(model().getConditionPattern(boundName));
+        } else {
+            pattern = model()
+                    .getPatterns()
+                    .stream()
+                    .filter(Pattern52::isNegated)
+                    .filter(p -> p.getFactType().equals(factType))
+                    .findFirst();
+        }
+
+        return pattern.orElse(EMPTY_PATTERN);
     }
 
     void prepareValues() {
@@ -179,13 +220,14 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     }
 
     @Override
-    public Pattern52 editingPattern() {
-        return editingPattern;
+    public PatternWrapper patternWrapper() {
+        return Optional.ofNullable(patternWrapper).orElse(new PatternWrapper());
     }
 
     @Override
-    public void setEditingPattern(final Pattern52 editingPattern) {
-        this.editingPattern = editingPattern;
+    public void setEditingPattern(final PatternWrapper patternWrapper) {
+        this.patternWrapper = patternWrapper;
+        this.editingPattern = extractEditingPattern(patternWrapper);
 
         setupDefaultValues();
 
@@ -199,8 +241,8 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     @Override
     public String getEntryPointName() {
-        if (editingPattern() != null) {
-            return editingPattern().getEntryPointName();
+        if (patternWrapper() != null) {
+            return patternWrapper().getEntryPointName();
         }
 
         return "";
@@ -208,14 +250,25 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     @Override
     public void setEntryPointName(final String entryPointName) {
-        if (editingPattern() != null) {
-            editingPattern().setEntryPointName(entryPointName);
+        if (patternWrapper() != null) {
+            patternWrapper().setEntryPointName(entryPointName);
         }
     }
 
     @Override
+    public List<PatternWrapper> getPatterns() {
+        final Set<PatternWrapper> patterns = new HashSet<>();
+
+        for (Pattern52 pattern52 : model().getPatterns()) {
+            patterns.add(new PatternWrapper(pattern52));
+        }
+
+        return new ArrayList<>(patterns);
+    }
+
+    @Override
     public ConditionCol52 editingCol() {
-        if (editingPattern() == null) {
+        if (nil(patternWrapper().getFactType())) {
             resetFieldAndOperator();
         }
 
@@ -242,6 +295,16 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     @Override
     public void setUpdate(Boolean value) {
         // empty - this widget is not enabled
+    }
+
+    @Override
+    public boolean showUpdateEngineWithChanges() {
+        return false;
+    }
+
+    @Override
+    public boolean showLogicallyInsert() {
+        return false;
     }
 
     @Override
@@ -301,7 +364,7 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     @Override
     public GuidedDecisionTable52.TableFormat tableFormat() {
-        return presenter.getModel().getTableFormat();
+        return model().getTableFormat();
     }
 
     @Override
@@ -333,7 +396,7 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     }
 
     private Validator validator() {
-        return new Validator(presenter.getModel().getConditions());
+        return new Validator(model().getConditions());
     }
 
     public void setConstraintValue(final int constraintValue) {
@@ -359,7 +422,7 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     }
 
     public String getFactType() {
-        return editingPattern() == null ? "" : editingPattern().getFactType();
+        return patternWrapper().getFactType();
     }
 
     public void setOperator(final String operator) {
@@ -384,7 +447,7 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     boolean isBindingNotUnique() {
         final String binding = editingCol().getBinding();
-        final BRLRuleModel rm = new BRLRuleModel(presenter.getModel());
+        final BRLRuleModel rm = new BRLRuleModel(model());
 
         return editingCol().isBound() && rm.isVariableNameUsed(binding);
     }
@@ -409,9 +472,8 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     void assertDefaultValue() {
         final CellUtilities cellUtilities = new CellUtilities();
-        final GuidedDecisionTable52 model = presenter.getModel();
         final AsyncPackageDataModelOracle oracle = presenter.getDataModelOracle();
-        final ColumnUtilities columnUtilities = new ColumnUtilities(model,
+        final ColumnUtilities columnUtilities = new ColumnUtilities(model(),
                                                                     oracle);
         final List<String> valueList = Arrays.asList(columnUtilities.getValueList(editingCol));
 
@@ -441,7 +503,7 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     }
 
     private boolean unique(String header) {
-        for (CompositeColumn<?> cc : presenter.getModel().getConditions()) {
+        for (CompositeColumn<?> cc : model().getConditions()) {
             for (int iChild = 0; iChild < cc.getChildColumns().size(); iChild++) {
                 if (cc.getChildColumns().get(iChild).getHeader().equals(header)) {
                     return false;
@@ -464,5 +526,9 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     private boolean isExtendedEntryTable() {
         return tableFormat() == GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY;
+    }
+
+    GuidedDecisionTable52 model() {
+        return presenter.getModel();
     }
 }

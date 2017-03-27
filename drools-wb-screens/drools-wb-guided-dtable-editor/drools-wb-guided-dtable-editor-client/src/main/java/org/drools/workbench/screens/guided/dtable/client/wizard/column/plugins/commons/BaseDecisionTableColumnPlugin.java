@@ -44,8 +44,8 @@ public abstract class BaseDecisionTableColumnPlugin implements DecisionTableColu
 //        for ( WizardPage wizardPage : getPages() ) {
 //            final BaseDecisionTableColumnPage page = (BaseDecisionTableColumnPage) wizardPage;
 //
-//            page.init( this );
-//            page.init( wizard );
+//            page.setPlugin( this );
+//            page.setPlugin( wizard );
 //        }
 
         setupFinishCommand();

@@ -17,6 +17,8 @@
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
@@ -26,6 +28,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.ActionWorkItemCol5
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.WorkItemPage;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
@@ -33,6 +36,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
 import org.uberfire.mocks.EventSourceMock;
 
@@ -213,5 +217,148 @@ public class ActionWorkItemPluginTest {
         final boolean unique = plugin.unique(header);
 
         assertFalse(unique);
+    }
+
+    @Test
+    public void testGetPages() throws Exception {
+        final List<WizardPage> pages = plugin.getPages();
+
+        assertEquals(2,
+                     pages.size());
+    }
+
+    @Test
+    public void testGetTitle() {
+        final String errorKey = GuidedDecisionTableErraiConstants.ActionWorkItemPlugin_ExecuteWorkItem;
+        final String errorMessage = "Title";
+
+        when(translationService.format(errorKey)).thenReturn(errorMessage);
+
+        final String title = plugin.getTitle();
+
+        assertEquals(errorMessage,
+                     title);
+    }
+
+    @Test
+    public void testInitializedWorkItemPage() {
+        plugin.workItemPage();
+
+        verify(workItemPage).enableParameters();
+    }
+
+    @Test
+    public void testInitializedAdditionalInfoPage() throws Exception {
+        plugin.additionalInfoPage();
+
+        verify(additionalInfoPage).setPlugin(plugin);
+        verify(additionalInfoPage).enableHeader();
+        verify(additionalInfoPage).enableHideColumn();
+    }
+
+    @Test
+    public void testInit() throws Exception {
+        final NewGuidedDecisionTableColumnWizard wizard = mock(NewGuidedDecisionTableColumnWizard.class);
+
+        plugin.init(wizard);
+
+        assertNotNull(plugin.editingCol());
+    }
+
+    @Test
+    public void testGetHeader() {
+        final ActionWorkItemCol52 actionCol52 = mock(ActionWorkItemCol52.class);
+
+        doReturn(actionCol52).when(plugin).editingCol();
+
+        plugin.getHeader();
+
+        verify(actionCol52).getHeader();
+    }
+
+    @Test
+    public void testWorkItemDefinition() {
+        final ActionWorkItemCol52 actionCol52 = mock(ActionWorkItemCol52.class);
+
+        doReturn(actionCol52).when(plugin).editingCol();
+
+        plugin.getWorkItemDefinition();
+
+        verify(actionCol52).getWorkItemDefinition();
+    }
+
+    @Test
+    public void testWorkItemWhenItDoesNotHaveWorkItemDefinition() {
+        final PortableWorkDefinition workDefinition = mock(PortableWorkDefinition.class);
+        final String workItemName = "workItem";
+
+        doReturn(workItemName).when(workDefinition).getName();
+        doReturn(workDefinition).when(plugin).getWorkItemDefinition();
+
+        final String workItem = plugin.getWorkItem();
+
+        assertEquals(workItemName,
+                     workItem);
+    }
+
+    @Test
+    public void testWorkItemWhenItHasWorkItemDefinition() {
+        doReturn(null).when(plugin).getWorkItemDefinition();
+
+        final String workItem = plugin.getWorkItem();
+
+        assertEquals("",
+                     workItem);
+    }
+
+    @Test
+    public void testFindWorkItemDefinition() {
+        final PortableWorkDefinition workItem1 = getMock("workItem1");
+        final PortableWorkDefinition workItem2 = getMock("workItem2");
+
+        final HashSet<PortableWorkDefinition> fakeDefinitions = new HashSet<PortableWorkDefinition>() {{
+            add(workItem1);
+            add(workItem2);
+        }};
+
+        when(presenter.getWorkItemDefinitions()).thenReturn(fakeDefinitions);
+
+        final PortableWorkDefinition workItem = plugin.findWorkItemDefinition("workItem1");
+
+        assertEquals(workItem1,
+                     workItem);
+    }
+
+    @Test
+    public void testForEachWorkItem() {
+        final PortableWorkDefinition workItem1 = getMock("workItem1");
+        final PortableWorkDefinition workItem2 = getMock("workItem2");
+        final HashMap<String, String> actualWorkItems = new HashMap<>();
+        final HashMap<String, String> expectedWorkItems = new HashMap<String, String>() {{
+            put("workItem1",
+                "workItem1");
+            put("workItem2",
+                "workItem2");
+        }};
+        final HashSet<PortableWorkDefinition> fakeDefinitions = new HashSet<PortableWorkDefinition>() {{
+            add(workItem1);
+            add(workItem2);
+        }};
+
+        when(presenter.getWorkItemDefinitions()).thenReturn(fakeDefinitions);
+
+        plugin.forEachWorkItem(actualWorkItems::put);
+
+        assertEquals(expectedWorkItems,
+                     actualWorkItems);
+    }
+
+    private PortableWorkDefinition getMock(final String name) {
+        final PortableWorkDefinition mock = mock(PortableWorkDefinition.class);
+
+        when(mock.getDisplayName()).thenReturn(name);
+        when(mock.getName()).thenReturn(name);
+
+        return mock;
     }
 }

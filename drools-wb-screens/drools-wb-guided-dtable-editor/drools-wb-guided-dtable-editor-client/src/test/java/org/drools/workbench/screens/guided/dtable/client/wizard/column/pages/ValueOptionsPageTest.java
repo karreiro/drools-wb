@@ -30,6 +30,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.widget.DTCellValueWidgetFactory;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -39,7 +40,6 @@ import org.kie.workbench.common.services.shared.preferences.ApplicationPreferenc
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.uberfire.client.callbacks.Callback;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -55,6 +55,9 @@ public class ValueOptionsPageTest {
 
     @Mock
     private GuidedDecisionTableView.Presenter presenter;
+
+    @Mock
+    private PatternWrapper patternWrapper;
 
     @Mock
     private Pattern52 pattern52;
@@ -91,7 +94,7 @@ public class ValueOptionsPageTest {
         when(editingCol.getDefaultValue()).thenReturn(defaultValue);
         when(presenter.getModel()).thenReturn(model);
         when(presenter.getDataModelOracle()).thenReturn(oracle);
-        when(plugin.editingPattern()).thenReturn(pattern52);
+        when(plugin.patternWrapper()).thenReturn(patternWrapper);
         when(plugin.editingCol()).thenReturn(editingCol);
         when(page.plugin()).thenReturn(plugin);
     }
@@ -117,6 +120,9 @@ public class ValueOptionsPageTest {
 
     @Test
     public void testCanSetupCepOperatorsWhenItIsEnabledAndEditingPatternIsNotNull() throws Exception {
+        when(plugin.editingPattern()).thenReturn(pattern52);
+        when(pattern52.getFactType()).thenReturn("factType");
+
         page.enableCepOperators();
 
         assertTrue(page.canSetupCepOperators());
@@ -124,7 +130,7 @@ public class ValueOptionsPageTest {
 
     @Test
     public void testCanSetupCepOperatorsWhenItIsEnabledAndEditingPatternIsNull() throws Exception {
-        when(plugin.editingPattern()).thenReturn(null);
+        when(plugin.patternWrapper()).thenReturn(null);
 
         page.enableCepOperators();
 
@@ -140,7 +146,7 @@ public class ValueOptionsPageTest {
 
     @Test
     public void testCanSetupDefaultValueWhenEditingPatternIsNull() throws Exception {
-        when(plugin.editingPattern()).thenReturn(null);
+        when(plugin.patternWrapper()).thenReturn(null);
 
         assertFalse(page.canSetupDefaultValue());
     }
@@ -200,7 +206,7 @@ public class ValueOptionsPageTest {
 
     @Test
     public void testCanSetupLimitedValueWhenEditingPatternIsNull() throws Exception {
-        when(plugin.editingPattern()).thenReturn(null);
+        when(plugin.patternWrapper()).thenReturn(null);
 
         assertFalse(page.canSetupLimitedValue());
     }
@@ -243,26 +249,20 @@ public class ValueOptionsPageTest {
 
     @Test
     public void testIsFactTypeAnEventWhenCepOperatorsIsEnabled() throws Exception {
-        final Callback<Boolean> callback = (b) -> {
-        };
-
         page.enableCepOperators();
 
+        when(plugin.editingPattern()).thenReturn(pattern52);
         when(pattern52.getFactType()).thenReturn("factType");
 
-        page.isFactTypeAnEvent(callback);
-
         page.isFactTypeAnEvent(Assert::assertTrue);
-        verify(oracle).isFactTypeAnEvent("factType",
-                                         callback);
+
+        verify(oracle).isFactTypeAnEvent(eq("factType"),
+                                         any());
     }
 
     @Test
     public void testIsFactTypeAnEventWhenCepOperatorsIsNotEnabled() throws Exception {
-        final Callback<Boolean> callback = (b) -> {
-        };
-
-        when(pattern52.getFactType()).thenReturn("factType");
+        when(patternWrapper.getFactType()).thenReturn("factType");
 
         page.isFactTypeAnEvent(Assert::assertFalse);
     }

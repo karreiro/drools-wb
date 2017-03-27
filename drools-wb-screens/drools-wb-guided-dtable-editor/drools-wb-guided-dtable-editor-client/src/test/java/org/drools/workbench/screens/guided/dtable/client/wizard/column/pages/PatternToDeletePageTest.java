@@ -20,9 +20,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.junit.GWTMockUtilities;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionRetractFactPlugin;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
@@ -53,6 +56,9 @@ public class PatternToDeletePageTest {
 
     @Mock
     private GuidedDecisionTable52 model;
+
+    @Mock
+    private SimplePanel content;
 
     @InjectMocks
     private PatternToDeletePage page = spy(new PatternToDeletePage());
@@ -140,6 +146,34 @@ public class PatternToDeletePageTest {
         page.markAsViewed();
 
         verify(plugin).setPatternToDeletePageAsCompleted();
+    }
+
+    @Test
+    public void testInitialise() throws Exception {
+        page.initialise();
+
+        verify(content).setWidget(view);
+    }
+
+    @Test
+    public void testGetTitle() throws Exception {
+        final String errorKey = GuidedDecisionTableErraiConstants.PatternToDeletePage_Pattern;
+        final String errorMessage = "Title";
+
+        when(translationService.format(errorKey)).thenReturn(errorMessage);
+
+        final String title = page.getTitle();
+
+        assertEquals(errorMessage,
+                     title);
+    }
+
+    @Test
+    public void testAsWidget() {
+        final Widget contentWidget = page.asWidget();
+
+        assertEquals(contentWidget,
+                     content);
     }
 
     private Pattern52 pattern(final String pattern1) {

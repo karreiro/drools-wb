@@ -36,10 +36,8 @@ import org.drools.workbench.models.guided.dtable.shared.model.ActionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLActionColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLActionVariableColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
-import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryBRLActionColumn;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
@@ -48,6 +46,7 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.Add
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.RuleModellerPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.drools.workbench.screens.guided.rule.client.editor.RuleModellerConfiguration;
 import org.drools.workbench.screens.guided.rule.client.editor.events.TemplateVariablesChangedEvent;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
@@ -90,37 +89,47 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     public void init(final NewGuidedDecisionTableColumnWizard wizard) {
         super.init(wizard);
 
+        setupEditingCol();
+        setupRuleModellerEvents();
+    }
+
+    void setupRuleModellerEvents() {
+        registration = getPresenter().getEventBus().addHandler(TemplateVariablesChangedEvent.TYPE,
+                                                               this);
+    }
+
+    void setupEditingCol() {
         editingCol = newBRLActionColumn();
-        registration = presenter.getEventBus().addHandler(TemplateVariablesChangedEvent.TYPE,
-                                                          this);
+    }
+
+    void teardownRuleModellerEvents() {
+        registration.removeHandler();
     }
 
     @Override
     public void onClose() {
         super.onClose();
 
-        registration.removeHandler();
+        teardownRuleModellerEvents();
     }
 
     @Override
     public Boolean generateColumn() {
 
-        if (nil(editingCol.getHeader())) {
-            Window.alert(GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnHeaderValueDescription());
+        if (nil(editingCol().getHeader())) {
+            Window.alert(translate(GuidedDecisionTableErraiConstants.BRLActionColumnPlugin_YouMustEnterAColumnHeaderValueDescription));
             return false;
         }
 
-        if (!isHeaderUnique(editingCol.getHeader())) {
-            Window.alert(GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother());
+        if (!isHeaderUnique(editingCol().getHeader())) {
+            Window.alert(translate(GuidedDecisionTableErraiConstants.BRLActionColumnPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother));
             return false;
         }
 
-        //Ensure variables reflect (name) changes made in RuleModeller
-        getDefinedVariables(this.getRuleModel());
+        getDefinedVariables(getRuleModel());
 
-        editingCol.setDefinition(Arrays.asList(getRuleModel().rhs));
-
-        presenter.appendColumn(editingCol);
+        editingCol().setDefinition(Arrays.asList(getRuleModel().rhs));
+        presenter.appendColumn(editingCol());
 
         return true;
     }
@@ -134,7 +143,7 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         return true;
     }
 
-    private boolean getDefinedVariables(RuleModel ruleModel) {
+    boolean getDefinedVariables(RuleModel ruleModel) {
         Map<InterpolationVariable, Integer> ivs = new HashMap<InterpolationVariable, Integer>();
         RuleModelVisitor rmv = new RuleModelVisitor(ivs);
         rmv.visit(ruleModel);
@@ -181,8 +190,8 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     }
 
     @Override
-    public DTColumnConfig52 editingCol() {
-        return (DTColumnConfig52) editingCol;
+    public BRLActionColumn editingCol() {
+        return editingCol;
     }
 
     @Override
@@ -205,6 +214,16 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     @Override
     public void setUpdate(final Boolean value) {
         // empty
+    }
+
+    @Override
+    public boolean showUpdateEngineWithChanges() {
+        return false;
+    }
+
+    @Override
+    public boolean showLogicallyInsert() {
+        return false;
     }
 
     @Override
@@ -240,7 +259,7 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         }
     }
 
-    private void setRuleModellerPageCompleted() {
+    void setRuleModellerPageCompleted() {
         this.ruleModellerPageCompleted = Boolean.TRUE;
     }
 
@@ -275,5 +294,10 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         if (event.getSource() == getRuleModel()) {
             getDefinedVariables(event.getModel());
         }
+    }
+
+    @Override
+    public Type getType() {
+        return Type.ADVANCED;
     }
 }

@@ -23,7 +23,6 @@ import java.util.stream.Stream;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.models.datamodel.oracle.FieldAccessorsAndMutators;
@@ -98,12 +97,12 @@ public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> exten
 
             if (filterEnumFields()) {
                 fieldNames
-                        .forEach(consumer);
-            } else {
-                fieldNames
                         .stream()
                         .filter(fieldName -> !oracle.hasEnums(factType(),
                                                               fieldName))
+                        .forEach(consumer);
+            } else {
+                fieldNames
                         .forEach(consumer);
             }
         };
@@ -118,11 +117,11 @@ public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> exten
     }
 
     boolean hasEditingPattern() {
-        return plugin().editingPattern() != null;
+        return !nil(factType());
     }
 
     private String factType() {
-        return plugin().editingPattern().getFactType();
+        return plugin().patternWrapper().getFactType();
     }
 
     private List<String> mapName(final ModelField[] modelFields) {
@@ -133,10 +132,7 @@ public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> exten
     }
 
     public String getFactField() {
-
-        String factField = plugin().getFactField();
-        GWT.log("--->>" + factField);
-        return factField;
+        return plugin().getFactField();
     }
 
     public interface View extends UberView<FieldPage> {

@@ -23,18 +23,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.junit.GWTMockUtilities;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
+import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.AttributeColumnPlugin;
 import org.drools.workbench.screens.guided.rule.client.editor.RuleAttributeWidget;
 import org.drools.workbench.screens.guided.rule.client.resources.GuidedRuleEditorResources;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.services.shared.preferences.ApplicationPreferences;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import static org.junit.Assert.*;
@@ -47,9 +52,19 @@ public class AttributeColumnPageTest {
     private GuidedDecisionTableView.Presenter presenter;
 
     @Mock
+    private AttributeColumnPage.View view;
+
+    @Mock
+    private TranslationService translationService;
+
+    @Mock
+    private SimplePanel content;
+
+    @Mock
     private AttributeColumnPlugin plugin;
 
-    private AttributeColumnPage page;
+    @InjectMocks
+    private AttributeColumnPage page = spy(new AttributeColumnPage());
 
     @BeforeClass
     public static void setupPreferences() {
@@ -57,15 +72,11 @@ public class AttributeColumnPageTest {
             put(ApplicationPreferences.DATE_FORMAT,
                 "dd/mm/yyyy");
         }};
-        ApplicationPreferences.setUp(preferences);
-    }
 
-    @Before
-    public void setup() {
-        page = new AttributeColumnPage() {{
-            presenter = AttributeColumnPageTest.this.presenter;
-            plugin = AttributeColumnPageTest.this.plugin;
-        }};
+        ApplicationPreferences.setUp(preferences);
+
+        // Prevent runtime GWT.create() error at 'content = new SimplePanel()'
+        GWTMockUtilities.disarm();
     }
 
     @Test
@@ -125,6 +136,57 @@ public class AttributeColumnPageTest {
         when(plugin.getAttribute()).thenReturn(RuleAttributeWidget.SALIENCE_ATTR);
 
         page.isComplete(Assert::assertTrue);
+    }
+
+    @Test
+    public void testInitialise() throws Exception {
+        page.initialise();
+
+        verify(content).setWidget(view);
+    }
+
+    @Test
+    public void testGetTitle() throws Exception {
+        final String errorKey = GuidedDecisionTableErraiConstants.AttributeColumnPage_AddNewAttribute;
+        final String errorMessage = "Title";
+
+        when(translationService.format(errorKey)).thenReturn(errorMessage);
+
+        final String title = page.getTitle();
+
+        assertEquals(errorMessage,
+                     title);
+    }
+
+    @Test
+    public void testPrepareView() throws Exception {
+        page.prepareView();
+
+        verify(view).init(page);
+    }
+
+    @Test
+    public void testAsWidget() {
+        final Widget contentWidget = page.asWidget();
+
+        assertEquals(contentWidget,
+                     content);
+    }
+
+    @Test
+    public void testSelectItem() {
+        final String item = "item";
+
+        page.selectItem(item);
+
+        verify(plugin).setAttribute(item);
+    }
+
+    @Test
+    public void testSelectedAttribute() {
+        page.selectedAttribute();
+
+        verify(plugin).getAttribute();
     }
 
     private void reservedAttributeNamesMock(final String... attributes) {

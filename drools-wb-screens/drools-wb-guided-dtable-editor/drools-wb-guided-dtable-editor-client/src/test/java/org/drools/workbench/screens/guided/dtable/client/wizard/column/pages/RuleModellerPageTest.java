@@ -16,22 +16,23 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.gwt.junit.GWTMockUtilities;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import com.google.gwtmockito.WithClassesToStub;
+import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.MetaDataColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.BRLActionColumnPlugin;
+import org.drools.workbench.screens.guided.rule.client.editor.RuleModeller;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.kie.workbench.common.services.shared.preferences.ApplicationPreferences;
+import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -39,89 +40,60 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(GwtMockitoTestRunner.class)
-public class MetaDataColumnPageTest {
+@WithClassesToStub(RuleModeller.class)
+public class RuleModellerPageTest {
 
     @Mock
-    private GuidedDecisionTableView.Presenter presenter;
+    private BRLActionColumnPlugin plugin;
 
     @Mock
-    private MetaDataColumnPlugin plugin;
+    private RuleModellerPage.View view;
+
+    @Mock
+    private SimplePanel content;
 
     @Mock
     private TranslationService translationService;
 
     @Mock
-    private MetaDataColumnPage.View view;
-
-    @Mock
-    private SimplePanel content;
+    private GuidedDecisionTableView.Presenter presenter;
 
     @InjectMocks
-    private MetaDataColumnPage page = new MetaDataColumnPage();
+    private RuleModellerPage<BRLActionColumnPlugin> page = spy(new RuleModellerPage<BRLActionColumnPlugin>());
 
     @BeforeClass
     public static void setupPreferences() {
-        final Map<String, String> preferences = new HashMap<String, String>() {{
-            put(ApplicationPreferences.DATE_FORMAT,
-                "dd/mm/yyyy");
-        }};
-        ApplicationPreferences.setUp(preferences);
-
         // Prevent runtime GWT.create() error at 'content = new SimplePanel()'
         GWTMockUtilities.disarm();
     }
 
-    @Test
-    public void testIsCompleteWhenMetaDataIsNull() throws Exception {
-        when(plugin.getMetaData()).thenReturn(null);
-
-        page.isComplete(Assert::assertFalse);
+    @Before
+    public void setup() {
+        when(page.plugin()).thenReturn(plugin);
     }
 
     @Test
-    public void testIsCompleteWhenMetaDataIsBlank() throws Exception {
-        when(plugin.getMetaData()).thenReturn("");
-
-        page.isComplete(Assert::assertFalse);
-    }
-
-    @Test
-    public void testIsCompleteWhenMetaDataIsNotNull() throws Exception {
-        when(plugin.getMetaData()).thenReturn("metaData");
+    public void testIsCompleteWhenRuleModellerPageIsCompleted() throws Exception {
+        when(plugin.isRuleModellerPageCompleted()).thenReturn(true);
 
         page.isComplete(Assert::assertTrue);
     }
 
     @Test
-    public void testGetMetadata() throws Exception {
-        page.getMetadata();
+    public void testIsCompleteWhenRuleModellerPageIsNotCompleted() throws Exception {
+        when(plugin.isRuleModellerPageCompleted()).thenReturn(false);
 
-        verify(plugin).getMetaData();
+        page.isComplete(Assert::assertFalse);
     }
 
     @Test
-    public void testEmptyMetadataError() throws Exception {
-        page.emptyMetadataError();
+    public void testRuleModeller() throws Exception {
+        when(plugin.tableFormat()).thenReturn(GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY);
+        when(presenter.getDataModelOracle()).thenReturn(mock(AsyncPackageDataModelOracle.class));
 
-        verify(view).showError(any());
-        verify(translationService).format(GuidedDecisionTableErraiConstants.MetaDataColumnPage_MetadataNameEmpty);
-    }
+        final RuleModeller ruleModeller = page.ruleModeller();
 
-    @Test
-    public void testColumnNameIsAlreadyInUseError() throws Exception {
-        page.columnNameIsAlreadyInUseError();
-
-        verify(view).showError(any());
-        verify(translationService).format(GuidedDecisionTableErraiConstants.MetaDataColumnPage_ThatColumnNameIsAlreadyInUsePleasePickAnother);
-    }
-
-    @Test
-    public void testSetMetadata() throws Exception {
-        final String metaData = "metaData";
-
-        page.setMetadata(metaData);
-
-        verify(plugin).setMetaData(metaData);
+        assertNotNull(ruleModeller);
     }
 
     @Test
@@ -133,7 +105,7 @@ public class MetaDataColumnPageTest {
 
     @Test
     public void testGetTitle() throws Exception {
-        final String errorKey = GuidedDecisionTableErraiConstants.MetaDataColumnPage_AddNewMetadata;
+        final String errorKey = GuidedDecisionTableErraiConstants.RuleModellerPage_RuleModeller;
         final String errorMessage = "Title";
 
         when(translationService.format(errorKey)).thenReturn(errorMessage);
@@ -149,6 +121,7 @@ public class MetaDataColumnPageTest {
         page.prepareView();
 
         verify(view).init(page);
+        verify(page).markAsViewed();
     }
 
     @Test
