@@ -18,6 +18,7 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.co
 
 import javax.inject.Inject;
 
+import com.google.gwt.user.client.ui.SimplePanel;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
@@ -29,6 +30,8 @@ public abstract class BaseDecisionTableColumnPage<T extends DecisionTableColumnP
     protected NewGuidedDecisionTableColumnWizard wizard;
 
     protected GuidedDecisionTableView.Presenter presenter;
+
+    protected SimplePanel content = new SimplePanel();
 
     protected T plugin;
 

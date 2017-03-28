@@ -38,8 +38,6 @@ import org.uberfire.client.mvp.UberView;
 @Dependent
 public class SummaryPage extends BaseDecisionTableColumnPage {
 
-    private SimplePanel content = new SimplePanel();
-
     private Boolean includeAdvanced = Boolean.FALSE;
 
     @Inject

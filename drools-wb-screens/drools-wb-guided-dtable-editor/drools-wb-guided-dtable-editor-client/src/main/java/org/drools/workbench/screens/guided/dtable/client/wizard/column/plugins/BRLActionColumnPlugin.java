@@ -115,7 +115,6 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     @Override
     public Boolean generateColumn() {
-
         if (nil(editingCol().getHeader())) {
             Window.alert(translate(GuidedDecisionTableErraiConstants.BRLActionColumnPlugin_YouMustEnterAColumnHeaderValueDescription));
             return false;

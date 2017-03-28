@@ -37,8 +37,6 @@ public class WorkItemPage<T extends HasWorkItemPage & DecisionTableColumnPlugin>
     @Inject
     private View view;
 
-    private SimplePanel content = new SimplePanel();
-
     private boolean parametersEnabled = false;
 
     @Override

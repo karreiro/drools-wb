@@ -33,7 +33,7 @@ public class ActionInsertFactWrapper implements ActionWrapper {
         this.actionCol52 = newActionInsertFact();
     }
 
-    private ActionInsertFactCol52 newActionInsertFact() {
+    ActionInsertFactCol52 newActionInsertFact() {
         final GuidedDecisionTable52.TableFormat tableFormat = plugin.getPresenter().getModel().getTableFormat();
 
         switch (tableFormat) {

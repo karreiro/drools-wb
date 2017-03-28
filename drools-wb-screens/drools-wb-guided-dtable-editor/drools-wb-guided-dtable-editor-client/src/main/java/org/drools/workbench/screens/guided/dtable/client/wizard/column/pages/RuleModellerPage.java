@@ -42,8 +42,6 @@ public class RuleModellerPage<T extends HasRuleModellerPage & DecisionTableColum
     @Inject
     private View view;
 
-    private SimplePanel content = new SimplePanel();
-
     private RuleModeller ruleModeller;
 
     @Override

@@ -35,8 +35,6 @@ public class CalculationTypePage extends BaseDecisionTableColumnPage<ConditionCo
     @Inject
     private View view;
 
-    private SimplePanel content = new SimplePanel();
-
     @Override
     public void initialise() {
         content.setWidget(view);

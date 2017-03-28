@@ -48,8 +48,6 @@ public class PatternPage<T extends HasPatternPage & DecisionTableColumnPlugin> e
     @Inject
     private NewPatternPresenter newPatternPresenter;
 
-    private SimplePanel content = new SimplePanel();
-
     private boolean negatedPatternEnabled = true;
 
     @Override

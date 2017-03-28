@@ -40,8 +40,6 @@ public class AttributeColumnPage extends BaseDecisionTableColumnPage<AttributeCo
     @Inject
     private View view;
 
-    private SimplePanel content = new SimplePanel();
-
     @Override
     public String getTitle() {
         return translate(GuidedDecisionTableErraiConstants.AttributeColumnPage_AddNewAttribute);

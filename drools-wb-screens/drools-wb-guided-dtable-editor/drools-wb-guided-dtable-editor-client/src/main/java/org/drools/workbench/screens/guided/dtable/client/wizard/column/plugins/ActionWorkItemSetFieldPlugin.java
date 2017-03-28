@@ -39,7 +39,6 @@ import org.drools.workbench.models.guided.dtable.shared.model.ActionWorkItemCol5
 import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
-import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableConstants;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasFieldPage;
@@ -54,7 +53,6 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.c
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionWorkItemWrapper;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
@@ -96,7 +94,7 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
 
     @Override
     public void setWorkItem(final String workItemKey) {
-        final WorkItemParameter workItemParameter = workItems.get(workItemKey);
+        final WorkItemParameter workItemParameter = getWorkItems().get(workItemKey);
         final PortableWorkDefinition workDefinition = workItemParameter.getWorkDefinition();
         final PortableParameterDefinition parameterDefinition = workItemParameter.getWorkParameterDefinition();
 
@@ -107,6 +105,10 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
         editingWrapper().setParameterClassName(parameterDefinition.getClassName());
 
         fireChangeEvent(workItemPage);
+    }
+
+    Map<String, WorkItemParameter> getWorkItems() {
+        return workItems;
     }
 
     private boolean acceptParameterType(final PortableParameterDefinition ppd) {
@@ -171,11 +173,11 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
         }
     }
 
-    private Boolean isWorkItemPageCompleted() {
+    Boolean isWorkItemPageCompleted() {
         return workItemPageCompleted;
     }
 
-    private void setWorkItemPageCompleted() {
+    void setWorkItemPageCompleted() {
         this.workItemPageCompleted = Boolean.TRUE;
     }
 
@@ -191,7 +193,7 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
         return presenter.getModel();
     }
 
-    private ActionWorkItemWrapper editingWrapper() {
+    ActionWorkItemWrapper editingWrapper() {
         return Optional.ofNullable(editingWrapper).orElse(getEmptyColumn());
     }
 
@@ -238,23 +240,22 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
 
     @Override
     public Boolean generateColumn() {
-
         if (!isFactPatternValid()) {
-            Window.alert(GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnFact());
+            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionWorkItemSetFieldPlugin_YouMustEnterAColumnFact));
             return false;
         }
 
         if (nil(editingWrapper().getFactField())) {
-            Window.alert(GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnField());
+            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionWorkItemSetFieldPlugin_YouMustEnterAColumnField));
             return false;
         }
         if (nil(editingWrapper().getHeader())) {
-            Window.alert(GuidedDecisionTableConstants.INSTANCE.YouMustEnterAColumnHeaderValueDescription());
+            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionWorkItemSetFieldPlugin_YouMustEnterAColumnHeaderValueDescription));
             return false;
         }
 
         if (!unique(editingWrapper().getHeader())) {
-            Window.alert(GuidedDecisionTableConstants.INSTANCE.ThatColumnNameIsAlreadyInUsePleasePickAnother());
+            Window.alert(translate(GuidedDecisionTableErraiConstants.ActionWorkItemSetFieldPlugin_ThatColumnNameIsAlreadyInUsePleasePickAnother));
             return false;
         }
 
@@ -272,7 +273,7 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
         }
     }
 
-    private boolean unique(String header) {
+    boolean unique(String header) {
         for (ActionCol52 o : model().getActionCols()) {
             if (o.getHeader().equals(header)) {
                 return false;
@@ -320,7 +321,6 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
             }
         }
 
-        // TODO
         for (Pattern52 pattern52 : model().getPatterns()) {
             patterns.add(new PatternWrapper(pattern52));
         }
@@ -350,14 +350,13 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
 
     @Override
     public void setFactField(final String selectedValue) {
-
         if (isNewFactPattern()) {
             editingWrapper = new ActionWorkItemInsertWrapper(this);
         } else {
             editingWrapper = new ActionWorkItemSetWrapper(this);
         }
 
-        String factType = patternWrapper().getFactType();
+        final String factType = patternWrapper().getFactType();
 
         editingWrapper().setFactField(selectedValue);
         editingWrapper().setFactType(factType);
@@ -382,7 +381,7 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
         return isNewFactPattern();
     }
 
-    private boolean isNewFactPattern() {
+    boolean isNewFactPattern() {
         final BRLRuleModel validator = new BRLRuleModel(model());
 
         return !validator.isVariableNameUsed(patternWrapper().getBoundName());
@@ -400,7 +399,12 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
                                                   this);
     }
 
-    private static class WorkItemParameter {
+    @Override
+    public Type getType() {
+        return Type.ADVANCED;
+    }
+
+    static class WorkItemParameter {
 
         private PortableWorkDefinition workDefinition;
         private PortableParameterDefinition workParameterDefinition;
@@ -418,10 +422,5 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
         PortableParameterDefinition getWorkParameterDefinition() {
             return workParameterDefinition;
         }
-    }
-
-    @Override
-    public Type getType() {
-        return Type.ADVANCED;
     }
 }

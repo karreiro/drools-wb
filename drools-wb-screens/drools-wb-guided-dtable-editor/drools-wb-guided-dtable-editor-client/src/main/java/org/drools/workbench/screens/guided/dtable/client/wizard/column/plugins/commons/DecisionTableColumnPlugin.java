@@ -22,13 +22,10 @@ import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 public interface DecisionTableColumnPlugin {
 
-    //Shown as the text to Users in the "type selection list" on the first page of the Wizard
     String getTitle();
 
-    //Return a list of subsequent pages required for the "type" selected in the first page list
     List<WizardPage> getPages();
 
-    //Responsible for creation of the column itself when the Wizard completes
     Boolean generateColumn();
 
     String getIdentifier();

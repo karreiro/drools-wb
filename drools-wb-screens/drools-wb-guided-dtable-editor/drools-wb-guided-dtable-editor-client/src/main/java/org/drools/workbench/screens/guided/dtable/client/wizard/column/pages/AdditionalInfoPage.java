@@ -38,8 +38,6 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
     @Inject
     private View view;
 
-    private SimplePanel content = new SimplePanel();
-
     private boolean headerEnabled = false;
 
     private boolean hideColumnEnabled = false;

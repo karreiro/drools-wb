@@ -44,8 +44,6 @@ public class ValueOptionsPage<T extends HasValueOptionsPage & DecisionTableColum
     @Inject
     private View view;
 
-    private SimplePanel content = new SimplePanel();
-
     private boolean valueListEnabled = false;
 
     private boolean cepOperatorsEnabled = false;

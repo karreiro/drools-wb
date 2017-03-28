@@ -50,8 +50,6 @@ public class OperatorPage extends BaseDecisionTableColumnPage<ConditionColumnPlu
     @Inject
     private Event<WizardPageStatusChangeEvent> changeEvent;
 
-    private SimplePanel content = new SimplePanel();
-
     @Override
     public void initialise() {
         content.setWidget(view);

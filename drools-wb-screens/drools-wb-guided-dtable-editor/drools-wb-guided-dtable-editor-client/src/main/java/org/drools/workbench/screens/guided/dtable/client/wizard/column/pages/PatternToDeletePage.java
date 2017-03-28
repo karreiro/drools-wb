@@ -36,8 +36,6 @@ public class PatternToDeletePage extends BaseDecisionTableColumnPage<ActionRetra
     @Inject
     private View view;
 
-    private SimplePanel content = new SimplePanel();
-
     @Override
     public void initialise() {
         content.setWidget(view);
