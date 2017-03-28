@@ -19,7 +19,8 @@ package org.drools.workbench.screens.guided.dtable.client.wizard;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.screens.guided.dtable.client.type.GuidedDTableResourceType;
-import org.drools.workbench.screens.guided.dtable.client.wizard.NewGuidedDecisionTableWizard.GuidedDecisionTableWizardHandler;
+import org.drools.workbench.screens.guided.dtable.client.wizard.table.NewGuidedDecisionTableWizard;
+import org.drools.workbench.screens.guided.dtable.client.wizard.table.NewGuidedDecisionTableWizard.GuidedDecisionTableWizardHandler;
 import org.drools.workbench.screens.guided.dtable.service.GuidedDecisionTableEditorService;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
@@ -49,52 +50,38 @@ import static org.mockito.Mockito.*;
 @RunWith(GwtMockitoTestRunner.class)
 public class NewGuidedDecisionTableWizardHelperTest {
 
+    @Rule
+    public ExpectedException rule = ExpectedException.none();
     @Mock
     private GuidedDecisionTableEditorService dtService;
     private Caller<GuidedDecisionTableEditorService> dtServiceCaller;
-
     @Mock
     private AsyncPackageDataModelOracleFactory oracleFactory;
-
     @Mock
     private PackageDataModelOracleBaselinePayload oracleBasePayload;
-
     @Mock
     private AsyncPackageDataModelOracle oracle;
-
     @Mock
     private SyncBeanManager beanManager;
-
     @Mock
     private SyncBeanDef<NewGuidedDecisionTableWizard> wizardBeanDef;
-
     @Mock
     private NewGuidedDecisionTableWizard wizardBean;
-
     @Mock
     private Path contextPath;
-
     private String baseFileName = "baseFileName";
-
     private GuidedDecisionTable52.TableFormat tableFormat = GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY;
 
     private GuidedDecisionTable52.HitPolicy hitPolicy = GuidedDecisionTable52.HitPolicy.NONE;
 
     @Mock
     private HasBusyIndicator view;
-
     @Mock
     private RemoteCallback<Path> onSaveSuccessCallback;
-
     @Captor
     private ArgumentCaptor<GuidedDecisionTableWizardHandler> wizardHandlerCaptor;
-
     @Captor
     private ArgumentCaptor<String> fileNameCaptor;
-
-    @Rule
-    public ExpectedException rule = ExpectedException.none();
-
     private GuidedDecisionTable52 model;
 
     private NewGuidedDecisionTableWizardHelper helper;

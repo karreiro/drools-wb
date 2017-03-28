@@ -37,9 +37,7 @@ import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
  * A page for the guided Decision Table Wizard to define Fact Patterns
  */
 @Dependent
-public class FactPatternsPage extends AbstractGuidedDecisionTableWizardPage
-        implements
-        FactPatternsPageView.Presenter {
+public class FactPatternsPage extends AbstractGuidedDecisionTableWizardPage implements FactPatternsPageView.Presenter {
 
     @Inject
     private FactPatternsPageView view;
@@ -60,14 +58,14 @@ public class FactPatternsPage extends AbstractGuidedDecisionTableWizardPage
 
     @Override
     public void initialise() {
-        view.init( this );
-        view.setValidator( getValidator() );
+        view.init(this);
+        view.setValidator(getValidator());
 
-        final List<String> availableTypes = Arrays.asList( oracle.getFactTypes() );
-        view.setAvailableFactTypes( availableTypes );
-        view.setChosenPatterns( new ArrayList<Pattern52>() );
+        final List<String> availableTypes = Arrays.asList(oracle.getFactTypes());
+        view.setAvailableFactTypes(availableTypes);
+        view.setChosenPatterns(new ArrayList<>());
 
-        content.setWidget( view );
+        content.setWidget(view);
     }
 
     @Override
@@ -76,67 +74,67 @@ public class FactPatternsPage extends AbstractGuidedDecisionTableWizardPage
     }
 
     @Override
-    public void isComplete( final Callback<Boolean> callback ) {
+    public void isComplete(final Callback<Boolean> callback) {
         //Are the patterns valid?
         final boolean arePatternBindingsUnique = getValidator().arePatternBindingsUnique();
 
         //Signal duplicates to other pages
-        final DuplicatePatternsEvent event = new DuplicatePatternsEvent( arePatternBindingsUnique );
-        duplicatePatternsEvent.fire( event );
+        final DuplicatePatternsEvent event = new DuplicatePatternsEvent(arePatternBindingsUnique);
+        duplicatePatternsEvent.fire(event);
 
-        callback.callback( arePatternBindingsUnique );
+        callback.callback(arePatternBindingsUnique);
     }
 
-    public void handleImportAddedEvent( @Observes ImportAddedEvent event ) {
-        if ( !event.getDataModelOracle().equals( this.oracle ) ) {
+    public void handleImportAddedEvent(@Observes ImportAddedEvent event) {
+        if (!event.getDataModelOracle().equals(this.oracle)) {
             return;
         }
-        final List<String> availableTypes = Arrays.asList( oracle.getFactTypes() );
-        view.setAvailableFactTypes( availableTypes );
+        final List<String> availableTypes = Arrays.asList(oracle.getFactTypes());
+        view.setAvailableFactTypes(availableTypes);
     }
 
-    public void handleImportRemovedEvent( @Observes ImportRemovedEvent event ) {
-        if ( !event.getDataModelOracle().equals( this.oracle ) ) {
+    public void handleImportRemovedEvent(@Observes ImportRemovedEvent event) {
+        if (!event.getDataModelOracle().equals(this.oracle)) {
             return;
         }
-        final List<String> availableTypes = Arrays.asList( oracle.getFactTypes() );
-        view.setAvailableFactTypes( availableTypes );
+        final List<String> availableTypes = Arrays.asList(oracle.getFactTypes());
+        view.setAvailableFactTypes(availableTypes);
     }
 
-    public void onDuplicatePatterns( final @Observes DuplicatePatternsEvent event ) {
-        view.setArePatternBindingsUnique( event.getArePatternBindingsUnique() );
-    }
-
-    @Override
-    public void isPatternEvent( final Pattern52 pattern,
-                                final Callback<Boolean> callback ) {
-        oracle.isFactTypeAnEvent( pattern.getFactType(),
-                                  callback );
+    public void onDuplicatePatterns(final @Observes DuplicatePatternsEvent event) {
+        view.setArePatternBindingsUnique(event.getArePatternBindingsUnique());
     }
 
     @Override
-    public void signalRemovalOfPattern( final Pattern52 pattern ) {
-        final PatternRemovedEvent event = new PatternRemovedEvent( pattern );
-        patternRemovedEvent.fire( event );
+    public void isPatternEvent(final Pattern52 pattern,
+                               final Callback<Boolean> callback) {
+        oracle.isFactTypeAnEvent(pattern.getFactType(),
+                                 callback);
     }
 
     @Override
-    public void setConditionPatterns( final List<Pattern52> patterns ) {
+    public void signalRemovalOfPattern(final Pattern52 pattern) {
+        final PatternRemovedEvent event = new PatternRemovedEvent(pattern);
+        patternRemovedEvent.fire(event);
+    }
+
+    @Override
+    public void setConditionPatterns(final List<Pattern52> patterns) {
         model.getConditions().clear();
-        model.getConditions().addAll( patterns );
+        model.getConditions().addAll(patterns);
     }
 
     @Override
-    public void makeResult( final GuidedDecisionTable52 model ) {
+    public void makeResult(final GuidedDecisionTable52 model) {
         //Ensure every Pattern is bound
         int fi = 1;
-        for ( Pattern52 p : model.getPatterns() ) {
-            if ( !getValidator().isPatternValid( p ) ) {
-                String binding = NEW_FACT_PREFIX + ( fi++ );
-                p.setBoundName( binding );
-                while ( !getValidator().isPatternBindingUnique( p ) ) {
-                    binding = NEW_FACT_PREFIX + ( fi++ );
-                    p.setBoundName( binding );
+        for (Pattern52 p : model.getPatterns()) {
+            if (!getValidator().isPatternValid(p)) {
+                String binding = NEW_FACT_PREFIX + (fi++);
+                p.setBoundName(binding);
+                while (!getValidator().isPatternBindingUnique(p)) {
+                    binding = NEW_FACT_PREFIX + (fi++);
+                    p.setBoundName(binding);
                 }
             }
         }
@@ -144,8 +142,7 @@ public class FactPatternsPage extends AbstractGuidedDecisionTableWizardPage
 
     @Override
     public void stateChanged() {
-        final WizardPageStatusChangeEvent event = new WizardPageStatusChangeEvent( this );
-        wizardPageStatusChangeEvent.fire( event );
+        final WizardPageStatusChangeEvent event = new WizardPageStatusChangeEvent(this);
+        wizardPageStatusChangeEvent.fire(event);
     }
-
 }
