@@ -45,19 +45,25 @@ public class NewGuidedDecisionTableColumnWizard extends AbstractWizard {
 
     private Supplier<Boolean> finishCommand;
 
-    @Inject
     private WizardView view;
 
-    @Inject
     private SummaryPage summaryPage;
 
-    @Inject
     private TranslationService translationService;
 
     private GuidedDecisionTableView.Presenter presenter;
 
     private Command onCloseCallback = () -> {
     };
+
+    @Inject
+    public NewGuidedDecisionTableColumnWizard(final WizardView view,
+                                              final SummaryPage summaryPage,
+                                              final TranslationService translationService) {
+        this.view = view;
+        this.summaryPage = summaryPage;
+        this.translationService = translationService;
+    }
 
     @Override
     public String getTitle() {

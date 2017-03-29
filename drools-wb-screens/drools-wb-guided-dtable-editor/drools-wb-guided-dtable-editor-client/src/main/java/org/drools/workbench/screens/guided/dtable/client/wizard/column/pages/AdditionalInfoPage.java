@@ -26,15 +26,15 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.H
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.gwtbootstrap3.client.ui.CheckBox;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.client.callbacks.Callback;
-import org.uberfire.client.mvp.UberView;
+import org.uberfire.client.mvp.UberElement;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
 @Dependent
 public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableColumnPlugin> extends BaseDecisionTableColumnPage<T> {
 
-    @Inject
     private View view;
 
     private boolean headerEnabled = false;
@@ -45,9 +45,12 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
 
     private boolean updateEngineWithChangesEnabled = false;
 
-    @Override
-    public void initialise() {
-        content.setWidget(view);
+    @Inject
+    public AdditionalInfoPage(final View view,
+                              final TranslationService translationService) {
+        super(translationService);
+
+        this.view = view;
     }
 
     @Override
@@ -58,11 +61,14 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
     @Override
     public void prepareView() {
         view.init(this);
+        view.clear();
+
+        setup();
     }
 
     @Override
-    public Widget asWidget() {
-        return content;
+    protected UberElement<?> getView() {
+        return view;
     }
 
     @Override
@@ -98,6 +104,13 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
         return DTCellValueWidgetFactory.getHideColumnIndicator(plugin().editingCol());
     }
 
+    private void setup() {
+        setupHeader();
+        setupHideColumn();
+        setupLogicallyInsert();
+        setupUpdateEngineWithChanges();
+    }
+
     void setupHeader() {
         if (headerEnabled) {
             view.showHeader();
@@ -126,15 +139,15 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
         return headerEnabled && !nil(getHeader());
     }
 
-    void setInsertLogical(final Boolean value) {
-        plugin().setInsertLogical(value);
+    void setInsertLogical(final Boolean insertLogical) {
+        plugin().setInsertLogical(insertLogical);
     }
 
-    public void setUpdate(final Boolean value) {
-        plugin().setUpdate(value);
+    public void setUpdate(final Boolean update) {
+        plugin().setUpdate(update);
     }
 
-    public interface View extends UberView<AdditionalInfoPage> {
+    public interface View extends UberElement<AdditionalInfoPage> {
 
         void showHideColumn(final CheckBox checkBox);
 
@@ -143,5 +156,7 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
         void showLogicallyInsert();
 
         void showUpdateEngineWithChanges();
+
+        void clear();
     }
 }

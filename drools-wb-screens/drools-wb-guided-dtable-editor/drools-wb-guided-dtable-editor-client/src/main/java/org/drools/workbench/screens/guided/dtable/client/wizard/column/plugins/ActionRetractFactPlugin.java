@@ -19,6 +19,7 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 import java.util.ArrayList;
 import java.util.List;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.Window;
@@ -36,22 +37,34 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.Add
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.PatternToDeletePage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
+import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
 @Dependent
 public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin implements HasAdditionalInfoPage {
 
-    @Inject
     private PatternToDeletePage patternToDeletePage;
 
-    @Inject
     private AdditionalInfoPage additionalInfoPage;
 
     private ActionRetractFactCol52 editingCol;
 
     private Boolean patternToDeletePageCompleted = Boolean.FALSE;
+
+    @Inject
+    public ActionRetractFactPlugin(final PatternToDeletePage patternToDeletePage,
+                                   final AdditionalInfoPage additionalInfoPage,
+                                   final Event<WizardPageStatusChangeEvent> changeEvent,
+                                   final TranslationService translationService) {
+        super(changeEvent,
+              translationService);
+
+        this.patternToDeletePage = patternToDeletePage;
+        this.additionalInfoPage = additionalInfoPage;
+    }
 
     @Override
     public void init(final NewGuidedDecisionTableColumnWizard wizard) {

@@ -23,7 +23,9 @@ import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.MetaDataColumnPlugin;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.client.callbacks.Callback;
+import org.uberfire.client.mvp.UberElement;
 import org.uberfire.client.mvp.UberView;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
@@ -31,12 +33,19 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 @Dependent
 public class MetaDataColumnPage extends BaseDecisionTableColumnPage<MetaDataColumnPlugin> {
 
-    @Inject
     private View view;
 
+    @Inject
+    public MetaDataColumnPage(final View view,
+                              final TranslationService translationService) {
+        super(translationService);
+
+        this.view = view;
+    }
+
     @Override
-    public void initialise() {
-        content.setWidget(view);
+    protected UberElement<?> getView() {
+        return view;
     }
 
     @Override
@@ -54,11 +63,7 @@ public class MetaDataColumnPage extends BaseDecisionTableColumnPage<MetaDataColu
     @Override
     public void prepareView() {
         view.init(this);
-    }
-
-    @Override
-    public Widget asWidget() {
-        return content;
+        view.clear();
     }
 
     public String getMetadata() {
@@ -77,8 +82,10 @@ public class MetaDataColumnPage extends BaseDecisionTableColumnPage<MetaDataColu
         view.showError(translate(GuidedDecisionTableErraiConstants.MetaDataColumnPage_ThatColumnNameIsAlreadyInUsePleasePickAnother));
     }
 
-    public interface View extends UberView<MetaDataColumnPage> {
+    public interface View extends UberElement<MetaDataColumnPage> {
 
         void showError(String errorMessage);
+
+        void clear();
     }
 }

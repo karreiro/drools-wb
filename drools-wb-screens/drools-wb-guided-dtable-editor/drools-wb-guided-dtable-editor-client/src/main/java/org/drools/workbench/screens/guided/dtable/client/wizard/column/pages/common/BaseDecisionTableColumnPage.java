@@ -16,33 +16,53 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common;
 
-import javax.inject.Inject;
-
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
+import org.jboss.errai.common.client.ui.ElementWrapperWidget;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
+import org.uberfire.client.mvp.UberElement;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 public abstract class BaseDecisionTableColumnPage<T extends DecisionTableColumnPlugin> implements WizardPage {
+
+    protected T plugin;
 
     protected NewGuidedDecisionTableColumnWizard wizard;
 
     protected GuidedDecisionTableView.Presenter presenter;
 
-    protected SimplePanel content = new SimplePanel();
+    private SimplePanel content;
 
-    protected T plugin;
-
-    @Inject
     private TranslationService translationService;
+
+    protected BaseDecisionTableColumnPage(final TranslationService translationService) {
+        this.translationService = translationService;
+    }
+
+    abstract protected UberElement<?> getView();
 
     public void init(final NewGuidedDecisionTableColumnWizard wizard) {
         this.wizard = wizard;
         this.presenter = wizard.getPresenter();
+        this.content = new SimplePanel();
 
         initialise();
+    }
+
+    @Override
+    public void initialise() {
+        final UberElement<?> view = getView();
+        final ElementWrapperWidget<?> widget = ElementWrapperWidget.getWidget(view.getElement());
+
+        content.add(widget);
+    }
+
+    @Override
+    public Widget asWidget() {
+        return content;
     }
 
     public void setPlugin(final T plugin) {

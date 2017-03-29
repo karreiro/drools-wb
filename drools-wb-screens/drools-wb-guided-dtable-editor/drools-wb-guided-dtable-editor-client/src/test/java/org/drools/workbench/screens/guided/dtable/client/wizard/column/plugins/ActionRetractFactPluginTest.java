@@ -70,7 +70,10 @@ public class ActionRetractFactPluginTest {
     private LimitedEntryActionRetractFactCol52 limitedEntryActionRetractFactCol52;
 
     @InjectMocks
-    private ActionRetractFactPlugin plugin = spy(new ActionRetractFactPlugin());
+    private ActionRetractFactPlugin plugin = spy(new ActionRetractFactPlugin(patternToDeletePage,
+                                                                             additionalInfoPage,
+                                                                             changeEvent,
+                                                                             translationService));
 
     @Test
     public void testInit() throws Exception {

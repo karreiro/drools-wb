@@ -19,19 +19,31 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 import java.util.ArrayList;
 import java.util.List;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import org.drools.workbench.models.guided.dtable.shared.model.AttributeCol52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AttributeColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
+import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
 
 @Dependent
 public class AttributeColumnPlugin extends BaseDecisionTableColumnPlugin {
 
-    @Inject
     private AttributeColumnPage page;
+
+    @Inject
+    public AttributeColumnPlugin(final AttributeColumnPage page,
+                                 final Event<WizardPageStatusChangeEvent> changeEvent,
+                                 final TranslationService translationService) {
+        super(changeEvent,
+              translationService);
+
+        this.page = page;
+    }
 
     private String attribute;
 

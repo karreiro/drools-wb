@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.Window;
@@ -54,8 +55,10 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.c
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
+import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
@@ -71,21 +74,33 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
 
     private ActionWorkItemWrapper editingWrapper;
 
-    @Inject
     private PatternPage patternPage;
 
-    @Inject
     private FieldPage fieldPage;
 
-    @Inject
     private AdditionalInfoPage additionalInfoPage;
 
-    @Inject
     private WorkItemPage workItemPage;
 
     private PatternWrapper patternWrapper;
 
     private Boolean workItemPageCompleted = Boolean.FALSE;
+
+    @Inject
+    public ActionWorkItemSetFieldPlugin(final PatternPage patternPage,
+                                        final FieldPage fieldPage,
+                                        final AdditionalInfoPage additionalInfoPage,
+                                        final WorkItemPage workItemPage,
+                                        final Event<WizardPageStatusChangeEvent> changeEvent,
+                                        final TranslationService translationService) {
+        super(changeEvent,
+              translationService);
+
+        this.patternPage = patternPage;
+        this.fieldPage = fieldPage;
+        this.additionalInfoPage = additionalInfoPage;
+        this.workItemPage = workItemPage;
+    }
 
     @Override
     public String getWorkItem() {

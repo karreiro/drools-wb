@@ -61,7 +61,8 @@ public class PatternToDeletePageTest {
     private SimplePanel content;
 
     @InjectMocks
-    private PatternToDeletePage page = spy(new PatternToDeletePage());
+    private PatternToDeletePage page = spy(new PatternToDeletePage(view,
+                                                                   translationService));
 
     @BeforeClass
     public static void staticSetup() {
@@ -80,6 +81,8 @@ public class PatternToDeletePageTest {
 
     @Test
     public void testPrepareView() throws Exception {
+        doReturn(new ArrayList<String>()).when(page).getLHSBoundFacts();
+
         page.prepareView();
 
         verify(view).init(page);
@@ -146,13 +149,6 @@ public class PatternToDeletePageTest {
         page.markAsViewed();
 
         verify(plugin).setPatternToDeletePageAsCompleted();
-    }
-
-    @Test
-    public void testInitialise() throws Exception {
-        page.initialise();
-
-        verify(content).setWidget(view);
     }
 
     @Test

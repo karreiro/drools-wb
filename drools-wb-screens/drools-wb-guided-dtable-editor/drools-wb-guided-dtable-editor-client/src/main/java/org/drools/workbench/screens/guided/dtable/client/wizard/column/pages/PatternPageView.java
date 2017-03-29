@@ -16,6 +16,7 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
+import java.util.function.Consumer;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -23,12 +24,12 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasPatternPage;
 import org.jboss.errai.common.client.dom.Div;
+import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
@@ -38,44 +39,46 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 
 @Dependent
 @Templated
-public class PatternPageView extends Composite implements PatternPage.View {
+public class PatternPageView implements IsElement,
+                                        PatternPage.View {
 
     private PatternPage<? extends HasPatternPage> page;
 
-    @Inject
     @DataField("patternList")
     private ListBox patternList;
 
-    @Inject
     @DataField("entryPointName")
     private TextBox entryPointName;
 
-    @Inject
     @DataField("createANewFactPattern")
     private Button createANewFactPattern;
 
-    @Inject
     @DataField("entryPointContainer")
     private Div entryPointContainer;
 
-    @Inject
     private TranslationService translationService;
+
+    @Inject
+    public PatternPageView(final ListBox patternList,
+                           final TextBox entryPointName,
+                           final Button createANewFactPattern,
+                           final Div entryPointContainer,
+                           final TranslationService translationService) {
+        this.patternList = patternList;
+        this.entryPointName = entryPointName;
+        this.createANewFactPattern = createANewFactPattern;
+        this.entryPointContainer = entryPointContainer;
+        this.translationService = translationService;
+    }
 
     @Override
     public void init(final PatternPage page) {
         this.page = page;
-
-        setup();
     }
 
     @Override
-    public void setup() {
-        setupPatternList();
-        setupEntryPointName();
-    }
-
-    private void setupEntryPointName() {
-        entryPointName.setText(page.getEntryPointName());
+    public void setupEntryPointName(final String entryPointName) {
+        this.entryPointName.setText(entryPointName);
     }
 
     @EventHandler("createANewFactPattern")
@@ -108,27 +111,25 @@ public class PatternPageView extends Composite implements PatternPage.View {
         entryPointContainer.setHidden(true);
     }
 
-    private void setupPatternList() {
+    @Override
+    public void setupPatternList(final Consumer<ListBox> consumer) {
         final String selectPattern = translate(GuidedDecisionTableErraiConstants.PatternPageView_SelectPattern);
 
         patternList.clear();
         patternList.addItem("-- " + selectPattern + " --",
                             "");
 
-        page.forEachPattern((item, value) -> patternList.addItem(item,
-                                                                 value));
-
-        selectTheCurrentPattern();
-        hidePatternListWhenItIsEmpty();
+        consumer.accept(patternList);
     }
 
-    private void hidePatternListWhenItIsEmpty() {
+    @Override
+    public void hidePatternListWhenItIsEmpty() {
         patternList.setVisible(patternList.getItemCount() > 1);
     }
 
-    private void selectTheCurrentPattern() {
-        final String currentValue = page.currentPatternValue();
-        final int currentValueIndex = getCurrentIndexFromList(currentValue,
+    @Override
+    public void selectPattern(final String currentPatternValue) {
+        final int currentValueIndex = getCurrentIndexFromList(currentPatternValue,
                                                               patternList);
 
         patternList.setSelectedIndex(currentValueIndex);

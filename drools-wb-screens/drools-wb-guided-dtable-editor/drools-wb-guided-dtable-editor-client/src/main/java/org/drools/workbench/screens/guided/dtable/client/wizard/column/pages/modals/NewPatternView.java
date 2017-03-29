@@ -46,32 +46,41 @@ public class NewPatternView implements NewPatternPresenter.View,
 
     private static final String WIDTH = "550px";
 
-    @Inject
     @DataField("body")
     private Div body;
 
-    @Inject
     @DataField("factTypeList")
     private ListBox factTypeList;
 
-    @Inject
     @DataField("binding")
     private TextBox binding;
 
-    @Inject
     @DataField("negatePatternMatch")
     private CheckBox negatePatternMatch;
 
-    @Inject
     @DataField("negatePatternContainer")
     private Div negatePatternContainer;
 
-    @Inject
     private TranslationService translationService;
 
     private NewPatternPresenter presenter;
 
     private BaseModal modal;
+
+    @Inject
+    public NewPatternView(final Div body,
+                          final ListBox factTypeList,
+                          final TextBox binding,
+                          final CheckBox negatePatternMatch,
+                          final Div negatePatternContainer,
+                          final TranslationService translationService) {
+        this.body = body;
+        this.factTypeList = factTypeList;
+        this.binding = binding;
+        this.negatePatternMatch = negatePatternMatch;
+        this.negatePatternContainer = negatePatternContainer;
+        this.translationService = translationService;
+    }
 
     @Override
     public void init(NewPatternPresenter presenter) {

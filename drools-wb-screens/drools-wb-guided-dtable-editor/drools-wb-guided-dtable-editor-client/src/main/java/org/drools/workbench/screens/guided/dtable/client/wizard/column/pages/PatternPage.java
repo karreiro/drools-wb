@@ -21,10 +21,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
@@ -33,7 +35,9 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.com
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.modals.NewPatternPresenter;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.client.callbacks.Callback;
+import org.uberfire.client.mvp.UberElement;
 import org.uberfire.client.mvp.UberView;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
@@ -41,19 +45,32 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 @Dependent
 public class PatternPage<T extends HasPatternPage & DecisionTableColumnPlugin> extends BaseDecisionTableColumnPage<T> {
 
-    @Inject
     private View view;
 
-    @Inject
     private NewPatternPresenter newPatternPresenter;
 
     private boolean negatedPatternEnabled = true;
 
+    @Inject
+    public PatternPage(final View view,
+                       final NewPatternPresenter newPatternPresenter,
+                       final TranslationService translationService) {
+        super(translationService);
+
+        this.view = view;
+        this.newPatternPresenter = newPatternPresenter;
+    }
+
     @Override
     public void initialise() {
-        newPatternPresenter.init(this);
+        super.initialise();
 
-        content.setWidget(view);
+        newPatternPresenter.init(this);
+    }
+
+    @Override
+    protected UberElement<?> getView() {
+        return view;
     }
 
     @Override
@@ -73,11 +90,19 @@ public class PatternPage<T extends HasPatternPage & DecisionTableColumnPlugin> e
     @Override
     public void prepareView() {
         view.init(this);
+
+        setupPattern();
+        setupEntryPoint();
     }
 
-    @Override
-    public Widget asWidget() {
-        return content;
+    private void setupEntryPoint() {
+        view.setupEntryPointName(getEntryPointName());
+    }
+
+    private void setupPattern() {
+        view.setupPatternList(fieldsList -> forEachPattern(fieldsList::addItem));
+        view.selectPattern(currentPatternValue());
+        view.hidePatternListWhenItIsEmpty();
     }
 
     public GuidedDecisionTableView.Presenter presenter() {
@@ -166,14 +191,20 @@ public class PatternPage<T extends HasPatternPage & DecisionTableColumnPlugin> e
         plugin().setEntryPointName(view.getEntryPointName());
     }
 
-    public interface View extends UberView<PatternPage> {
+    public interface View extends UberElement<PatternPage> {
 
-        void setup();
+        void setupEntryPointName(final String entryPointName);
 
         String getSelectedValue();
 
         String getEntryPointName();
 
         void disableEntryPoint();
+
+        void setupPatternList(Consumer<ListBox> consumer);
+
+        void hidePatternListWhenItIsEmpty();
+
+        void selectPattern(String currentPatternValue);
     }
 }

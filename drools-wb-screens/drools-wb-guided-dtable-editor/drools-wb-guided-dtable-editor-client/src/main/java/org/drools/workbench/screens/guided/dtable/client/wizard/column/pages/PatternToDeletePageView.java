@@ -21,9 +21,9 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
+import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
@@ -33,22 +33,26 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 
 @Dependent
 @Templated
-public class PatternToDeletePageView extends Composite implements PatternToDeletePage.View {
+public class PatternToDeletePageView implements IsElement,
+                                                PatternToDeletePage.View {
 
-    @Inject
     @DataField("patternList")
     private ListBox patternList;
 
-    @Inject
     private TranslationService translationService;
 
     private PatternToDeletePage page;
 
+    @Inject
+    public PatternToDeletePageView(final ListBox patternList,
+                                   final TranslationService translationService) {
+        this.patternList = patternList;
+        this.translationService = translationService;
+    }
+
     @Override
     public void init(final PatternToDeletePage page) {
         this.page = page;
-
-        setupPatternList();
     }
 
     @EventHandler("patternList")
@@ -61,34 +65,26 @@ public class PatternToDeletePageView extends Composite implements PatternToDelet
         return patternList.getSelectedValue();
     }
 
-    private void setupPatternList() {
-        final List<String> patterns = page.loadPatterns();
-        final boolean hasPatterns = !patterns.isEmpty();
-
+    @Override
+    public void setupPatternList(final List<String> patterns) {
         patternList.clear();
-        patternList.setEnabled(hasPatterns);
+        patternList.setEnabled(true);
 
-        if (hasPatterns) {
-            setupPatternList(patterns);
-        } else {
-            setupEmptyPatternList();
-        }
-    }
-
-    private void setupPatternList(List<String> patterns) {
         patternList.addItem(translate(GuidedDecisionTableErraiConstants.PatternToDeletePageView_Choose));
 
         patterns.forEach(patternList::addItem);
-
-        selectTheCurrentPattern();
     }
 
-    private void setupEmptyPatternList() {
+    @Override
+    public void setupEmptyPatternList() {
+        patternList.clear();
+        patternList.setEnabled(false);
+
         patternList.addItem(translate(GuidedDecisionTableErraiConstants.PatternToDeletePageView_None));
     }
 
-    private void selectTheCurrentPattern() {
-        final String currentValue = page.binding();
+    @Override
+    public void selectTheCurrentPattern(final String currentValue) {
         final int currentValueIndex = getCurrentIndexFromList(currentValue,
                                                               patternList);
 

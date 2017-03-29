@@ -24,18 +24,27 @@ import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.client.callbacks.Callback;
+import org.uberfire.client.mvp.UberElement;
 import org.uberfire.client.mvp.UberView;
 
 @Dependent
 public class CalculationTypePage extends BaseDecisionTableColumnPage<ConditionColumnPlugin> {
 
-    @Inject
     private View view;
 
+    @Inject
+    public CalculationTypePage(final View view,
+                               final TranslationService translationService) {
+        super(translationService);
+
+        this.view = view;
+    }
+
     @Override
-    public void initialise() {
-        content.setWidget(view);
+    protected UberElement<?> getView() {
+        return view;
     }
 
     @Override
@@ -51,11 +60,7 @@ public class CalculationTypePage extends BaseDecisionTableColumnPage<ConditionCo
     @Override
     public void prepareView() {
         view.init(this);
-    }
-
-    @Override
-    public Widget asWidget() {
-        return content;
+        view.selectConstraintValue(getConstraintValue());
     }
 
     int getConstraintValue() {
@@ -66,7 +71,8 @@ public class CalculationTypePage extends BaseDecisionTableColumnPage<ConditionCo
         plugin().setConstraintValue(constraintValue);
     }
 
-    public interface View extends UberView<CalculationTypePage> {
+    public interface View extends UberElement<CalculationTypePage> {
 
+        void selectConstraintValue(final int constraintValue);
     }
 }

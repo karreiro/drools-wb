@@ -31,6 +31,7 @@ import org.drools.workbench.screens.guided.dtable.client.widget.DTCellValueWidge
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -74,8 +75,15 @@ public class ValueOptionsPageTest {
     @Mock
     private DTCellValueWidgetFactory factory;
 
+    @Mock
+    private ValueOptionsPage.View view;
+
+    @Mock
+    private TranslationService translationService;
+
     @InjectMocks
-    private ValueOptionsPage<ConditionColumnPlugin> page = spy(new ValueOptionsPage<ConditionColumnPlugin>());
+    private ValueOptionsPage<ConditionColumnPlugin> page = spy(new ValueOptionsPage<ConditionColumnPlugin>(view,
+                                                                                                           translationService));
 
     @BeforeClass
     public static void staticSetup() {

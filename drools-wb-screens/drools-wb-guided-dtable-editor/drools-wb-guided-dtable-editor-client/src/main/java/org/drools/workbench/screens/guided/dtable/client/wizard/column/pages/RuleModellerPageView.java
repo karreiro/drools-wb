@@ -19,9 +19,9 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.ui.Composite;
 import org.drools.workbench.screens.guided.rule.client.editor.RuleModeller;
 import org.jboss.errai.common.client.dom.Div;
+import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
@@ -29,25 +29,27 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 
 @Dependent
 @Templated
-public class RuleModellerPageView extends Composite implements RuleModellerPage.View {
+public class RuleModellerPageView implements IsElement,
+                                             RuleModellerPage.View {
 
-    @Inject
     @DataField("rule-modeller-container")
     private Div ruleModellerContainer;
 
     private RuleModellerPage page;
 
+    @Inject
+    public RuleModellerPageView(final Div ruleModellerContainer) {
+        this.ruleModellerContainer = ruleModellerContainer;
+    }
+
     @Override
     public void init(final RuleModellerPage page) {
         this.page = page;
-
-        setupRuleModellerWidget();
     }
 
-    private void setupRuleModellerWidget() {
-        final RuleModeller widget = page.ruleModeller();
-
-        addWidgetToContainer(widget,
+    @Override
+    public void setupRuleModellerWidget(final RuleModeller ruleModeller) {
+        addWidgetToContainer(ruleModeller,
                              ruleModellerContainer);
     }
 }

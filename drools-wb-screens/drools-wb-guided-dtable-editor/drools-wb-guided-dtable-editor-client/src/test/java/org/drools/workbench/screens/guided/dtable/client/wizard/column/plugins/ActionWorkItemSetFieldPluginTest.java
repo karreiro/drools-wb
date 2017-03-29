@@ -86,7 +86,12 @@ public class ActionWorkItemSetFieldPluginTest {
     private EventSourceMock<WizardPageStatusChangeEvent> changeEvent;
 
     @InjectMocks
-    private ActionWorkItemSetFieldPlugin plugin = spy(new ActionWorkItemSetFieldPlugin());
+    private ActionWorkItemSetFieldPlugin plugin = spy(new ActionWorkItemSetFieldPlugin(patternPage,
+                                                                                       fieldPage,
+                                                                                       additionalInfoPage,
+                                                                                       workItemPage,
+                                                                                       changeEvent,
+                                                                                       translationService));
 
     @Test
     public void testSetWorkItem() throws Exception {

@@ -19,8 +19,9 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.IsWidget;
 import org.jboss.errai.common.client.dom.Div;
+import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -29,45 +30,53 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 
 @Dependent
 @Templated
-public class OperatorPageView extends Composite implements OperatorPage.View {
+public class OperatorPageView implements IsElement,
+                                         OperatorPage.View {
 
     private OperatorPage page;
 
-    @Inject
     @DataField("warning")
     private Div warning;
 
-    @Inject
     @DataField("info")
     private Div info;
 
-    @Inject
     @DataField("operatorsContainer")
     private Div operatorsContainer;
 
-    @Inject
     private TranslationService translationService;
+
+    @Inject
+    public OperatorPageView(final Div warning,
+                            final Div info,
+                            final Div operatorsContainer,
+                            final TranslationService translationService) {
+        this.warning = warning;
+        this.info = info;
+        this.operatorsContainer = operatorsContainer;
+        this.translationService = translationService;
+    }
 
     @Override
     public void init(final OperatorPage page) {
         this.page = page;
-
-        toggleFields();
-        setupOperator();
     }
 
-    private void toggleFields() {
-        if (page.isConstraintValuePredicate()) {
-            info.setHidden(false);
-            warning.setHidden(true);
-        } else {
-            info.setHidden(true);
-            warning.setHidden(page.canSetOperator());
-        }
+    @Override
+    public void showFactFieldWarningWhenItIsNotDefined(final boolean hasOperator) {
+        info.setHidden(true);
+        warning.setHidden(hasOperator);
     }
 
-    private void setupOperator() {
-        page.operatorDropdown(dropdown -> addWidgetToContainer(dropdown,
-                                                               operatorsContainer));
+    @Override
+    public void showPredicateWarning() {
+        info.setHidden(false);
+        warning.setHidden(true);
+    }
+
+    @Override
+    public void setupOperator(final IsWidget dropdown) {
+        addWidgetToContainer(dropdown,
+                             operatorsContainer);
     }
 }

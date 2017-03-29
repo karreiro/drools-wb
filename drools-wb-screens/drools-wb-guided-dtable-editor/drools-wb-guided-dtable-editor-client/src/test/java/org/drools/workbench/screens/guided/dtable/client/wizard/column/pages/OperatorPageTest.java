@@ -53,6 +53,8 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.uberfire.client.callbacks.Callback;
+import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
+import org.uberfire.mocks.EventSourceMock;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -90,8 +92,13 @@ public class OperatorPageTest {
     @Mock
     private SimplePanel content;
 
+    @Mock
+    private EventSourceMock<WizardPageStatusChangeEvent> eventSourceMock;
+
     @InjectMocks
-    private OperatorPage page = spy(new OperatorPage());
+    private OperatorPage page = spy(new OperatorPage(view,
+                                                     eventSourceMock,
+                                                     translationService));
 
     @BeforeClass
     public static void setupPreferences() {
@@ -123,21 +130,21 @@ public class OperatorPageTest {
     public void testCanSetOperatorWhenEditingColIsBlank() {
         when(plugin.getFactField()).thenReturn("");
 
-        assertFalse(page.canSetOperator());
+        assertFalse(page.hasFactField());
     }
 
     @Test
     public void testCanSetOperatorWhenEditingColIsNull() {
         when(plugin.getFactField()).thenReturn(null);
 
-        assertFalse(page.canSetOperator());
+        assertFalse(page.hasFactField());
     }
 
     @Test
     public void testCanSetOperatorWhenEditingColIsNotNull() {
         when(plugin.getFactField()).thenReturn("factField");
 
-        assertTrue(page.canSetOperator());
+        assertTrue(page.hasFactField());
     }
 
     @Test
@@ -240,13 +247,6 @@ public class OperatorPageTest {
         verify(oracle).getOperatorCompletions(eq("factType"),
                                               eq("factField"),
                                               any());
-    }
-
-    @Test
-    public void testInitialise() throws Exception {
-        page.initialise();
-
-        verify(content).setWidget(view);
     }
 
     @Test

@@ -76,7 +76,10 @@ public class BRLActionColumnPluginTest {
     private BRLActionColumn editingCol;
 
     @InjectMocks
-    private BRLActionColumnPlugin plugin = spy(new BRLActionColumnPlugin());
+    private BRLActionColumnPlugin plugin = spy(new BRLActionColumnPlugin(ruleModellerPage,
+                                                                         additionalInfoPage,
+                                                                         changeEvent,
+                                                                         translationService));
 
     @Test
     public void testGetTitle() throws Exception {

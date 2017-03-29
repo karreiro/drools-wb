@@ -47,6 +47,7 @@ import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi
 import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi.RefreshConditionsPanelEvent;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi.RefreshMetaDataPanelEvent;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.popovers.ColumnHeaderPopOver;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.model.GuidedDecisionTableEditorContent;
 import org.guvnor.common.services.shared.metadata.model.Overview;
 import org.jboss.errai.ioc.client.api.ManagedInstance;
@@ -76,7 +77,7 @@ public class GuidedDecisionTableModellerPresenterTest {
     private GuidedDecisionTableModellerView view;
 
     @Mock
-    private SyncBeanManager iocManager;
+    private ManagedInstance<NewGuidedDecisionTableColumnWizard> wizardManagedInstance;
 
     @Mock
     private GridLayer gridLayer;
@@ -133,7 +134,7 @@ public class GuidedDecisionTableModellerPresenterTest {
                                                                                                       updateRadarEvent,
                                                                                                       pinnedEvent,
                                                                                                       columnHeaderPopOver,
-                                                                                                      iocManager);
+                                                                                                      wizardManagedInstance);
         presenter = spy(wrapped);
 
         when(dtablePresenterProvider.get()).thenReturn(dtablePresenter);

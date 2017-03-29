@@ -90,7 +90,14 @@ public class ConditionColumnPluginTest {
     private NewGuidedDecisionTableColumnWizard wizard;
 
     @InjectMocks
-    private ConditionColumnPlugin plugin = spy(new ConditionColumnPlugin());
+    private ConditionColumnPlugin plugin = spy(new ConditionColumnPlugin(patternPage,
+                                                                         calculationTypePage,
+                                                                         fieldPage,
+                                                                         operatorPage,
+                                                                         valueOptionsPage,
+                                                                         additionalInfoPage,
+                                                                         changeEvent,
+                                                                         translationService));
 
     @Before
     public void setup() {

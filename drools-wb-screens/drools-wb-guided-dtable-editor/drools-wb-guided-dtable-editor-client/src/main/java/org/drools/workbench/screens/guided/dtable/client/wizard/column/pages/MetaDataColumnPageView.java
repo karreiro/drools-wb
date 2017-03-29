@@ -20,37 +20,42 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.common.client.dom.Span;
+import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 @Dependent
 @Templated
-public class MetaDataColumnPageView extends Composite implements MetaDataColumnPage.View {
+public class MetaDataColumnPageView implements IsElement,
+                                               MetaDataColumnPage.View {
 
-    @Inject
     @DataField("metaDataBox")
     TextBox metaDataBox;
 
-    @Inject
     @DataField("error")
     Div error;
 
-    @Inject
     @DataField("errorMessage")
     Span errorMessage;
 
     private MetaDataColumnPage page;
 
+    @Inject
+    public MetaDataColumnPageView(final TextBox metaDataBox,
+                                  final Div error,
+                                  final Span errorMessage) {
+        this.metaDataBox = metaDataBox;
+        this.error = error;
+        this.errorMessage = errorMessage;
+    }
+
     @Override
     public void init(final MetaDataColumnPage page) {
         this.page = page;
-
-        setup();
     }
 
     @EventHandler("metaDataBox")
@@ -64,7 +69,8 @@ public class MetaDataColumnPageView extends Composite implements MetaDataColumnP
         error.setHidden(false);
     }
 
-    private void setup() {
+    @Override
+    public void clear() {
         metaDataBox.setText(page.getMetadata());
         errorMessage.setTextContent("");
         error.setHidden(true);

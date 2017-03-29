@@ -60,7 +60,8 @@ public class WorkItemPageTest {
     private TranslationService translationService;
 
     @InjectMocks
-    private WorkItemPage<ActionWorkItemPlugin> page = spy(new WorkItemPage<ActionWorkItemPlugin>());
+    private WorkItemPage<ActionWorkItemPlugin> page = spy(new WorkItemPage<ActionWorkItemPlugin>(view,
+                                                                                                 translationService));
 
     @BeforeClass
     public static void staticSetup() {
@@ -123,7 +124,7 @@ public class WorkItemPageTest {
 
         when(view.getSelectedWorkItem()).thenReturn(workItem);
 
-        page.selectWorkItem();
+        page.selectWorkItem(view.getSelectedWorkItem());
 
         verify(plugin).setWorkItem(workItem);
         verify(page).showParameters();
@@ -173,13 +174,6 @@ public class WorkItemPageTest {
         verify(plugin).getWorkItem();
         assertEquals(expectedWorkItem,
                      actualWorkItem);
-    }
-
-    @Test
-    public void testInitialise() throws Exception {
-        page.initialise();
-
-        verify(content).setWidget(view);
     }
 
     @Test

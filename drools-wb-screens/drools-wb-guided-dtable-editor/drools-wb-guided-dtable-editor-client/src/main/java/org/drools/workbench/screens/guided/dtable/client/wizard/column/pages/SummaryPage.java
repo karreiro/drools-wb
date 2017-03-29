@@ -18,9 +18,10 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.Dependent;
-import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.Widget;
@@ -28,8 +29,10 @@ import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDe
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
+import org.jboss.errai.ioc.client.api.ManagedInstance;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.client.callbacks.Callback;
-import org.uberfire.client.mvp.UberView;
+import org.uberfire.client.mvp.UberElement;
 
 /**
  * A summary page for the guided Decision Table Wizard
@@ -39,11 +42,21 @@ public class SummaryPage extends BaseDecisionTableColumnPage {
 
     private Boolean includeAdvanced = Boolean.FALSE;
 
-    @Inject
-    private Instance<BaseDecisionTableColumnPlugin> plugins;
+    private List<BaseDecisionTableColumnPlugin> plugins = new ArrayList<>();
+
+    private ManagedInstance<BaseDecisionTableColumnPlugin> pluginManagedInstance;
+
+    private View view;
 
     @Inject
-    private View view;
+    public SummaryPage(final ManagedInstance<BaseDecisionTableColumnPlugin> pluginManagedInstance,
+                       final View view,
+                       final TranslationService translationService) {
+        super(translationService);
+
+        this.pluginManagedInstance = pluginManagedInstance;
+        this.view = view;
+    }
 
     @Override
     public String getTitle() {
@@ -58,16 +71,22 @@ public class SummaryPage extends BaseDecisionTableColumnPage {
     @Override
     public void prepareView() {
         view.init(this);
+
+        setupPluginList();
     }
 
     @Override
-    public void initialise() {
-        content.setWidget(view);
+    protected UberElement<?> getView() {
+        return view;
     }
 
-    @Override
-    public Widget asWidget() {
-        return content;
+    @PostConstruct
+    public void loadPlugins() {
+        final ArrayList<BaseDecisionTableColumnPlugin> loadedPlugins = new ArrayList<BaseDecisionTableColumnPlugin>() {{
+            pluginManagedInstance.forEach(this::add);
+        }};
+
+        this.plugins = sortByTitle(loadedPlugins);
     }
 
     void openPage(final String selectedItemText) {
@@ -81,7 +100,7 @@ public class SummaryPage extends BaseDecisionTableColumnPage {
     }
 
     BaseDecisionTableColumnPlugin findPluginByIdentifier(final String selectedItemText) {
-        for (BaseDecisionTableColumnPlugin plugin : this.plugins) {
+        for (BaseDecisionTableColumnPlugin plugin : this.pluginManagedInstance) {
             if (plugin.getIdentifier().equals(selectedItemText)) {
                 return plugin;
             }
@@ -91,31 +110,47 @@ public class SummaryPage extends BaseDecisionTableColumnPage {
     }
 
     List<BaseDecisionTableColumnPlugin> pluginsByCategory() {
-        return pluginsSortedByTitle()
+        return plugins()
                 .stream()
                 .filter(plugin -> includeAdvanced || plugin.getType() == DecisionTableColumnPlugin.Type.BASIC)
                 .collect(Collectors.toList());
     }
 
-    List<BaseDecisionTableColumnPlugin> pluginsSortedByTitle() {
-        final List<BaseDecisionTableColumnPlugin> plugins = plugins();
-
-        plugins.sort((p1, p2) -> p1.getTitle().compareTo(p2.getTitle()));
-
+    List<BaseDecisionTableColumnPlugin> plugins() {
         return plugins;
     }
 
-    List<BaseDecisionTableColumnPlugin> plugins() {
-        return new ArrayList<BaseDecisionTableColumnPlugin>() {{
-            plugins.forEach(this::add);
-        }};
+    List<BaseDecisionTableColumnPlugin> sortByTitle(final List<BaseDecisionTableColumnPlugin> plugins) {
+        final ArrayList<BaseDecisionTableColumnPlugin> sortedPlugins = new ArrayList<>(plugins);
+
+        sortedPlugins.sort((plugin1, plugin2) -> {
+            return plugin1.getTitle().compareTo(plugin2.getTitle());
+        });
+
+        return sortedPlugins;
     }
 
     void setIncludeAdvanced(final Boolean includeAdvanced) {
         this.includeAdvanced = includeAdvanced;
+
+        setupPluginList();
     }
 
-    public interface View extends UberView<SummaryPage> {
+    private void setupPluginList() {
+        view.loadPluginList(pluginsByCategory());
+        view.setSelectedPlugin(currentPluginIdentifier());
+    }
 
+    private String currentPluginIdentifier() {
+        final DecisionTableColumnPlugin plugin = Optional.ofNullable(plugin()).orElse(DecisionTableColumnPlugin.DEFAULT);
+
+        return plugin.getIdentifier();
+    }
+
+    public interface View extends UberElement<SummaryPage> {
+
+        void loadPluginList(final List<BaseDecisionTableColumnPlugin> plugins);
+
+        void setSelectedPlugin(final String identifier);
     }
 }

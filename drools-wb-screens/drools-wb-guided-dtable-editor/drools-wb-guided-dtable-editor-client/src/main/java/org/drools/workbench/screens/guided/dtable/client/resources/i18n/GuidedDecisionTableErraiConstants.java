@@ -120,9 +120,6 @@ public class GuidedDecisionTableErraiConstants {
     public static final String FieldPageView_SelectField = "FieldPageView.SelectField";
 
     @TranslationKey(defaultValue = "")
-    public static final String PatternPage_NegatedPattern = "PatternPage.NegatedPattern";
-
-    @TranslationKey(defaultValue = "")
     public static final String PatternPageView_SelectPattern = "PatternPageView.SelectPattern";
 
     @TranslationKey(defaultValue = "")

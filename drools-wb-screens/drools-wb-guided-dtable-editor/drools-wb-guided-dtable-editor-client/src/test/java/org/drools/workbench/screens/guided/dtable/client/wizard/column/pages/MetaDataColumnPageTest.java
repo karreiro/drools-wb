@@ -57,7 +57,8 @@ public class MetaDataColumnPageTest {
     private SimplePanel content;
 
     @InjectMocks
-    private MetaDataColumnPage page = new MetaDataColumnPage();
+    private MetaDataColumnPage page = new MetaDataColumnPage(view,
+                                                             translationService);
 
     @BeforeClass
     public static void setupPreferences() {
@@ -122,13 +123,6 @@ public class MetaDataColumnPageTest {
         page.setMetadata(metaData);
 
         verify(plugin).setMetaData(metaData);
-    }
-
-    @Test
-    public void testInitialise() throws Exception {
-        page.initialise();
-
-        verify(content).setWidget(view);
     }
 
     @Test

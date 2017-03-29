@@ -82,7 +82,12 @@ public class ActionSetFactPluginTest {
     private EventSourceMock<WizardPageStatusChangeEvent> changeEvent;
 
     @InjectMocks
-    private ActionSetFactPlugin plugin = spy(new ActionSetFactPlugin());
+    private ActionSetFactPlugin plugin = spy(new ActionSetFactPlugin(patternPage,
+                                                                     fieldPage,
+                                                                     valueOptionsPage,
+                                                                     additionalInfoPage,
+                                                                     changeEvent,
+                                                                     translationService));
 
     @Test
     public void testGetTitle() {

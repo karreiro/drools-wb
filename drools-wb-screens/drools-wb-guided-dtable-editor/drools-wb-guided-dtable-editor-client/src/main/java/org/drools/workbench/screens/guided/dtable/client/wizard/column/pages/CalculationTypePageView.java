@@ -20,30 +20,37 @@ import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.user.client.ui.Composite;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.jboss.errai.common.client.dom.Input;
+import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 @Dependent
 @Templated
-public class CalculationTypePageView extends Composite implements CalculationTypePage.View {
+public class CalculationTypePageView implements IsElement,
+                                                CalculationTypePage.View {
 
-    @Inject
     @DataField("isConstraintValueTypeLiteral")
     Input isConstraintValueTypeLiteral;
 
-    @Inject
     @DataField("isConstraintValueTypeRetValue")
     Input isConstraintValueTypeRetValue;
 
-    @Inject
     @DataField("isConstraintValueTypePredicate")
     Input isConstraintValueTypePredicate;
 
     private CalculationTypePage page;
+
+    @Inject
+    public CalculationTypePageView(final Input isConstraintValueTypeLiteral,
+                                   final Input isConstraintValueTypeRetValue,
+                                   final Input isConstraintValueTypePredicate) {
+        this.isConstraintValueTypeLiteral = isConstraintValueTypeLiteral;
+        this.isConstraintValueTypeRetValue = isConstraintValueTypeRetValue;
+        this.isConstraintValueTypePredicate = isConstraintValueTypePredicate;
+    }
 
     @EventHandler({"isConstraintValueTypeLiteral", "isConstraintValueTypeRetValue", "isConstraintValueTypePredicate"})
     public void onConstraintValueSelected(ChangeEvent event) {
@@ -53,16 +60,15 @@ public class CalculationTypePageView extends Composite implements CalculationTyp
     @Override
     public void init(final CalculationTypePage page) {
         this.page = page;
-
-        selectConstraintValue();
     }
 
-    private void selectConstraintValue() {
+    @Override
+    public void selectConstraintValue(final int constraintValue) {
         isConstraintValueTypeLiteral.setChecked(false);
         isConstraintValueTypeRetValue.setChecked(false);
         isConstraintValueTypePredicate.setChecked(false);
 
-        switch (page.getConstraintValue()) {
+        switch (constraintValue) {
             case BaseSingleFieldConstraint.TYPE_LITERAL:
                 isConstraintValueTypeLiteral.setChecked(true);
                 break;

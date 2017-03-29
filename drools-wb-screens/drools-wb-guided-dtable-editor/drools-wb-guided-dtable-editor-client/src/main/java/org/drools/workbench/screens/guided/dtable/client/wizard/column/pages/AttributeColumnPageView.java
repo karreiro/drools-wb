@@ -16,13 +16,14 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
+import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import org.jboss.errai.common.client.dom.Div;
+import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -31,23 +32,27 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 
 @Dependent
 @Templated
-public class AttributeColumnPageView extends Composite implements AttributeColumnPage.View {
+public class AttributeColumnPageView implements IsElement,
+                                                AttributeColumnPage.View {
 
     private AttributeColumnPage page;
 
-    @Inject
     @DataField("attributeList")
     private ListBox attributeList;
 
-    @Inject
     @DataField("attributeDescription")
     private Div attributeDescription;
+
+    @Inject
+    public AttributeColumnPageView(final ListBox attributeList,
+                                   final Div attributeDescription) {
+        this.attributeList = attributeList;
+        this.attributeDescription = attributeDescription;
+    }
 
     @Override
     public void init(final AttributeColumnPage page) {
         this.page = page;
-
-        setup();
     }
 
     @EventHandler("attributeList")
@@ -58,12 +63,11 @@ public class AttributeColumnPageView extends Composite implements AttributeColum
                                           attributeList.getSelectedValue());
     }
 
-    private void setup() {
+    @Override
+    public void setupAttributeList(final List<String> attributes) {
         attributeList.clear();
 
-        for (String item : page.getAttributes()) {
-            attributeList.addItem(item);
-        }
+        attributes.forEach(attributeList::addItem);
 
         attributeList.setVisibleItemCount(attributeList.getItemCount());
         attributeList.setSelectedIndex(attributeIndex());

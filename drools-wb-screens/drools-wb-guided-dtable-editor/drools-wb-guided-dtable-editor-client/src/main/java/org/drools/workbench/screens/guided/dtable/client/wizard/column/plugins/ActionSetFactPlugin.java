@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.Window;
@@ -50,8 +51,10 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.c
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.LimitedWidgetFactory;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ValueOptionsPageInitializer;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
+import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
@@ -61,16 +64,12 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
                                                                                   HasValueOptionsPage,
                                                                                   HasAdditionalInfoPage {
 
-    @Inject
     private PatternPage patternPage;
 
-    @Inject
     private FieldPage fieldPage;
 
-    @Inject
     private ValueOptionsPage<ActionSetFactPlugin> valueOptionsPage;
 
-    @Inject
     private AdditionalInfoPage<ActionSetFactPlugin> additionalInfoPage;
 
     private Boolean valueOptionsPageCompleted = Boolean.FALSE;
@@ -80,6 +79,22 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
     private PatternWrapper patternWrapper;
 
     private Pattern52 editingPattern = new Pattern52();
+
+    @Inject
+    public ActionSetFactPlugin(final PatternPage patternPage,
+                               final FieldPage fieldPage,
+                               final ValueOptionsPage<ActionSetFactPlugin> valueOptionsPage,
+                               final AdditionalInfoPage<ActionSetFactPlugin> additionalInfoPage,
+                               final Event<WizardPageStatusChangeEvent> changeEvent,
+                               final TranslationService translationService) {
+        super(changeEvent,
+              translationService);
+
+        this.patternPage = patternPage;
+        this.fieldPage = fieldPage;
+        this.valueOptionsPage = valueOptionsPage;
+        this.additionalInfoPage = additionalInfoPage;
+    }
 
     @Override
     public String getTitle() {

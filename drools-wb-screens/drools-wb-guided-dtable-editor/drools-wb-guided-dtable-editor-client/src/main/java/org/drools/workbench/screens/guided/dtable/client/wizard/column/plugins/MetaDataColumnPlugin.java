@@ -19,23 +19,35 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 import java.util.ArrayList;
 import java.util.List;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import org.drools.workbench.models.guided.dtable.shared.model.MetadataCol52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.MetaDataColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
+import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
 @Dependent
 public class MetaDataColumnPlugin extends BaseDecisionTableColumnPlugin {
 
-    @Inject
     private MetaDataColumnPage page;
 
     private String metaData;
+
+    @Inject
+    public MetaDataColumnPlugin(final MetaDataColumnPage page,
+                                final Event<WizardPageStatusChangeEvent> changeEvent,
+                                final TranslationService translationService) {
+        super(changeEvent,
+              translationService);
+
+        this.page = page;
+    }
 
     @Override
     public String getTitle() {

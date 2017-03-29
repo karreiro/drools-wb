@@ -23,6 +23,7 @@ import java.util.stream.Stream;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.models.datamodel.oracle.FieldAccessorsAndMutators;
 import org.drools.workbench.models.datamodel.oracle.ModelField;
@@ -31,8 +32,10 @@ import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDe
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasFieldPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.client.callbacks.Callback;
+import org.uberfire.client.mvp.UberElement;
 import org.uberfire.client.mvp.UberView;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
@@ -40,12 +43,19 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 @Dependent
 public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> extends BaseDecisionTableColumnPage<T> {
 
-    @Inject
     private View view;
 
+    @Inject
+    public FieldPage(final View view,
+                     final TranslationService translationService) {
+        super(translationService);
+
+        this.view = view;
+    }
+
     @Override
-    public void initialise() {
-        content.setWidget(view);
+    protected UberElement<?> getView() {
+        return view;
     }
 
     @Override
@@ -61,11 +71,22 @@ public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> exten
     @Override
     public void prepareView() {
         view.init(this);
+
+        setupWarningMessages();
+        setupField();
     }
 
-    @Override
-    public Widget asWidget() {
-        return content;
+    private void setupField() {
+        view.setupFieldList(fieldsList -> forEachFactField(fieldsList::addItem));
+        view.selectField(getFactField());
+    }
+
+    private void setupWarningMessages() {
+        if (isConstraintValuePredicate()) {
+            view.showPredicateWarning();
+        } else {
+            view.showPatternWarningWhenItIsNotDefined(hasEditingPattern());
+        }
     }
 
     void setEditingCol(final String selectedValue) {
@@ -132,7 +153,14 @@ public class FieldPage<T extends HasFieldPage & DecisionTableColumnPlugin> exten
         return plugin().getFactField();
     }
 
-    public interface View extends UberView<FieldPage> {
+    public interface View extends UberElement<FieldPage> {
 
+        void showPredicateWarning();
+
+        void showPatternWarningWhenItIsNotDefined(final boolean hasEditingPattern);
+
+        void setupFieldList(final Consumer<ListBox> consumer);
+
+        void selectField(final String factField);
     }
 }

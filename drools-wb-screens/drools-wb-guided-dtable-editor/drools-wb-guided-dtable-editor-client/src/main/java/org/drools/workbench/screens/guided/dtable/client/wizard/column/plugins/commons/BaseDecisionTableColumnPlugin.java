@@ -17,7 +17,6 @@
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons;
 
 import javax.enterprise.event.Event;
-import javax.inject.Inject;
 
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
@@ -31,11 +30,15 @@ public abstract class BaseDecisionTableColumnPlugin implements DecisionTableColu
 
     protected GuidedDecisionTableView.Presenter presenter;
 
-    @Inject
     private Event<WizardPageStatusChangeEvent> changeEvent;
 
-    @Inject
     private TranslationService translationService;
+
+    protected BaseDecisionTableColumnPlugin(final Event<WizardPageStatusChangeEvent> changeEvent,
+                                            final TranslationService translationService) {
+        this.changeEvent = changeEvent;
+        this.translationService = translationService;
+    }
 
     public void init(final NewGuidedDecisionTableColumnWizard wizard) {
         this.wizard = wizard;

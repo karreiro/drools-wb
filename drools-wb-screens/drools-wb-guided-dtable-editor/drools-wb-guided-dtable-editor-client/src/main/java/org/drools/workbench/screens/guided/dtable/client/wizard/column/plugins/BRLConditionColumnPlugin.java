@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import com.google.gwt.event.shared.HandlerRegistration;
@@ -48,7 +49,9 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.c
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
 import org.drools.workbench.screens.guided.rule.client.editor.RuleModellerConfiguration;
 import org.drools.workbench.screens.guided.rule.client.editor.events.TemplateVariablesChangedEvent;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
+import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
@@ -57,10 +60,8 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
                                                                                        HasAdditionalInfoPage,
                                                                                        TemplateVariablesChangedEvent.Handler {
 
-    @Inject
     private RuleModellerPage ruleModellerPage;
 
-    @Inject
     private AdditionalInfoPage additionalInfoPage;
 
     private BRLConditionColumn editingCol;
@@ -70,6 +71,18 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
     private HandlerRegistration registration;
 
     private RuleModel ruleModel = null;
+
+    @Inject
+    public BRLConditionColumnPlugin(final RuleModellerPage ruleModellerPage,
+                                    final AdditionalInfoPage additionalInfoPage,
+                                    final Event<WizardPageStatusChangeEvent> changeEvent,
+                                    final TranslationService translationService) {
+        super(changeEvent,
+              translationService);
+
+        this.ruleModellerPage = ruleModellerPage;
+        this.additionalInfoPage = additionalInfoPage;
+    }
 
     @Override
     public void init(final NewGuidedDecisionTableColumnWizard wizard) {

@@ -32,15 +32,15 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.c
 import org.drools.workbench.screens.guided.rule.client.editor.BindingTextBox;
 import org.drools.workbench.screens.guided.rule.client.editor.CEPWindowOperatorsDropdown;
 import org.gwtbootstrap3.client.ui.TextBox;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.client.callbacks.Callback;
-import org.uberfire.client.mvp.UberView;
+import org.uberfire.client.mvp.UberElement;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
 @Dependent
 public class ValueOptionsPage<T extends HasValueOptionsPage & DecisionTableColumnPlugin> extends BaseDecisionTableColumnPage<T> {
 
-    @Inject
     private View view;
 
     private boolean valueListEnabled = false;
@@ -53,9 +53,17 @@ public class ValueOptionsPage<T extends HasValueOptionsPage & DecisionTableColum
 
     private boolean bindingEnabled = false;
 
+    @Inject
+    public ValueOptionsPage(final View view,
+                            final TranslationService translationService) {
+        super(translationService);
+
+        this.view = view;
+    }
+
     @Override
-    public void initialise() {
-        content.setWidget(view);
+    protected UberElement<?> getView() {
+        return view;
     }
 
     @Override
@@ -73,30 +81,106 @@ public class ValueOptionsPage<T extends HasValueOptionsPage & DecisionTableColum
         view.init(this);
 
         markAsViewed();
+        setupValueList();
+        setupCepOperators();
+        setupDefaultValue();
+        setupLimitedValue();
+        setupBinding();
     }
 
-    @Override
-    public Widget asWidget() {
-        return content;
+    private void setupValueList() {
+        if (!isValueListEnabled()) {
+            view.hideValueList();
+            return;
+        }
+
+        if (!canSetupValueList()) {
+            view.disableValueList();
+        } else {
+            view.enableValueList();
+        }
+
+        view.setValueListText(getValueList());
     }
 
-    boolean isValueListEnabled() {
+    private void setupCepOperators() {
+        if (!isCepOperatorsEnabled()) {
+            view.hideCepOperators();
+            return;
+        }
+
+        isFactTypeAnEvent((isEvent) -> {
+            if (canSetupCepOperators() && isEvent) {
+                view.setupCepOperators(newCEPWindowOperatorsDropdown());
+            } else {
+                view.setupCepOperators(disabledTextBox());
+            }
+        });
+    }
+
+    private void setupDefaultValue() {
+        if (!isDefaultValueEnabled()) {
+            view.hideDefaultValue();
+            return;
+        }
+
+        if (canSetupDefaultValue()) {
+            view.setupDefaultValue(newDefaultValueWidget());
+        } else {
+            view.setupDefaultValue(disabledTextBox());
+        }
+    }
+
+    private void setupLimitedValue() {
+        if (!isLimitedValueEnabled()) {
+            view.hideLimitedValue();
+            return;
+        }
+
+        if (canSetupLimitedValue()) {
+            view.setupLimitedValue(newLimitedValueWidget());
+        } else {
+            view.setupLimitedValue(disabledTextBox());
+        }
+    }
+
+    private void setupBinding() {
+        if (!isBindingEnabled()) {
+            view.hideBinding();
+            return;
+        }
+
+        if (canSetupBinding()) {
+            view.setupBinding(newBindingTextBox());
+        } else {
+            view.setupBinding(disabledTextBox());
+        }
+    }
+
+    private TextBox disabledTextBox() {
+        return new TextBox() {{
+            getElement().setAttribute("disabled",
+                                      "disabled");
+        }};
+    }
+
+    private boolean isValueListEnabled() {
         return valueListEnabled;
     }
 
-    boolean isCepOperatorsEnabled() {
+    private boolean isCepOperatorsEnabled() {
         return cepOperatorsEnabled;
     }
 
-    boolean isDefaultValueEnabled() {
+    private boolean isDefaultValueEnabled() {
         return defaultValueEnabled;
     }
 
-    boolean isLimitedValueEnabled() {
+    private boolean isLimitedValueEnabled() {
         return limitedValueEnabled;
     }
 
-    boolean isBindingEnabled() {
+    private boolean isBindingEnabled() {
         return bindingEnabled;
     }
 
@@ -128,7 +212,7 @@ public class ValueOptionsPage<T extends HasValueOptionsPage & DecisionTableColum
         return plugin().limitedValueWidget();
     }
 
-    CEPWindowOperatorsDropdown newCEPWindowOperatorsDropdown() {
+    private CEPWindowOperatorsDropdown newCEPWindowOperatorsDropdown() {
         final Pattern52 editingPattern = editingPattern();
 
         return new CEPWindowOperatorsDropdown(editingPattern,
@@ -142,7 +226,7 @@ public class ValueOptionsPage<T extends HasValueOptionsPage & DecisionTableColum
         }};
     }
 
-    TextBox newBindingTextBox() {
+    private TextBox newBindingTextBox() {
         final BindingTextBox bindingTextBox = new BindingTextBox();
 
         bindingTextBox.setText(plugin().getBinding());
@@ -201,7 +285,7 @@ public class ValueOptionsPage<T extends HasValueOptionsPage & DecisionTableColum
         return isBindingEnabled() && plugin().constraintValue() == BaseSingleFieldConstraint.TYPE_LITERAL;
     }
 
-    boolean canSetupValueList() {
+    private boolean canSetupValueList() {
         if (!isValueListEnabled()) {
             return false;
         }
@@ -265,13 +349,38 @@ public class ValueOptionsPage<T extends HasValueOptionsPage & DecisionTableColum
 
     public void setValueList(final String valueList) {
         plugin().setValueList(valueList);
+
+        setupDefaultValue();
     }
 
     private void markAsViewed() {
         plugin().setValueOptionsPageAsCompleted();
     }
 
-    public interface View extends UberView<ValueOptionsPage> {
+    public interface View extends UberElement<ValueOptionsPage> {
 
+        void setValueListText(String valueListText);
+
+        void enableValueList();
+
+        void disableValueList();
+
+        void hideValueList();
+
+        void setupDefaultValue(IsWidget widget);
+
+        void hideDefaultValue();
+
+        void setupLimitedValue(IsWidget widget);
+
+        void hideLimitedValue();
+
+        void setupBinding(IsWidget widget);
+
+        void hideBinding();
+
+        void hideCepOperators();
+
+        void setupCepOperators(IsWidget widget);
     }
 }

@@ -68,7 +68,10 @@ public class ActionWorkItemPluginTest {
     private GuidedDecisionTable52 model;
 
     @InjectMocks
-    private ActionWorkItemPlugin plugin = spy(new ActionWorkItemPlugin());
+    private ActionWorkItemPlugin plugin = spy(new ActionWorkItemPlugin(additionalInfoPage,
+                                                                       workItemPage,
+                                                                       changeEvent,
+                                                                       translationService));
 
     @Test
     public void testSetWorkItemWithABlankValue() throws Exception {

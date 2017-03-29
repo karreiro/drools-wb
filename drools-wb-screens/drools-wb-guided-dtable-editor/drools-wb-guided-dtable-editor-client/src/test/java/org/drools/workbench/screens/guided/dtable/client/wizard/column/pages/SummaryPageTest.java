@@ -32,6 +32,7 @@ import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDeci
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Assert;
 import org.junit.Before;
@@ -66,8 +67,13 @@ public class SummaryPageTest {
     @Mock
     private GuidedDecisionTableView.Presenter presenter;
 
+    @Mock
+    private ManagedInstance<BaseDecisionTableColumnPlugin> pluginManagedInstance;
+
     @InjectMocks
-    private SummaryPage page = spy(new SummaryPage());
+    private SummaryPage page = spy(new SummaryPage(pluginManagedInstance,
+                                                   view,
+                                                   translationService));
 
     @BeforeClass
     public static void setupPreferences() {
@@ -128,19 +134,15 @@ public class SummaryPageTest {
 
     @Test
     public void testPluginsSortedByTitle() {
-        final ArrayList<BaseDecisionTableColumnPlugin> fakePlugins = new ArrayList<BaseDecisionTableColumnPlugin>() {{
-            add(pluginMock("Plugin A"));
-            add(pluginMock("Plugin C"));
-            add(pluginMock("Plugin B"));
-        }};
-
-        doReturn(fakePlugins).when(page).plugins();
-
         final List<String> expectedTitles = Arrays.asList("Plugin A",
                                                           "Plugin B",
                                                           "Plugin C");
 
-        final List<String> actualTitles = mapTitles(page.pluginsSortedByTitle());
+        final List<String> actualTitles = mapTitles(page.sortByTitle(new ArrayList<BaseDecisionTableColumnPlugin>() {{
+            add(pluginMock("Plugin A"));
+            add(pluginMock("Plugin C"));
+            add(pluginMock("Plugin B"));
+        }}));
 
         assertEquals(expectedTitles,
                      actualTitles);
@@ -159,13 +161,6 @@ public class SummaryPageTest {
                 .stream()
                 .map(BaseDecisionTableColumnPlugin::getTitle)
                 .collect(Collectors.toList());
-    }
-
-    @Test
-    public void testInitialise() throws Exception {
-        page.initialise();
-
-        verify(content).setWidget(view);
     }
 
     @Test

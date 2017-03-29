@@ -33,8 +33,10 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.com
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 import org.drools.workbench.screens.guided.rule.client.editor.CEPOperatorsDropdown;
 import org.gwtbootstrap3.client.ui.ListBox;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.client.callbacks.Callback;
+import org.uberfire.client.mvp.UberElement;
 import org.uberfire.client.mvp.UberView;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
 
@@ -43,15 +45,23 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 @Dependent
 public class OperatorPage extends BaseDecisionTableColumnPage<ConditionColumnPlugin> {
 
-    @Inject
     private View view;
 
-    @Inject
     private Event<WizardPageStatusChangeEvent> changeEvent;
 
+    @Inject
+    public OperatorPage(final View view,
+                        final Event<WizardPageStatusChangeEvent> changeEvent,
+                        final TranslationService translationService) {
+        super(translationService);
+
+        this.view = view;
+        this.changeEvent = changeEvent;
+    }
+
     @Override
-    public void initialise() {
-        content.setWidget(view);
+    protected UberElement<?> getView() {
+        return view;
     }
 
     @Override
@@ -62,11 +72,21 @@ public class OperatorPage extends BaseDecisionTableColumnPage<ConditionColumnPlu
     @Override
     public void prepareView() {
         view.init(this);
+
+        setupWarningMessages();
+        setupOperator();
     }
 
-    @Override
-    public Widget asWidget() {
-        return content;
+    private void setupOperator() {
+        operatorDropdown(dropdown -> view.setupOperator(dropdown));
+    }
+
+    private void setupWarningMessages() {
+        if (isConstraintValuePredicate()) {
+            view.showPredicateWarning();
+        } else {
+            view.showFactFieldWarningWhenItIsNotDefined(hasFactField());
+        }
     }
 
     @Override
@@ -85,7 +105,7 @@ public class OperatorPage extends BaseDecisionTableColumnPage<ConditionColumnPlu
     }
 
     void operatorDropdown(final Consumer<IsWidget> widgetSupplier) {
-        if (canSetOperator()) {
+        if (hasFactField()) {
             cepOperatorsDropdown(widgetSupplier);
         } else {
             emptyOperatorsDropdown(widgetSupplier);
@@ -96,7 +116,7 @@ public class OperatorPage extends BaseDecisionTableColumnPage<ConditionColumnPlu
         return plugin().constraintValue() == BaseSingleFieldConstraint.TYPE_PREDICATE;
     }
 
-    boolean canSetOperator() {
+    boolean hasFactField() {
         return !nil(plugin().getFactField());
     }
 
@@ -166,7 +186,12 @@ public class OperatorPage extends BaseDecisionTableColumnPage<ConditionColumnPlu
         return plugin().constraintValue();
     }
 
-    public interface View extends UberView<OperatorPage> {
+    public interface View extends UberElement<OperatorPage> {
 
+        void showFactFieldWarningWhenItIsNotDefined(boolean hasOperator);
+
+        void showPredicateWarning();
+
+        void setupOperator(IsWidget dropdown);
     }
 }

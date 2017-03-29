@@ -59,7 +59,8 @@ public class RuleModellerPageTest {
     private GuidedDecisionTableView.Presenter presenter;
 
     @InjectMocks
-    private RuleModellerPage<BRLActionColumnPlugin> page = spy(new RuleModellerPage<BRLActionColumnPlugin>());
+    private RuleModellerPage<BRLActionColumnPlugin> page = spy(new RuleModellerPage<BRLActionColumnPlugin>(view,
+                                                                                                           translationService));
 
     @BeforeClass
     public static void setupPreferences() {
@@ -97,13 +98,6 @@ public class RuleModellerPageTest {
     }
 
     @Test
-    public void testInitialise() throws Exception {
-        page.initialise();
-
-        verify(content).setWidget(view);
-    }
-
-    @Test
     public void testGetTitle() throws Exception {
         final String errorKey = GuidedDecisionTableErraiConstants.RuleModellerPage_RuleModeller;
         final String errorMessage = "Title";
@@ -118,6 +112,8 @@ public class RuleModellerPageTest {
 
     @Test
     public void testPrepareView() throws Exception {
+        when(plugin.tableFormat()).thenReturn(GuidedDecisionTable52.TableFormat.EXTENDED_ENTRY);
+
         page.prepareView();
 
         verify(view).init(page);

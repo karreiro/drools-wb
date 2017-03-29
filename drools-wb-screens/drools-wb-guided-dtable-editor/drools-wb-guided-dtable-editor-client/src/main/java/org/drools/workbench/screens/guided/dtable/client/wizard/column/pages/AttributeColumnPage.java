@@ -29,16 +29,24 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.com
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.AttributeColumnPlugin;
 import org.drools.workbench.screens.guided.rule.client.editor.RuleAttributeWidget;
 import org.drools.workbench.screens.guided.rule.client.resources.GuidedRuleEditorResources;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.client.callbacks.Callback;
-import org.uberfire.client.mvp.UberView;
+import org.uberfire.client.mvp.UberElement;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
 @Dependent
 public class AttributeColumnPage extends BaseDecisionTableColumnPage<AttributeColumnPlugin> {
 
-    @Inject
     private View view;
+
+    @Inject
+    public AttributeColumnPage(final View view,
+                               final TranslationService translationService) {
+        super(translationService);
+
+        this.view = view;
+    }
 
     @Override
     public String getTitle() {
@@ -53,18 +61,14 @@ public class AttributeColumnPage extends BaseDecisionTableColumnPage<AttributeCo
     }
 
     @Override
-    public void initialise() {
-        content.setWidget(view);
+    protected UberElement<?> getView() {
+        return view;
     }
 
     @Override
     public void prepareView() {
         view.init(this);
-    }
-
-    @Override
-    public Widget asWidget() {
-        return content;
+        view.setupAttributeList(getAttributes());
     }
 
     List<String> getAttributes() {
@@ -103,8 +107,8 @@ public class AttributeColumnPage extends BaseDecisionTableColumnPage<AttributeCo
         return plugin().getAttribute();
     }
 
-    public interface View extends UberView<AttributeColumnPage> {
+    public interface View extends UberElement<AttributeColumnPage> {
 
+        void setupAttributeList(final List<String> attributes);
     }
 }
-

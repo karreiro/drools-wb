@@ -42,6 +42,8 @@ import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOr
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.uberfire.client.callbacks.Callback;
+import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
+import org.uberfire.mocks.EventSourceMock;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -74,10 +76,32 @@ public class FieldPageTest {
     private SimplePanel content;
 
     @Mock
+    private PatternPage<ConditionColumnPlugin> patternPage;
+
+    @Mock
+    private CalculationTypePage calculationTypePage;
+
+    @Mock
+    private FieldPage fieldPage;
+
+    @Mock
+    private OperatorPage operatorPage;
+
+    @Mock
+    private AdditionalInfoPage<ConditionColumnPlugin> additionalInfoPage;
+
+    @Mock
+    private ValueOptionsPage valueOptionsPage;
+
+    @Mock
     private TranslationService translationService;
 
+    @Mock
+    private EventSourceMock<WizardPageStatusChangeEvent> changeEvent;
+
     @InjectMocks
-    private FieldPage<ConditionColumnPlugin> page = spy(new FieldPage<ConditionColumnPlugin>());
+    private FieldPage<ConditionColumnPlugin> page = spy(new FieldPage<ConditionColumnPlugin>(view,
+                                                                                             translationService));
 
     @BeforeClass
     public static void setupPreferences() {
@@ -165,7 +189,14 @@ public class FieldPageTest {
 
     @Test
     public void testFieldsCallbackWhenConstraintIsRetValue() throws Exception {
-        final ConditionColumnPlugin plugin = spy(new ConditionColumnPlugin());
+        final ConditionColumnPlugin plugin = spy(new ConditionColumnPlugin(patternPage,
+                                                                           calculationTypePage,
+                                                                           fieldPage,
+                                                                           operatorPage,
+                                                                           valueOptionsPage,
+                                                                           additionalInfoPage,
+                                                                           changeEvent,
+                                                                           translationService));
 
         doReturn(BaseSingleFieldConstraint.TYPE_RET_VALUE).when(plugin).constraintValue();
 
@@ -293,13 +324,6 @@ public class FieldPageTest {
     }
 
     @Test
-    public void testInitialise() throws Exception {
-        page.initialise();
-
-        verify(content).setWidget(view);
-    }
-
-    @Test
     public void testGetTitle() throws Exception {
         final String errorKey = GuidedDecisionTableErraiConstants.FieldPage_Field;
         final String errorMessage = "Title";
@@ -314,6 +338,8 @@ public class FieldPageTest {
 
     @Test
     public void testPrepareView() throws Exception {
+        doReturn(pattern52).when(plugin).patternWrapper();
+
         page.prepareView();
 
         verify(view).init(page);

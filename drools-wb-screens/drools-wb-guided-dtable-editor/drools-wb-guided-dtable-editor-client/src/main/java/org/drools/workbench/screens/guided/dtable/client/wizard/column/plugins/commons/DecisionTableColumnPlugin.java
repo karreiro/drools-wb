@@ -16,11 +16,39 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
 public interface DecisionTableColumnPlugin {
+
+    DecisionTableColumnPlugin DEFAULT = new DecisionTableColumnPlugin() {
+        @Override
+        public String getTitle() {
+            return "";
+        }
+
+        @Override
+        public List<WizardPage> getPages() {
+            return new ArrayList<>();
+        }
+
+        @Override
+        public Boolean generateColumn() {
+            return false;
+        }
+
+        @Override
+        public String getIdentifier() {
+            return "";
+        }
+
+        @Override
+        public Type getType() {
+            return null;
+        }
+    };
 
     String getTitle();
 

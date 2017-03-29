@@ -20,13 +20,11 @@ import java.util.List;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
+import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -35,23 +33,27 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 
 @Dependent
 @Templated
-public class SummaryPageView extends Composite implements SummaryPage.View {
+public class SummaryPageView implements IsElement,
+                                        SummaryPage.View {
 
     private SummaryPage page;
 
-    @Inject
     @DataField("pluginsList")
     private ListBox pluginsList;
 
-    @Inject
     @DataField("includeAdvanced")
     private CheckBox includeAdvanced;
+
+    @Inject
+    public SummaryPageView(final ListBox pluginsList,
+                           final CheckBox includeAdvanced) {
+        this.pluginsList = pluginsList;
+        this.includeAdvanced = includeAdvanced;
+    }
 
     @Override
     public void init(final SummaryPage page) {
         this.page = page;
-
-        setupPlugins();
     }
 
     @EventHandler("pluginsList")
@@ -62,13 +64,6 @@ public class SummaryPageView extends Composite implements SummaryPage.View {
     @EventHandler("includeAdvanced")
     public void onSelectIncludeAdvanced(final ChangeEvent event) {
         page.setIncludeAdvanced(includeAdvanced.getValue());
-
-        setupPlugins();
-    }
-
-    private void setupPlugins() {
-        loadPluginList();
-        setupPluginList();
     }
 
     private void openSelectedPlugin() {
@@ -77,30 +72,22 @@ public class SummaryPageView extends Composite implements SummaryPage.View {
         page.openPage(selectedValue);
     }
 
-    private void loadPluginList() {
-        final List<BaseDecisionTableColumnPlugin> plugins = page.pluginsByCategory();
-
+    @Override
+    public void loadPluginList(final List<BaseDecisionTableColumnPlugin> plugins) {
         pluginsList.clear();
 
         for (final BaseDecisionTableColumnPlugin plugin : plugins) {
             pluginsList.addItem(plugin.getTitle(),
                                 plugin.getIdentifier());
         }
-    }
 
-    private void setupPluginList() {
         pluginsList.setVisibleItemCount(pluginsList.getItemCount());
-        pluginsList.setSelectedIndex(selectedPlugin());
     }
 
-    private int selectedPlugin() {
-        final DecisionTableColumnPlugin plugin = page.plugin();
-
-        if (plugin != null) {
-            return getCurrentIndexFromList(plugin.getIdentifier(),
-                                           pluginsList);
-        }
-
-        return -1;
+    @Override
+    public void setSelectedPlugin(final String identifier) {
+        final int currentValueIndex = getCurrentIndexFromList(identifier,
+                                                              pluginsList);
+        pluginsList.setSelectedIndex(currentValueIndex);
     }
 }

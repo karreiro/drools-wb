@@ -50,7 +50,9 @@ public class MetaDataColumnPluginTest {
     private EventSourceMock<WizardPageStatusChangeEvent> changeEvent;
 
     @InjectMocks
-    private MetaDataColumnPlugin plugin = new MetaDataColumnPlugin();
+    private MetaDataColumnPlugin plugin = new MetaDataColumnPlugin(page,
+                                                                   changeEvent,
+                                                                   translationService);
 
     @Test
     public void testGetTitle() {

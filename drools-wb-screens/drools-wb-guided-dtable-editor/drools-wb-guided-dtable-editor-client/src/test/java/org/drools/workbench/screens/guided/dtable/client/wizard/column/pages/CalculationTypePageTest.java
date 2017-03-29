@@ -51,7 +51,8 @@ public class CalculationTypePageTest {
     private TranslationService translationService;
 
     @InjectMocks
-    private CalculationTypePage page = spy(new CalculationTypePage());
+    private CalculationTypePage page = spy(new CalculationTypePage(view,
+                                                                   translationService));
 
     @BeforeClass
     public static void setupPreferences() {
@@ -90,13 +91,6 @@ public class CalculationTypePageTest {
         when(plugin.constraintValue()).thenReturn(BaseSingleFieldConstraint.TYPE_UNDEFINED);
 
         page.isComplete(Assert::assertFalse);
-    }
-
-    @Test
-    public void testInitialise() throws Exception {
-        page.initialise();
-
-        verify(content).setWidget(view);
     }
 
     @Test

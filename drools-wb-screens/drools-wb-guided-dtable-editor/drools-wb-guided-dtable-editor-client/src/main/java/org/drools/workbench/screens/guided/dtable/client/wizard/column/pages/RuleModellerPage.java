@@ -31,17 +31,26 @@ import org.drools.workbench.screens.guided.rule.client.editor.RuleModeller;
 import org.drools.workbench.screens.guided.rule.client.editor.RuleModellerConfiguration;
 import org.drools.workbench.screens.guided.rule.client.editor.RuleModellerWidgetFactory;
 import org.drools.workbench.screens.guided.template.client.editor.TemplateModellerWidgetFactory;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.client.callbacks.Callback;
+import org.uberfire.client.mvp.UberElement;
 import org.uberfire.client.mvp.UberView;
 
 @Dependent
 public class RuleModellerPage<T extends HasRuleModellerPage & DecisionTableColumnPlugin> extends BaseDecisionTableColumnPage<T> {
 
-    @Inject
     private View view;
 
     private RuleModeller ruleModeller;
+
+    @Inject
+    public RuleModellerPage(final View view,
+                            final TranslationService translationService) {
+        super(translationService);
+
+        this.view = view;
+    }
 
     @Override
     public String getTitle() {
@@ -54,8 +63,8 @@ public class RuleModellerPage<T extends HasRuleModellerPage & DecisionTableColum
     }
 
     @Override
-    public void initialise() {
-        content.setWidget(view);
+    protected UberElement<?> getView() {
+        return view;
     }
 
     @Override
@@ -63,11 +72,11 @@ public class RuleModellerPage<T extends HasRuleModellerPage & DecisionTableColum
         view.init(this);
 
         markAsViewed();
+        setupRuleModeller();
     }
 
-    @Override
-    public Widget asWidget() {
-        return content;
+    private void setupRuleModeller() {
+        view.setupRuleModellerWidget(ruleModeller());
     }
 
     RuleModeller ruleModeller() {
@@ -127,7 +136,8 @@ public class RuleModellerPage<T extends HasRuleModellerPage & DecisionTableColum
         plugin().setRuleModellerPageAsCompleted();
     }
 
-    public interface View extends UberView<RuleModellerPage> {
+    public interface View extends UberElement<RuleModellerPage> {
 
+        void setupRuleModellerWidget(RuleModeller ruleModeller);
     }
 }

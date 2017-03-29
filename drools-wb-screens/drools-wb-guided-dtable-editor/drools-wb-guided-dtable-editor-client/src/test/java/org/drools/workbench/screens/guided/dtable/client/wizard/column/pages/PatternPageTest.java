@@ -65,7 +65,10 @@ public class PatternPageTest {
     private TranslationService translationService;
 
     @InjectMocks
-    private PatternPage<ConditionColumnPlugin> page = spy(new PatternPage<ConditionColumnPlugin>());
+    private PatternPage<ConditionColumnPlugin> page = spy(new PatternPage<ConditionColumnPlugin>(view,
+                                                                                                 newPatternPresenter,
+                                                                                                 translationService));
+    ;
 
     @Mock
     private SimplePanel content;
@@ -232,14 +235,6 @@ public class PatternPageTest {
 
         assertEquals(1,
                      patterns.size());
-    }
-
-    @Test
-    public void testInitialise() throws Exception {
-        page.initialise();
-
-        verify(newPatternPresenter).init(page);
-        verify(content).setWidget(view);
     }
 
     @Test

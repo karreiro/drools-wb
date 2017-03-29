@@ -16,16 +16,14 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
-import java.util.function.Supplier;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.user.client.Element;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.IsWidget;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.jboss.errai.common.client.dom.Div;
+import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -34,160 +32,136 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 
 @Dependent
 @Templated
-public class ValueOptionsPageView extends Composite implements ValueOptionsPage.View {
+public class ValueOptionsPageView implements IsElement,
+                                             ValueOptionsPage.View {
 
-    @Inject
     @DataField("valueListGroupContainer")
     private Div valueListGroupContainer;
 
-    @Inject
     @DataField("cepWindowOperatorsGroupContainer")
     private Div cepWindowOperatorsGroupContainer;
 
-    @Inject
     @DataField("defaultValueGroupContainer")
     private Div defaultValueGroupContainer;
 
-    @Inject
     @DataField("limitedValueGroupContainer")
     private Div limitedValueGroupContainer;
 
-    @Inject
     @DataField("bindingGroupContainer")
     private Div bindingGroupContainer;
 
-    @Inject
     @DataField("valueList")
     private TextBox valueList;
 
-    @Inject
     @DataField("cepWindowOperatorsContainer")
     private Div cepWindowOperatorsContainer;
 
-    @Inject
     @DataField("defaultValueContainer")
     private Div defaultValueContainer;
 
-    @Inject
     @DataField("limitedValueContainer")
     private Div limitedValueContainer;
 
-    @Inject
     @DataField("bindingContainer")
     private Div bindingContainer;
 
     private ValueOptionsPage<?> page;
 
+    @Inject
+    public ValueOptionsPageView(final Div valueListGroupContainer,
+                                final Div cepWindowOperatorsGroupContainer,
+                                final Div defaultValueGroupContainer,
+                                final Div limitedValueGroupContainer,
+                                final Div bindingGroupContainer,
+                                final TextBox valueList,
+                                final Div cepWindowOperatorsContainer,
+                                final Div defaultValueContainer,
+                                final Div limitedValueContainer,
+                                final Div bindingContainer) {
+        this.valueListGroupContainer = valueListGroupContainer;
+        this.cepWindowOperatorsGroupContainer = cepWindowOperatorsGroupContainer;
+        this.defaultValueGroupContainer = defaultValueGroupContainer;
+        this.limitedValueGroupContainer = limitedValueGroupContainer;
+        this.bindingGroupContainer = bindingGroupContainer;
+        this.valueList = valueList;
+        this.cepWindowOperatorsContainer = cepWindowOperatorsContainer;
+        this.defaultValueContainer = defaultValueContainer;
+        this.limitedValueContainer = limitedValueContainer;
+        this.bindingContainer = bindingContainer;
+    }
+
     @Override
     public void init(final ValueOptionsPage page) {
         this.page = page;
-
-        setupComponents();
-    }
-
-    private void setupComponents() {
-        setupValueList();
-        setupCepOperators();
-        setupDefaultValue();
-        setupLimitedValue();
-        setupBinding();
     }
 
     @EventHandler("valueList")
     public void onSelectValueList(final KeyUpEvent event) {
         page.setValueList(valueList.getText());
-
-        setupDefaultValue();
     }
 
-    private void setupValueList() {
-        if (!page.isValueListEnabled()) {
-            valueListGroupContainer.setHidden(true);
-            return;
-        }
-
-        if (!page.canSetupValueList()) {
-            disableElement(valueList.getElement());
-        } else {
-            enableElement(valueList.getElement());
-        }
-
-        valueList.setText(page.getValueList());
+    @Override
+    public void setValueListText(final String valueListText) {
+        valueList.setText(valueListText);
     }
 
-    private void setupDefaultValue() {
-        if (!page.isDefaultValueEnabled()) {
-            defaultValueGroupContainer.setHidden(true);
-            return;
-        }
-
-        setupElement(page.canSetupDefaultValue(),
-                     page::newDefaultValueWidget,
-                     defaultValueContainer);
+    @Override
+    public void enableValueList() {
+        valueList.getElement().removeAttribute("disabled");
     }
 
-    private void setupLimitedValue() {
-        if (!page.isLimitedValueEnabled()) {
-            limitedValueGroupContainer.setHidden(true);
-            return;
-        }
-
-        setupElement(page.canSetupLimitedValue(),
-                     page::newLimitedValueWidget,
-                     limitedValueContainer);
+    @Override
+    public void disableValueList() {
+        valueList.getElement().setAttribute("disabled",
+                                            "disabled");
     }
 
-    private void setupBinding() {
-        if (!page.isBindingEnabled()) {
-            bindingGroupContainer.setHidden(true);
-            return;
-        }
-
-        setupElement(page.canSetupBinding(),
-                     page::newBindingTextBox,
-                     bindingContainer);
+    @Override
+    public void hideValueList() {
+        valueListGroupContainer.setHidden(true);
     }
 
-    private void setupCepOperators() {
-        if (!page.isCepOperatorsEnabled()) {
-            cepWindowOperatorsGroupContainer.setHidden(true);
-            return;
-        }
-
-        page.isFactTypeAnEvent((isEvent) -> {
-            setupElement(page.canSetupCepOperators() && isEvent,
-                         page::newCEPWindowOperatorsDropdown,
-                         cepWindowOperatorsContainer);
-        });
-    }
-
-    private void setupElement(final boolean canSetup,
-                              final Supplier<IsWidget> widgetSupplier,
-                              final Div container) {
-        final IsWidget widget;
-
-        if (canSetup) {
-            widget = widgetSupplier.get();
-        } else {
-            widget = disabledTextBox();
-        }
-
+    @Override
+    public void setupDefaultValue(final IsWidget widget) {
         addWidgetToContainer(widget,
-                             container);
+                             defaultValueContainer);
     }
 
-    private TextBox disabledTextBox() {
-        return new TextBox() {{
-            disableElement(getElement());
-        }};
+    @Override
+    public void hideDefaultValue() {
+        defaultValueGroupContainer.setHidden(true);
     }
 
-    private void disableElement(final Element element) {
-        element.setAttribute("disabled",
-                             "disabled");
+    @Override
+    public void setupLimitedValue(final IsWidget widget) {
+        addWidgetToContainer(widget,
+                             limitedValueContainer);
     }
 
-    private void enableElement(final Element element) {
-        element.removeAttribute("disabled");
+    @Override
+    public void hideLimitedValue() {
+        limitedValueGroupContainer.setHidden(true);
+    }
+
+    @Override
+    public void setupBinding(final IsWidget widget) {
+        addWidgetToContainer(widget,
+                             bindingContainer);
+    }
+
+    @Override
+    public void hideBinding() {
+        bindingGroupContainer.setHidden(true);
+    }
+
+    @Override
+    public void setupCepOperators(final IsWidget widget) {
+        addWidgetToContainer(widget,
+                             cepWindowOperatorsContainer);
+    }
+
+    @Override
+    public void hideCepOperators() {
+        cepWindowOperatorsGroupContainer.setHidden(true);
     }
 }

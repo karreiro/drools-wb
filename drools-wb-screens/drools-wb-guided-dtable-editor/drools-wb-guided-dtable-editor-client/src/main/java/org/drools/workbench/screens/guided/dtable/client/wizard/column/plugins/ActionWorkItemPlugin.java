@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.Window;
@@ -35,7 +36,9 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.Add
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.WorkItemPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.AdditionalInfoPageInitializer;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.BaseDecisionTableColumnPlugin;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
+import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
@@ -43,13 +46,23 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implements HasWorkItemPage,
                                                                                    HasAdditionalInfoPage {
 
-    @Inject
     private AdditionalInfoPage<ActionWorkItemPlugin> additionalInfoPage;
 
-    @Inject
     private WorkItemPage workItemPage;
 
     private ActionWorkItemCol52 editingCol;
+
+    @Inject
+    public ActionWorkItemPlugin(final AdditionalInfoPage<ActionWorkItemPlugin> additionalInfoPage,
+                                final WorkItemPage workItemPage,
+                                final Event<WizardPageStatusChangeEvent> changeEvent,
+                                final TranslationService translationService) {
+        super(changeEvent,
+              translationService);
+
+        this.additionalInfoPage = additionalInfoPage;
+        this.workItemPage = workItemPage;
+    }
 
     @Override
     public String getTitle() {

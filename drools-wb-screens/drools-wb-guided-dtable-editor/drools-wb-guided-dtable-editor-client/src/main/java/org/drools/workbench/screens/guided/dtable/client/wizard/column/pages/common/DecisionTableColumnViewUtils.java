@@ -33,7 +33,7 @@ public class DecisionTableColumnViewUtils {
             }
         }
 
-        return 0;
+        return -1;
     }
 
     public static boolean nil(String s) {

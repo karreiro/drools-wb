@@ -16,14 +16,15 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
+import java.util.function.Consumer;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.ListBox;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.jboss.errai.common.client.dom.Div;
+import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
@@ -35,24 +36,31 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 
 @Dependent
 @Templated
-public class WorkItemPageView extends Composite implements WorkItemPage.View {
+public class WorkItemPageView implements IsElement,
+                                         WorkItemPage.View {
 
-    @Inject
     @DataField("workItems")
     private ListBox workItems;
 
-    @Inject
-    private TranslationService translationService;
-
-    @Inject
     @DataField("workItemParametersContainer")
     private Div workItemParametersContainer;
 
+    private TranslationService translationService;
+
     private WorkItemPage<?> page;
+
+    @Inject
+    public WorkItemPageView(final ListBox workItems,
+                            final Div workItemParametersContainer,
+                            final TranslationService translationService) {
+        this.workItems = workItems;
+        this.workItemParametersContainer = workItemParametersContainer;
+        this.translationService = translationService;
+    }
 
     @EventHandler("workItems")
     public void onSelectWorkItem(final ChangeEvent event) {
-        page.selectWorkItem();
+        page.selectWorkItem(getSelectedWorkItem());
     }
 
     @Override
@@ -63,8 +71,31 @@ public class WorkItemPageView extends Composite implements WorkItemPage.View {
     @Override
     public void init(final WorkItemPage page) {
         this.page = page;
+    }
 
-        setupWorkItemsList();
+    @Override
+    public void setupWorkItemList(final Consumer<ListBox> consumer) {
+        workItems.clear();
+        workItems.setEnabled(true);
+        workItems.addItem(translate(GuidedDecisionTableErraiConstants.WorkItemPageView_Choose),
+                          "");
+
+        consumer.accept(workItems);
+    }
+
+    @Override
+    public void setupEmptyWorkItemList() {
+        workItems.clear();
+        workItems.setEnabled(false);
+        workItems.addItem(translate(GuidedDecisionTableErraiConstants.WorkItemPageView_NoWorkItemsAvailable));
+    }
+
+    @Override
+    public void selectWorkItem(final String currentWorkItem) {
+        final int currentValueIndex = getCurrentIndexFromList(currentWorkItem,
+                                                              workItems);
+
+        workItems.setSelectedIndex(currentValueIndex);
     }
 
     @Override
@@ -83,45 +114,6 @@ public class WorkItemPageView extends Composite implements WorkItemPage.View {
     @Override
     public int workItemsCount() {
         return workItems.getItemCount();
-    }
-
-    private void setupWorkItemsList() {
-        setupWorkItemList();
-
-        if (!page.hasWorkItems()) {
-            setupEmptyWorkItemList();
-        }
-    }
-
-    private void setupEmptyWorkItemList() {
-        workItems.clear();
-        workItems.setEnabled(false);
-        workItems.addItem(translate(GuidedDecisionTableErraiConstants.WorkItemPageView_NoWorkItemsAvailable));
-    }
-
-    private void setupWorkItemList() {
-        workItems.clear();
-        workItems.setEnabled(true);
-        workItems.addItem(translate(GuidedDecisionTableErraiConstants.WorkItemPageView_Choose),
-                          "");
-
-        page.forEachWorkItem((displayName, name) -> this.workItems.addItem(displayName,
-                                                                           name));
-
-        selectCurrentWorkItem();
-        showParameterForTheCurrentWorkItem();
-    }
-
-    private void showParameterForTheCurrentWorkItem() {
-        page.showParameters();
-    }
-
-    private void selectCurrentWorkItem() {
-        final String workItem = page.currentWorkItem();
-        final int currentValueIndex = getCurrentIndexFromList(workItem,
-                                                              workItems);
-
-        workItems.setSelectedIndex(currentValueIndex);
     }
 
     private String translate(final String key,

@@ -74,7 +74,10 @@ public class BRLConditionColumnPluginTest {
     private NewGuidedDecisionTableColumnWizard wizard;
 
     @InjectMocks
-    private BRLConditionColumnPlugin plugin = spy(new BRLConditionColumnPlugin());
+    private BRLConditionColumnPlugin plugin = spy(new BRLConditionColumnPlugin(ruleModellerPage,
+                                                                               additionalInfoPage,
+                                                                               changeEvent,
+                                                                               translationService));
 
     @Test
     public void testGetTitle() throws Exception {

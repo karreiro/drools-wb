@@ -23,8 +23,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.enterprise.context.Dependent;
+import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.IsWidget;
 import org.drools.workbench.models.datamodel.oracle.DataType;
@@ -58,8 +60,10 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.c
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.LimitedWidgetFactory;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ValueOptionsPageInitializer;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
+import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
@@ -71,22 +75,16 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     private static final Pattern52 EMPTY_PATTERN = new Pattern52();
 
-    @Inject
     private PatternPage<ConditionColumnPlugin> patternPage;
 
-    @Inject
     private CalculationTypePage calculationTypePage;
 
-    @Inject
     private FieldPage<ConditionColumnPlugin> fieldPage;
 
-    @Inject
     private OperatorPage operatorPage;
 
-    @Inject
     private AdditionalInfoPage<ConditionColumnPlugin> additionalInfoPage;
 
-    @Inject
     private ValueOptionsPage<ConditionColumnPlugin> valueOptionsPage;
 
     private PatternWrapper patternWrapper;
@@ -98,6 +96,26 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     private Boolean valueOptionsPageCompleted;
 
     private Pattern52 editingPattern = EMPTY_PATTERN;
+
+    @Inject
+    public ConditionColumnPlugin(final PatternPage<ConditionColumnPlugin> patternPage,
+                                 final CalculationTypePage calculationTypePage,
+                                 final FieldPage<ConditionColumnPlugin> fieldPage,
+                                 final OperatorPage operatorPage,
+                                 final ValueOptionsPage<ConditionColumnPlugin> valueOptionsPage,
+                                 final AdditionalInfoPage<ConditionColumnPlugin> additionalInfoPage,
+                                 final Event<WizardPageStatusChangeEvent> changeEvent,
+                                 final TranslationService translationService) {
+        super(changeEvent,
+              translationService);
+
+        this.patternPage = patternPage;
+        this.calculationTypePage = calculationTypePage;
+        this.fieldPage = fieldPage;
+        this.operatorPage = operatorPage;
+        this.valueOptionsPage = valueOptionsPage;
+        this.additionalInfoPage = additionalInfoPage;
+    }
 
     @Override
     public String getTitle() {

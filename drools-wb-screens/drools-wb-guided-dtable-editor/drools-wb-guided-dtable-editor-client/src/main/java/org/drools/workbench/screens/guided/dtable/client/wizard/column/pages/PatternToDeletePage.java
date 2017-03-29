@@ -18,6 +18,7 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import com.google.gwt.user.client.ui.Widget;
@@ -25,19 +26,28 @@ import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionRetractFactPlugin;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.client.callbacks.Callback;
+import org.uberfire.client.mvp.UberElement;
 import org.uberfire.client.mvp.UberView;
 
 import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTableColumnViewUtils.nil;
 
 public class PatternToDeletePage extends BaseDecisionTableColumnPage<ActionRetractFactPlugin> {
 
-    @Inject
     private View view;
 
+    @Inject
+    public PatternToDeletePage(final View view,
+                               final TranslationService translationService) {
+        super(translationService);
+
+        this.view = view;
+    }
+
     @Override
-    public void initialise() {
-        content.setWidget(view);
+    protected UberElement<?> getView() {
+        return view;
     }
 
     @Override
@@ -55,11 +65,20 @@ public class PatternToDeletePage extends BaseDecisionTableColumnPage<ActionRetra
         view.init(this);
 
         markAsViewed();
+        setupPatternList();
     }
 
-    @Override
-    public Widget asWidget() {
-        return content;
+    private void setupPatternList() {
+        final List<String> patterns = loadPatterns();
+        final boolean hasPatterns = !patterns.isEmpty();
+
+        if (hasPatterns) {
+            view.setupPatternList(patterns);
+        } else {
+            view.setupEmptyPatternList();
+        }
+
+        view.selectTheCurrentPattern(binding());
     }
 
     List<String> loadPatterns() {
@@ -87,8 +106,14 @@ public class PatternToDeletePage extends BaseDecisionTableColumnPage<ActionRetra
         plugin().setPatternToDeletePageAsCompleted();
     }
 
-    public interface View extends UberView<PatternToDeletePage> {
+    public interface View extends UberElement<PatternToDeletePage> {
 
         String selectedPattern();
+
+        void setupPatternList(final List<String> patterns);
+
+        void setupEmptyPatternList();
+
+        void selectTheCurrentPattern(final String currentValue);
     }
 }

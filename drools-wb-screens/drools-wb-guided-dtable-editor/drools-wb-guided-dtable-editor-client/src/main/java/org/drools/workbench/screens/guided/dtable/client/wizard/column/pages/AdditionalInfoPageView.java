@@ -21,10 +21,10 @@ import javax.inject.Inject;
 
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.user.client.ui.Composite;
 import org.gwtbootstrap3.client.ui.CheckBox;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.jboss.errai.common.client.dom.Div;
+import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
 import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
@@ -33,7 +33,8 @@ import static org.drools.workbench.screens.guided.dtable.client.wizard.column.pa
 
 @Dependent
 @Templated
-public class AdditionalInfoPageView extends Composite implements AdditionalInfoPage.View {
+public class AdditionalInfoPageView implements IsElement,
+                                               AdditionalInfoPage.View {
 
     @Inject
     @DataField("headerFormItem")
@@ -87,9 +88,6 @@ public class AdditionalInfoPageView extends Composite implements AdditionalInfoP
     @Override
     public void init(final AdditionalInfoPage page) {
         this.page = page;
-
-        clear();
-        setup();
     }
 
     @Override
@@ -117,14 +115,8 @@ public class AdditionalInfoPageView extends Composite implements AdditionalInfoP
         updateEngineWithChangesFormItem.setHidden(false);
     }
 
-    private void setup() {
-        page.setupHeader();
-        page.setupHideColumn();
-        page.setupLogicallyInsert();
-        page.setupUpdateEngineWithChanges();
-    }
-
-    private void clear() {
+    @Override
+    public void clear() {
         headerFormItem.setHidden(true);
         hideColumnFormItem.setHidden(true);
         logicallyInsertFormItem.setHidden(true);

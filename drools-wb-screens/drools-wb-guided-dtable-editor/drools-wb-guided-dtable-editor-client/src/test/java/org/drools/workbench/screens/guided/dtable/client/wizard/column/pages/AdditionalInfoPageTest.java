@@ -59,7 +59,8 @@ public class AdditionalInfoPageTest {
     private TranslationService translationService;
 
     @InjectMocks
-    private AdditionalInfoPage<ConditionColumnPlugin> page = spy(new AdditionalInfoPage<>());
+    private AdditionalInfoPage<ConditionColumnPlugin> page = spy(new AdditionalInfoPage<>(view,
+                                                                                          translationService));
 
     @BeforeClass
     public static void setupPreferences() {
@@ -236,13 +237,6 @@ public class AdditionalInfoPageTest {
         page.setUpdate(value);
 
         verify(plugin).setUpdate(value);
-    }
-
-    @Test
-    public void testInitialise() throws Exception {
-        page.initialise();
-
-        verify(content).setWidget(view);
     }
 
     @Test

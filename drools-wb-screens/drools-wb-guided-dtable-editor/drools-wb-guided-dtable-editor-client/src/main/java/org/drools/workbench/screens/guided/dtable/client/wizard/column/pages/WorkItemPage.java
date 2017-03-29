@@ -17,26 +17,36 @@
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.Widget;
 import org.drools.workbench.models.datamodel.workitems.PortableWorkDefinition;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasWorkItemPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
+import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.kie.workbench.common.widgets.client.workitems.WorkItemParametersWidget;
 import org.uberfire.client.callbacks.Callback;
+import org.uberfire.client.mvp.UberElement;
 import org.uberfire.client.mvp.UberView;
 
 @Dependent
 public class WorkItemPage<T extends HasWorkItemPage & DecisionTableColumnPlugin> extends BaseDecisionTableColumnPage<T> {
 
-    @Inject
     private View view;
 
     private boolean parametersEnabled = false;
+
+    @Inject
+    public WorkItemPage(final View view,
+                        final TranslationService translationService) {
+        super(translationService);
+        this.view = view;
+    }
 
     @Override
     public String getTitle() {
@@ -49,8 +59,8 @@ public class WorkItemPage<T extends HasWorkItemPage & DecisionTableColumnPlugin>
     }
 
     @Override
-    public void initialise() {
-        content.setWidget(view);
+    protected UberElement<?> getView() {
+        return view;
     }
 
     @Override
@@ -58,11 +68,19 @@ public class WorkItemPage<T extends HasWorkItemPage & DecisionTableColumnPlugin>
         view.init(this);
 
         markAsViewed();
+        setupWorkItemsList();
     }
 
-    @Override
-    public Widget asWidget() {
-        return content;
+    private void setupWorkItemsList() {
+        view.setupWorkItemList(fieldsList -> forEachWorkItem(fieldsList::addItem));
+
+        if (hasWorkItems()) {
+            view.selectWorkItem(currentWorkItem());
+
+            showParameters();
+        } else {
+            view.setupEmptyWorkItemList();
+        }
     }
 
     public void enableParameters() {
@@ -77,9 +95,7 @@ public class WorkItemPage<T extends HasWorkItemPage & DecisionTableColumnPlugin>
         return view.workItemsCount() > 1;
     }
 
-    void selectWorkItem() {
-        final String selectedWorkItem = view.getSelectedWorkItem();
-
+    void selectWorkItem(final String selectedWorkItem) {
         plugin().setWorkItem(selectedWorkItem);
 
         showParameters();
@@ -119,13 +135,19 @@ public class WorkItemPage<T extends HasWorkItemPage & DecisionTableColumnPlugin>
         plugin().setWorkItemPageAsCompleted();
     }
 
-    public interface View extends UberView<WorkItemPage> {
+    public interface View extends UberElement<WorkItemPage> {
+
+        String getSelectedWorkItem();
+
+        void setupWorkItemList(Consumer<ListBox> consumer);
+
+        void setupEmptyWorkItemList();
+
+        void selectWorkItem(String currentWorkItem);
 
         void showParameters(final WorkItemParametersWidget parametersWidget);
 
         void hideParameters();
-
-        String getSelectedWorkItem();
 
         int workItemsCount();
     }

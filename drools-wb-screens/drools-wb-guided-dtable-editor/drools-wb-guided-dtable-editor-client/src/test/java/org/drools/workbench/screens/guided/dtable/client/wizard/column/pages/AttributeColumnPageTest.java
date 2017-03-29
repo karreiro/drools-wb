@@ -32,7 +32,6 @@ import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDe
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.AttributeColumnPlugin;
 import org.drools.workbench.screens.guided.rule.client.editor.RuleAttributeWidget;
-import org.drools.workbench.screens.guided.rule.client.resources.GuidedRuleEditorResources;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -64,7 +63,8 @@ public class AttributeColumnPageTest {
     private AttributeColumnPlugin plugin;
 
     @InjectMocks
-    private AttributeColumnPage page = spy(new AttributeColumnPage());
+    private AttributeColumnPage page = spy(new AttributeColumnPage(view,
+                                                                   translationService));
 
     @BeforeClass
     public static void setupPreferences() {
@@ -135,13 +135,6 @@ public class AttributeColumnPageTest {
         when(plugin.getAttribute()).thenReturn(RuleAttributeWidget.SALIENCE_ATTR);
 
         page.isComplete(Assert::assertTrue);
-    }
-
-    @Test
-    public void testInitialise() throws Exception {
-        page.initialise();
-
-        verify(content).setWidget(view);
     }
 
     @Test

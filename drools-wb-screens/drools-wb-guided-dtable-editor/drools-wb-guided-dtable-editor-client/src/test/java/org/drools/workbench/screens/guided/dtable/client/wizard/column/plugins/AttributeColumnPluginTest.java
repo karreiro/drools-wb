@@ -50,7 +50,9 @@ public class AttributeColumnPluginTest {
     private EventSourceMock<WizardPageStatusChangeEvent> changeEvent;
 
     @InjectMocks
-    private AttributeColumnPlugin plugin = new AttributeColumnPlugin();
+    private AttributeColumnPlugin plugin = new AttributeColumnPlugin(page,
+                                                                     changeEvent,
+                                                                     translationService);
 
     @Test
     public void testGetTitle() {
