@@ -16,7 +16,6 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
-import java.util.function.Consumer;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
@@ -112,14 +111,12 @@ public class PatternPageView implements IsElement,
     }
 
     @Override
-    public void setupPatternList(final Consumer<ListBox> consumer) {
+    public void setupPatternList() {
         final String selectPattern = translate(GuidedDecisionTableErraiConstants.PatternPageView_SelectPattern);
 
         patternList.clear();
         patternList.addItem("-- " + selectPattern + " --",
                             "");
-
-        consumer.accept(patternList);
     }
 
     @Override
@@ -139,5 +136,12 @@ public class PatternPageView implements IsElement,
                              final Object... args) {
         return translationService.format(key,
                                          args);
+    }
+
+    @Override
+    public void addItem(final String itemName,
+                        final String itemKey) {
+        patternList.addItem(itemName,
+                            itemKey);
     }
 }

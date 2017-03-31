@@ -31,6 +31,7 @@ import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDe
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasPatternPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.BaseDecisionTableColumnPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.modals.HasList;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.modals.NewPatternPresenter;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
@@ -98,9 +99,15 @@ public class PatternPage<T extends HasPatternPage & DecisionTableColumnPlugin> e
     }
 
     private void setupPattern() {
-        view.setupPatternList(fieldsList -> forEachPattern(fieldsList::addItem));
+        view.setupPatternList();
         view.selectPattern(currentPatternValue());
         view.hidePatternListWhenItIsEmpty();
+
+        setUpPatternList();
+    }
+
+    private void setUpPatternList() {
+        forEachPattern(view::addItem);
     }
 
     public GuidedDecisionTableView.Presenter presenter() {
@@ -195,7 +202,8 @@ public class PatternPage<T extends HasPatternPage & DecisionTableColumnPlugin> e
                 .orElse(PatternWrapper.DEFAULT);
     }
 
-    public interface View extends UberElement<PatternPage> {
+    public interface View extends HasList,
+                                  UberElement<PatternPage> {
 
         void setupEntryPointName(final String entryPointName);
 
@@ -205,7 +213,7 @@ public class PatternPage<T extends HasPatternPage & DecisionTableColumnPlugin> e
 
         void disableEntryPoint();
 
-        void setupPatternList(Consumer<ListBox> consumer);
+        void setupPatternList();
 
         void hidePatternListWhenItIsEmpty();
 
