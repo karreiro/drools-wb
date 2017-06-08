@@ -145,10 +145,14 @@ public class NewGuidedDecisionTableColumnWizard extends AbstractWizard {
         }
     }
 
-    private void loadPages(final DecisionTableColumnPlugin plugin) {
-        pages.clear();
-        pages.add(summaryPage);
-        pages.addAll(plugin.getPages());
+    void loadPages(final DecisionTableColumnPlugin plugin) {
+        getPages().clear();
+
+        if (plugin.isNewColumn()) {
+            getPages().add(summaryPage);
+        }
+
+        getPages().addAll(plugin.getPages());
     }
 
     @Override

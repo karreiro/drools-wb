@@ -401,7 +401,7 @@ public class ActionSetFactPluginTest {
 
     @Test
     public void testShowUpdateEngineWithChangesWhenFactPatternIsNotNew() {
-        doReturn(false).when(plugin).isNewFactPattern();
+        doReturn(mock(ActionSetFactWrapper.class)).when(plugin).editingWrapper();
 
         final boolean showUpdateEngineWithChanges = plugin.showUpdateEngineWithChanges();
 
@@ -411,7 +411,7 @@ public class ActionSetFactPluginTest {
 
     @Test
     public void testShowLogicallyInsertWhenFactPatternIsNew() {
-        doReturn(true).when(plugin).isNewFactPattern();
+        doReturn(mock(ActionInsertFactWrapper.class)).when(plugin).editingWrapper();
 
         final boolean showLogicallyInsert = plugin.showLogicallyInsert();
 

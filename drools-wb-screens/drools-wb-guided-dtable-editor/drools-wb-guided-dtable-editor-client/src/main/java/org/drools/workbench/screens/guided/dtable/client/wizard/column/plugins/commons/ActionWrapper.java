@@ -33,7 +33,7 @@ public interface ActionWrapper {
         }
 
         @Override
-        public boolean isUpdate() {
+        public boolean isUpdateEngine() {
             return false;
         }
 
@@ -108,13 +108,18 @@ public interface ActionWrapper {
         public ActionCol52 getActionCol52() {
             return new ActionCol52();
         }
+
+        @Override
+        public void setActionCol52(final ActionCol52 actionCol52) {
+
+        }
     };
 
     boolean isInsertLogical();
 
     void setInsertLogical(final boolean insertLogical);
 
-    boolean isUpdate();
+    boolean isUpdateEngine();
 
     void setUpdate(final boolean update);
 
@@ -147,4 +152,6 @@ public interface ActionWrapper {
     void setValueList(final String valueList);
 
     ActionCol52 getActionCol52();
+
+    void setActionCol52(final ActionCol52 actionCol52);
 }

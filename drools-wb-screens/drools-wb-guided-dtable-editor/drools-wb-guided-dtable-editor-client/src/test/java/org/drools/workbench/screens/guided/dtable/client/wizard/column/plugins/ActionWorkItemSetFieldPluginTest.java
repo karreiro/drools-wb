@@ -36,13 +36,14 @@ import org.drools.workbench.models.guided.dtable.shared.model.ActionInsertFactCo
 import org.drools.workbench.models.guided.dtable.shared.model.ActionWorkItemCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
-import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.FieldPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.PatternPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.WorkItemPage;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionWorkItemInsertWrapper;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionWorkItemSetWrapper;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionWorkItemWrapper;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
@@ -61,6 +62,9 @@ import static org.mockito.Mockito.*;
 @RunWith(GwtMockitoTestRunner.class)
 @WithClassesToStub(BRLRuleModel.class)
 public class ActionWorkItemSetFieldPluginTest {
+
+    @Mock
+    PatternWrapper patternWrapper;
 
     @Mock
     private BiConsumer<String, String> biConsumer;
@@ -82,9 +86,6 @@ public class ActionWorkItemSetFieldPluginTest {
 
     @Mock
     private ActionWorkItemWrapper editingWrapper;
-
-    @Mock
-    PatternWrapper patternWrapper;
 
     @Mock
     private TranslationService translationService;
@@ -116,7 +117,12 @@ public class ActionWorkItemSetFieldPluginTest {
             put(workItemKey,
                 parameter);
         }};
+        final List<ActionInsertFactCol52> actions = new ArrayList<ActionInsertFactCol52>() {{
+            add(mock(ActionInsertFactCol52.class));
+        }};
 
+        doReturn(model).when(presenter).getModel();
+        doReturn(actions).when(model).getActionCols();
         doReturn("workName").when(workDefinition).getName();
         doReturn("parameterName").when(parameterDefinition).getName();
         doReturn("parameterClassName").when(parameterDefinition).getClassName();
@@ -287,17 +293,13 @@ public class ActionWorkItemSetFieldPluginTest {
         final List<ActionInsertFactCol52> actions = new ArrayList<ActionInsertFactCol52>() {{
             add(mock(ActionInsertFactCol52.class));
         }};
-        final List<Pattern52> patterns = new ArrayList<Pattern52>() {{
-            add(mock(Pattern52.class));
-        }};
 
         doReturn(model).when(presenter).getModel();
         doReturn(actions).when(model).getActionCols();
-        doReturn(patterns).when(model).getPatterns();
 
         final List<PatternWrapper> result = plugin.getPatterns();
 
-        assertEquals(2,
+        assertEquals(1,
                      result.size());
     }
 
@@ -356,7 +358,7 @@ public class ActionWorkItemSetFieldPluginTest {
 
     @Test
     public void testShowUpdateEngineWithChangesWhenFactPatternIsNew() throws Exception {
-        doReturn(true).when(plugin).isNewFactPattern();
+        doReturn(mock(ActionWorkItemInsertWrapper.class)).when(plugin).editingWrapper();
 
         final boolean updateEngineWithChanges = plugin.showUpdateEngineWithChanges();
 
@@ -365,7 +367,7 @@ public class ActionWorkItemSetFieldPluginTest {
 
     @Test
     public void testShowUpdateEngineWithChangesWhenFactPatternIsNotNew() throws Exception {
-        doReturn(false).when(plugin).isNewFactPattern();
+        doReturn(mock(ActionWorkItemSetWrapper.class)).when(plugin).editingWrapper();
 
         final boolean updateEngineWithChanges = plugin.showUpdateEngineWithChanges();
 
@@ -374,7 +376,7 @@ public class ActionWorkItemSetFieldPluginTest {
 
     @Test
     public void testShowLogicallyInsertWhenFactPatternIsNew() throws Exception {
-        doReturn(true).when(plugin).isNewFactPattern();
+        doReturn(mock(ActionWorkItemInsertWrapper.class)).when(plugin).editingWrapper();
 
         final boolean logicallyInsert = plugin.showLogicallyInsert();
 
@@ -383,7 +385,7 @@ public class ActionWorkItemSetFieldPluginTest {
 
     @Test
     public void testShowLogicallyInsertWhenFactPatternIsNotNew() throws Exception {
-        doReturn(false).when(plugin).isNewFactPattern();
+        doReturn(mock(ActionWorkItemSetWrapper.class)).when(plugin).editingWrapper();
 
         final boolean logicallyInsert = plugin.showLogicallyInsert();
 
@@ -429,24 +431,33 @@ public class ActionWorkItemSetFieldPluginTest {
     @Ignore("Reproducer for: GUVNOR-3170")
     public void testForEachWorkItemStringField() throws Exception {
         setUpWorkItemDefinitions();
-        when(oracle.getFieldClassName("Person", "factField")).thenReturn("java.lang.String");
+        when(oracle.getFieldClassName("Person",
+                                      "factField")).thenReturn("java.lang.String");
 
         plugin.forEachWorkItem(biConsumer);
 
-        verify(biConsumer, times(2)).accept(anyString(), anyString());
-        verify(biConsumer).accept("StringWorkItem - StringResult", "FirstWorkItemStringResult");
-        verify(biConsumer).accept("FloatWorkItem - FloatResult", "SecondWorkItemFloatResult");
+        verify(biConsumer,
+               times(2)).accept(anyString(),
+                                anyString());
+        verify(biConsumer).accept("StringWorkItem - StringResult",
+                                  "FirstWorkItemStringResult");
+        verify(biConsumer).accept("FloatWorkItem - FloatResult",
+                                  "SecondWorkItemFloatResult");
     }
 
     @Test
     public void testForEachWorkItemFloatField() throws Exception {
         setUpWorkItemDefinitions();
-        when(oracle.getFieldClassName("Person", "factField")).thenReturn("java.lang.Float");
+        when(oracle.getFieldClassName("Person",
+                                      "factField")).thenReturn("java.lang.Float");
 
         plugin.forEachWorkItem(biConsumer);
 
-        verify(biConsumer, times(1)).accept(anyString(), anyString());
-        verify(biConsumer).accept("FloatWorkItem - FloatResult", "SecondWorkItemFloatResult");
+        verify(biConsumer,
+               times(1)).accept(anyString(),
+                                anyString());
+        verify(biConsumer).accept("FloatWorkItem - FloatResult",
+                                  "SecondWorkItemFloatResult");
     }
 
     private void setUpWorkItemDefinitions() {
@@ -473,7 +484,7 @@ public class ActionWorkItemSetFieldPluginTest {
         when(editingWrapper.getFactField()).thenReturn("factField");
         when(presenter.getDataModelOracle()).thenReturn(oracle);
         when(presenter.getModel()).thenReturn(model);
-        when(model.getActionCols()).thenReturn(Arrays.asList(firstWorkItem, secondWorkItem));
+        when(model.getActionCols()).thenReturn(Arrays.asList(firstWorkItem,
+                                                             secondWorkItem));
     }
-
 }

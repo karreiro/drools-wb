@@ -38,7 +38,7 @@ public interface ActionWorkItemWrapper extends ActionWrapper {
         }
 
         @Override
-        public boolean isUpdate() {
+        public boolean isUpdateEngine() {
             return false;
         }
 
@@ -120,6 +120,11 @@ public interface ActionWorkItemWrapper extends ActionWrapper {
         @Override
         public ActionCol52 getActionCol52() {
             return new ActionCol52();
+        }
+
+        @Override
+        public void setActionCol52(final ActionCol52 actionCol52) {
+
         }
 
         @Override

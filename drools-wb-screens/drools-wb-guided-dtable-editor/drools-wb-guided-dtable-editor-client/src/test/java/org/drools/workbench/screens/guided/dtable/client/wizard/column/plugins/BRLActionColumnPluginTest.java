@@ -33,6 +33,7 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuided
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.AdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.RuleModellerPage;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -130,6 +131,7 @@ public class BRLActionColumnPluginTest {
         when(model.getActionCols()).thenReturn(actionCol52s);
         when(presenter.getModel()).thenReturn(model);
         when(editingCol.getHeader()).thenReturn(header);
+        when(plugin.isNewColumn()).thenReturn(true);
 
         final Boolean success = plugin.generateColumn();
 

@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
@@ -30,10 +31,12 @@ import com.google.gwt.user.client.ui.IsWidget;
 import org.drools.workbench.models.datamodel.oracle.DataType;
 import org.drools.workbench.models.datamodel.oracle.FieldAccessorsAndMutators;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
+import org.drools.workbench.models.guided.dtable.shared.model.BaseColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.CompositeColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
+import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryCol;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
@@ -123,6 +126,15 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         super.init(wizard);
 
         setupDefaultValues();
+
+        loadPattern();
+    }
+
+    private void loadPattern() {
+        patternWrapper = new PatternWrapper(editingPattern.getFactType(),
+                                            editingPattern.getBoundName(),
+                                            editingPattern.getEntryPointName(),
+                                            editingPattern.isNegated());
     }
 
     @Override
@@ -155,10 +167,15 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     }
 
     void appendColumn() {
-        final Pattern52 pattern = editingPattern();
-
-        presenter.appendColumn(pattern,
-                               editingCol());
+        if (isNewColumn()) {
+            presenter.appendColumn(editingPattern(),
+                                   editingCol());
+        } else {
+            presenter.updateColumn(getOriginalPattern52(),
+                                   originalCondition(),
+                                   editingPattern(),
+                                   editingCol());
+        }
     }
 
     public Pattern52 editingPattern() {
@@ -263,12 +280,17 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     @Override
     public Set<String> getAlreadyUsedColumnHeaders() {
-        Set<String> columnNames = new HashSet<>();
+        final List<CompositeColumn<? extends BaseColumn>> conditions = getPresenter().getModel().getConditions();
+        final Set<String> columnNames = new HashSet<>();
 
-        for (CompositeColumn<?> cc : getPresenter().getModel().getConditions()) {
-            for (int iChild = 0; iChild < cc.getChildColumns().size(); iChild++) {
-                columnNames.add(cc.getChildColumns().get(iChild).getHeader());
-            }
+        for (final CompositeColumn<?> condition : conditions) {
+            final List<String> headers = condition
+                    .getChildColumns()
+                    .stream()
+                    .map(BaseColumn::getHeader)
+                    .collect(Collectors.toList());
+
+            columnNames.addAll(headers);
         }
 
         return columnNames;
@@ -291,6 +313,16 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     @Override
     public boolean showLogicallyInsert() {
+        return false;
+    }
+
+    @Override
+    public boolean isLogicallyInsert() {
+        return false;
+    }
+
+    @Override
+    public boolean isUpdateEngine() {
         return false;
     }
 
@@ -430,12 +462,61 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     }
 
     void setupDefaultValues() {
-        editingPattern = emptyPattern();
-        editingCol = newConditionColumn();
-        constraintValue = BaseSingleFieldConstraint.TYPE_UNDEFINED;
-        valueOptionsPageCompleted = Boolean.FALSE;
+        if (isNewColumn()) {
+            editingPattern = emptyPattern();
+            editingCol = newConditionColumn();
 
-        resetFieldAndOperator();
+            constraintValue = BaseSingleFieldConstraint.TYPE_UNDEFINED;
+            valueOptionsPageCompleted = Boolean.FALSE;
+
+            resetFieldAndOperator();
+        } else {
+            editingPattern = getOriginalPattern52().clonePattern();
+            editingCol = clone(originalCondition());
+
+            constraintValue = editingCol.getConstraintValueType();
+            valueOptionsPageCompleted = Boolean.TRUE;
+        }
+    }
+
+    ConditionCol52 clone(final ConditionCol52 column) {
+        final ConditionCol52 clone;
+
+        if (column instanceof LimitedEntryConditionCol52) {
+            clone = new LimitedEntryConditionCol52() {{
+                final DTCellValue52 dcv = cloneDTCellValue(((LimitedEntryCol) column).getValue());
+
+                setValue(dcv);
+            }};
+        } else {
+            clone = new ConditionCol52();
+        }
+
+        clone.setConstraintValueType(column.getConstraintValueType());
+        clone.setFactField(column.getFactField());
+        clone.setFieldType(column.getFieldType());
+        clone.setHeader(column.getHeader());
+        clone.setOperator(column.getOperator());
+        clone.setValueList(column.getValueList());
+        clone.setDefaultValue(cloneDTCellValue(column.getDefaultValue()));
+        clone.setHideColumn(column.isHideColumn());
+        clone.setParameters(column.getParameters());
+        clone.setWidth(column.getWidth());
+        clone.setBinding(column.getBinding());
+
+        return clone;
+    }
+
+    DTCellValue52 cloneDTCellValue(final DTCellValue52 dcv) {
+        if (dcv == null) {
+            return null;
+        }
+
+        return new DTCellValue52(dcv);
+    }
+
+    ConditionCol52 originalCondition() {
+        return (ConditionCol52) getOriginalColumnConfig52();
     }
 
     void resetFieldAndOperator() {
@@ -482,7 +563,7 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
                                                 this);
     }
 
-    private ConditionCol52 newConditionColumn() {
+    ConditionCol52 newConditionColumn() {
         switch (tableFormat()) {
             case EXTENDED_ENTRY:
                 return new ConditionCol52();
@@ -501,7 +582,7 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         return presenter.getModel();
     }
 
-    private Pattern52 emptyPattern() {
+    Pattern52 emptyPattern() {
         return new Pattern52().clonePattern();
     }
 

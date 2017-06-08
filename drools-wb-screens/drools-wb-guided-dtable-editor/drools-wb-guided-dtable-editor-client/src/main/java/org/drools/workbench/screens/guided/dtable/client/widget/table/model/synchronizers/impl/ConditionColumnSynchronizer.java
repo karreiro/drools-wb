@@ -127,7 +127,6 @@ public class ConditionColumnSynchronizer extends BaseColumnSynchronizer<PatternC
             copyColumnData(originalColumn,
                            editedColumn,
                            diffs);
-            delete(originalMetaData);
             return diffs;
         }
 
