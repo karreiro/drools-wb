@@ -415,7 +415,6 @@ public class ConditionColumnSynchronizerTest extends BaseSynchronizerTest {
                      model.getConditionPattern("$a").getChildColumns().size());
         assertEquals(1,
                      model.getConditionPattern("$a2").getChildColumns().size());
-
         assertEquals(4,
                      uiModel.getColumns().size());
         assertTrue(uiModel.getColumns().get(2) instanceof StringUiColumn);

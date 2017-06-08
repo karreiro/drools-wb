@@ -16,10 +16,17 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons;
 
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.drools.workbench.models.guided.dtable.shared.model.ActionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionInsertFactCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
+import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryActionInsertFactCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryCol;
+import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 
 public class ActionInsertFactWrapper implements ActionWrapper {
@@ -27,6 +34,12 @@ public class ActionInsertFactWrapper implements ActionWrapper {
     private final ActionInsertFactCol52 actionCol52;
 
     private final BaseDecisionTableColumnPlugin plugin;
+
+    public ActionInsertFactWrapper(final BaseDecisionTableColumnPlugin plugin,
+                                   final ActionInsertFactCol52 actionCol52) {
+        this.plugin = plugin;
+        this.actionCol52 = clone(actionCol52);
+    }
 
     public ActionInsertFactWrapper(final BaseDecisionTableColumnPlugin plugin) {
         this.plugin = plugin;
@@ -57,7 +70,7 @@ public class ActionInsertFactWrapper implements ActionWrapper {
     }
 
     @Override
-    public boolean isUpdate() {
+    public boolean isUpdateEngine() {
         return false;
     }
 
@@ -139,6 +152,53 @@ public class ActionInsertFactWrapper implements ActionWrapper {
     @Override
     public ActionInsertFactCol52 getActionCol52() {
         return actionCol52;
+    }
+
+    @Override
+    public void setActionCol52(final ActionCol52 actionCol52) {
+
+    }
+
+    public ActionInsertFactCol52 clone(final ActionInsertFactCol52 column) {
+        final ActionInsertFactCol52 clone;
+
+        if (column instanceof LimitedEntryActionInsertFactCol52) {
+            clone = new LimitedEntryActionInsertFactCol52() {{
+                final DTCellValue52 value = ((LimitedEntryActionInsertFactCol52) column).getValue();
+
+                setValue(value);
+            }};
+        } else {
+            clone = new ActionInsertFactCol52();
+        }
+
+        clone.setFactField(column.getFactField());
+        clone.setBoundName(column.getBoundName());
+        clone.setValueList(column.getValueList());
+        clone.setHeader(column.getHeader());
+        clone.setInsertLogical(column.isInsertLogical());
+        clone.setDefaultValue(column.getDefaultValue());
+        clone.setFactType(column.getFactType());
+        clone.setHideColumn(column.isHideColumn());
+        clone.setType(column.getType());
+
+        return clone;
+    }
+
+    private Pattern52 getConditionPattern(final String header) {
+        for (Pattern52 cc : getModel().getPatterns()) {
+
+                final Pattern52 p = (Pattern52) cc;
+                if (p.getChildColumns().stream().map(DTColumnConfig52::getHeader).collect(Collectors.toList()).contains(header)) {
+                    return p;
+                }
+
+        }
+        return null;
+    }
+
+    private GuidedDecisionTable52 getModel() {
+        return presenter().getModel();
     }
 
     private GuidedDecisionTableView.Presenter presenter() {

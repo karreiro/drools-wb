@@ -36,10 +36,13 @@ import org.drools.workbench.models.datamodel.workitems.PortableWorkDefinition;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionInsertFactCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionWorkItemCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.ActionWorkItemInsertFactCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.ActionWorkItemSetFieldCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
+import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
-import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasFieldPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasPatternPage;
@@ -102,23 +105,84 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
     }
 
     @Override
+    public void init(final NewGuidedDecisionTableColumnWizard wizard) {
+        super.init(wizard);
+
+        setupValues();
+    }
+
+    private void setupValues() {
+
+        if (!isNewColumn()) {
+            final DTColumnConfig52 originalCol = getOriginalColumnConfig52();
+
+            if (originalCol instanceof ActionWorkItemInsertFactCol52) {
+                ActionWorkItemInsertFactCol52 col = (ActionWorkItemInsertFactCol52) originalCol;
+
+                editingWrapper = new ActionWorkItemInsertWrapper(this,
+                                                                 col);
+            } else if (originalCol instanceof ActionWorkItemSetFieldCol52) {
+                ActionWorkItemSetFieldCol52 col = (ActionWorkItemSetFieldCol52) originalCol;
+
+                editingWrapper = new ActionWorkItemSetWrapper(this,
+                                                              col);
+            }
+
+            final Optional<PatternWrapper> first =
+                    getPatterns()
+                            .stream()
+                            .filter(p -> p.getBoundName().equals(editingWrapper.getBoundName()))
+                            .findFirst();
+
+            if (first.isPresent()) {
+                patternWrapper = first.get();
+            } else {
+                patternWrapper = new PatternWrapper(editingWrapper.getFactField(),
+                                                    editingWrapper.getBoundName(),
+                                                    false);
+            }
+
+            setWorkItem(editingWrapper.getWorkItemName() + editingWrapper.getWorkItemResultParameterName());
+
+            setWorkItemPageAsCompleted();
+
+            fireChangeEvent(patternPage);
+            fireChangeEvent(fieldPage);
+            fireChangeEvent(workItemPage);
+            fireChangeEvent(additionalInfoPage);
+        }
+    }
+
+    @Override
     public String getWorkItem() {
         return selectedWorkItemKey;
     }
 
     @Override
     public void setWorkItem(final String workItemKey) {
-        final WorkItemParameter workItemParameter = getWorkItems().get(workItemKey);
-        final PortableWorkDefinition workDefinition = workItemParameter.getWorkDefinition();
-        final PortableParameterDefinition parameterDefinition = workItemParameter.getWorkParameterDefinition();
+        //setup work items
+        forEachWorkItem((a, b) -> {
+        });
 
-        selectedWorkItemKey = workItemKey;
+        getWorkItems().forEach((key, workItemParameter) -> {
 
-        editingWrapper().setWorkItemName(workDefinition.getName());
-        editingWrapper().setWorkItemResultParameterName(parameterDefinition.getName());
-        editingWrapper().setParameterClassName(parameterDefinition.getClassName());
+            String trim = key.replaceAll("\\s",
+                                         "");
+            String trim1 = workItemKey.replaceAll("\\s",
+                                                  "");
+            if (trim.equals(trim1)) {
+                final PortableWorkDefinition workDefinition = workItemParameter.getWorkDefinition();
+                final PortableParameterDefinition parameterDefinition = workItemParameter.getWorkParameterDefinition();
 
-        fireChangeEvent(workItemPage);
+                selectedWorkItemKey = trim;
+
+                editingWrapper().setWorkItemName(workDefinition.getName());
+                editingWrapper().setWorkItemResultParameterName(parameterDefinition.getName());
+                editingWrapper().setParameterClassName(parameterDefinition.getClassName());
+
+                fireChangeEvent(workItemPage);
+            }
+        });
     }
 
     Map<String, WorkItemParameter> getWorkItems() {
@@ -159,13 +223,16 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
     public void forEachWorkItem(BiConsumer<String, String> biConsumer) {
         workItems.clear();
 
-        actionWorkItems().forEach(actionCol52 -> {
+        final List<ActionCol52> actionCol52s = actionWorkItems();
+
+        actionCol52s.forEach(actionCol52 -> {
             final PortableWorkDefinition workItemDefinition = ((ActionWorkItemCol52) actionCol52).getWorkItemDefinition();
 
             for (final PortableParameterDefinition parameterDefinition : workItemDefinition.getResults()) {
                 if (acceptParameterType(parameterDefinition)) {
                     final String name = workItemDefinition.getName() + " - " + parameterDefinition.getName();
-                    final String key = workItemDefinition.getDisplayName() + "" + parameterDefinition.getName();
+                    final String key = (workItemDefinition.getDisplayName() + "" + parameterDefinition.getName()).replaceAll("\\s",
+                                                                                                                             "");
 
                     biConsumer.accept(name,
                                       key);
@@ -229,8 +296,11 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
 
     @Override
     public Set<String> getAlreadyUsedColumnHeaders() {
-        return presenter.getModel().getActionCols().stream()
-                .map(actionCol52 -> actionCol52.getHeader())
+        return presenter
+                .getModel()
+                .getActionCols()
+                .stream()
+                .map(DTColumnConfig52::getHeader)
                 .collect(Collectors.toSet());
     }
 
@@ -261,9 +331,20 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
 
     @Override
     public Boolean generateColumn() {
+        final ActionCol52 actionCol52 = editingWrapper().getActionCol52();
 
-        // Pass new\modified column back for handling
-        presenter.appendColumn(editingWrapper().getActionCol52());
+        if (isNewColumn()) {
+            presenter.appendColumn(actionCol52);
+        } else {
+            DTColumnConfig52 originalCol = getOriginalColumnConfig52();
+            if (originalCol instanceof ActionWorkItemInsertFactCol52) {
+                presenter.updateColumn((ActionWorkItemInsertFactCol52) originalCol,
+                                       actionCol52);
+            } else {
+                presenter.updateColumn((ActionWorkItemSetFieldCol52) originalCol,
+                                       actionCol52);
+            }
+        }
 
         return true;
     }
@@ -307,10 +388,6 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
             }
         }
 
-        for (Pattern52 pattern52 : model().getPatterns()) {
-            patterns.add(new PatternWrapper(pattern52));
-        }
-
         return new ArrayList<>(patterns);
     }
 
@@ -344,11 +421,15 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
 
         final String factType = patternWrapper().getFactType();
 
-        editingWrapper().setFactField(selectedValue);
-        editingWrapper().setFactType(factType);
-        editingWrapper().setBoundName(patternWrapper().getBoundName());
-        editingWrapper().setType(oracle().getFieldType(editingWrapper().getFactType(),
-                                                       editingWrapper().getFactField()));
+        ActionWorkItemWrapper wrapper = editingWrapper();
+
+        wrapper.setFactField(selectedValue);
+        wrapper.setFactType(factType);
+        wrapper.setBoundName(patternWrapper().getBoundName());
+        String factType1 = wrapper.getFactType();
+        String factField = wrapper.getFactField();
+        wrapper.setType(oracle().getFieldType(factType1,
+                                              factField));
 
         fireChangeEvent(fieldPage);
     }
@@ -359,12 +440,22 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
 
     @Override
     public boolean showUpdateEngineWithChanges() {
-        return !isNewFactPattern();
+        return editingWrapper() instanceof ActionWorkItemSetWrapper;
     }
 
     @Override
     public boolean showLogicallyInsert() {
-        return isNewFactPattern();
+        return editingWrapper() instanceof ActionWorkItemInsertWrapper;
+    }
+
+    @Override
+    public boolean isLogicallyInsert() {
+        return editingWrapper.isInsertLogical();
+    }
+
+    @Override
+    public boolean isUpdateEngine() {
+        return editingWrapper.isUpdateEngine();
     }
 
     boolean isNewFactPattern() {
