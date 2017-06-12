@@ -24,8 +24,6 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
-import com.google.gwt.user.client.Window;
-import org.drools.workbench.models.guided.dtable.shared.model.ActionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionRetractFactCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
@@ -92,7 +90,12 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
     @Override
     public Boolean generateColumn() {
 
-        presenter.appendColumn(editingCol);
+        if (isNewColumn()) {
+            presenter.appendColumn(editingCol);
+        } else {
+            presenter.updateColumn((ActionRetractFactCol52) getOriginalCol(),
+                                   (ActionRetractFactCol52) editingCol);
+        }
 
         return true;
     }
@@ -116,9 +119,18 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
 
     @Override
     public Set<String> getAlreadyUsedColumnHeaders() {
-        return presenter.getModel().getActionCols().stream()
-                    .map(actionCol52 -> actionCol52.getHeader())
-                    .collect(Collectors.toSet());
+        final Set<String> headers = presenter
+                .getModel()
+                .getActionCols()
+                .stream()
+                .map(DTColumnConfig52::getHeader)
+                .collect(Collectors.toSet());
+
+        if (!isNewColumn()) {
+            headers.remove(getOriginalCol().getHeader());
+        }
+
+        return headers;
     }
 
     @Override
@@ -162,7 +174,11 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
     }
 
     void setupDefaultValues() {
-        editingCol = clone(newActionRetractFactColumn());
+        if (isNewColumn()) {
+            editingCol = clone(newActionRetractFactColumn());
+        } else {
+            editingCol = clone((ActionRetractFactCol52) getOriginalCol());
+        }
     }
 
     void setPatternToDeletePageCompleted(Boolean completed) {

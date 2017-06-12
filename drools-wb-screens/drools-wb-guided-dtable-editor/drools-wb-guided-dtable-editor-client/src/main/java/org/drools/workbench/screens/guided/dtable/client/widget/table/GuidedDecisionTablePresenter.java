@@ -94,6 +94,7 @@ import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.
 import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.DependentEnumsUtilities;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.EnumLoaderUtilities;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionRetractFactPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.BRLConditionColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
@@ -163,6 +164,7 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
     private final ManagedInstance<NewGuidedDecisionTableColumnWizard> wizardManagedInstance;
     private final ManagedInstance<BRLConditionColumnPlugin> brlConditionColumnPlugin;
     private final ManagedInstance<ConditionColumnPlugin> conditionColumnPlugin;
+    private final ManagedInstance<ActionRetractFactPlugin> actionRetractFactPlugin;
     protected CellUtilities cellUtilities;
     protected ColumnUtilities columnUtilities;
     protected DependentEnumsUtilities dependentEnumsUtilities;
@@ -210,7 +212,8 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
                                         final EnumLoaderUtilities enumLoaderUtilities,
                                         final ManagedInstance<NewGuidedDecisionTableColumnWizard> wizardManagedInstance,
                                         final ManagedInstance<BRLConditionColumnPlugin> brlConditionColumnPlugin,
-                                        final ManagedInstance<ConditionColumnPlugin> conditionColumnPlugin) {
+                                        final ManagedInstance<ConditionColumnPlugin> conditionColumnPlugin,
+                                        final ManagedInstance<ActionRetractFactPlugin> actionRetractFactPlugin) {
         this.identity = identity;
         this.resourceType = resourceType;
         this.ruleNameService = ruleNameService;
@@ -235,6 +238,7 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
         this.wizardManagedInstance = wizardManagedInstance;
         this.brlConditionColumnPlugin = brlConditionColumnPlugin;
         this.conditionColumnPlugin = conditionColumnPlugin;
+        this.actionRetractFactPlugin = actionRetractFactPlugin;
 
         CellUtilities.injectDateConvertor(getDateConverter());
     }
@@ -962,7 +966,14 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
         } else if (column instanceof ActionInsertFactCol52) {
             view.editActionInsertFact((ActionInsertFactCol52) column);
         } else if (column instanceof ActionRetractFactCol52) {
-            view.editActionRetractFact((ActionRetractFactCol52) column);
+
+            final NewGuidedDecisionTableColumnWizard wizard = wizardManagedInstance.get();
+            final DecisionTableColumnPlugin plugin = actionRetractFactPlugin.get();
+
+            wizard.init(this);
+
+            wizard.start(plugin.updating(column));
+
         } else if (column instanceof ActionWorkItemCol52) {
             view.editActionWorkItem((ActionWorkItemCol52) column);
         } else if (column instanceof LimitedEntryBRLActionColumn) {
