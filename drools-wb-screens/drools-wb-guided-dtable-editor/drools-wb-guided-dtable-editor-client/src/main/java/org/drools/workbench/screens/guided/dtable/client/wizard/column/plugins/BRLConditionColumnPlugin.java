@@ -18,12 +18,14 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
@@ -37,10 +39,12 @@ import org.drools.workbench.models.datamodel.rule.visitors.RuleModelVisitor;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLConditionColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLConditionVariableColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
+import org.drools.workbench.models.guided.dtable.shared.model.BaseColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.CompositeColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryBRLConditionColumn;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
+import org.drools.workbench.screens.guided.dtable.client.widget.RuleModelCloneVisitor;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasRuleModellerPage;
@@ -116,7 +120,22 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
         getDefinedVariables(getRuleModel());
 
         editingCol.setDefinition(Arrays.asList(getRuleModel().lhs));
-        presenter.appendColumn(editingCol);
+
+        if (getOriginalCol() instanceof LimitedEntryBRLConditionColumn) {
+            if (isNewColumn()) {
+                presenter.appendColumn((LimitedEntryBRLConditionColumn) getEditingCol());
+            } else {
+                presenter.updateColumn(originalBRLCondition(),
+                                       (LimitedEntryBRLConditionColumn) getEditingCol());
+            }
+        } else {
+            if (isNewColumn()) {
+                presenter.appendColumn(getEditingCol());
+            } else {
+                presenter.updateColumn(originalBRLCondition(),
+                                       getEditingCol());
+            }
+        }
 
         return true;
     }
@@ -191,15 +210,28 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
 
     @Override
     public Set<String> getAlreadyUsedColumnHeaders() {
-        Set<String> columnNames = new HashSet<>();
+        final List<CompositeColumn<? extends BaseColumn>> conditions = getModel().getConditions();
+        final Set<String> columnNames = new HashSet<>();
 
-        for (CompositeColumn<?> cc : getPresenter().getModel().getConditions()) {
-            for (int iChild = 0; iChild < cc.getChildColumns().size(); iChild++) {
-                columnNames.add(cc.getChildColumns().get(iChild).getHeader());
-            }
+        for (final CompositeColumn<?> condition : conditions) {
+            final List<String> headers = condition
+                    .getChildColumns()
+                    .stream()
+                    .map(BaseColumn::getHeader)
+                    .collect(Collectors.toList());
+
+            columnNames.addAll(headers);
+        }
+
+        if (!isNewColumn()) {
+            columnNames.remove(getOriginalCol().getHeader());
         }
 
         return columnNames;
+    }
+
+    private GuidedDecisionTable52 getModel() {
+        return getPresenter().getModel();
     }
 
     @Override
@@ -230,7 +262,7 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
     }
 
     private RuleModel newRuleModel() {
-        final BRLRuleModel ruleModel = new BRLRuleModel(presenter.getModel());
+        final BRLRuleModel ruleModel = new BRLRuleModel(getModel());
         final List<IPattern> definition = editingCol.getDefinition();
 
         ruleModel.lhs = definition.toArray(new IPattern[definition.size()]);
@@ -261,7 +293,61 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
     }
 
     void setupEditingCol() {
-        editingCol = newBRLCondition();
+        if (isNewColumn()) {
+            editingCol = newBRLCondition();
+        } else {
+            editingCol = originalBRLConditionClone();
+        }
+    }
+
+    private BRLConditionColumn originalBRLCondition() {
+        return (BRLConditionColumn) getOriginalCol();
+    }
+
+    private BRLConditionColumn originalBRLConditionClone() {
+        final BRLConditionColumn originalCol = originalBRLCondition();
+        final BRLConditionColumn clone;
+
+        if (originalCol instanceof LimitedEntryBRLConditionColumn) {
+            clone = new LimitedEntryBRLConditionColumn();
+        } else {
+            clone = new BRLConditionColumn();
+            clone.setChildColumns(cloneVariables(originalCol.getChildColumns()));
+        }
+
+        clone.setHeader(originalCol.getHeader());
+        clone.setHideColumn(originalCol.isHideColumn());
+        clone.setDefinition(cloneDefinition(originalCol.getDefinition()));
+
+        return clone;
+    }
+
+    private List<BRLConditionVariableColumn> cloneVariables(List<BRLConditionVariableColumn> variables) {
+        return variables.stream().map(this::cloneVariable).collect(Collectors.toList());
+    }
+
+    private BRLConditionVariableColumn cloneVariable(BRLConditionVariableColumn variable) {
+        final BRLConditionVariableColumn clone = new BRLConditionVariableColumn(variable.getVarName(),
+                                                                                variable.getFieldType(),
+                                                                                variable.getFactType(),
+                                                                                variable.getFactField());
+        clone.setHeader(variable.getHeader());
+        clone.setHideColumn(variable.isHideColumn());
+        clone.setWidth(variable.getWidth());
+        return clone;
+    }
+
+    private List<IPattern> cloneDefinition(List<IPattern> definition) {
+        final RuleModelCloneVisitor visitor = new RuleModelCloneVisitor();
+        final RuleModel rm = new RuleModel();
+
+        definition.forEach(rm::addLhsItem);
+
+        final List<IPattern> clone = new ArrayList<>();
+
+        Collections.addAll(clone,
+                           visitor.visitRuleModel(rm).lhs);
+        return clone;
     }
 
     void setupRuleModellerEvents() {
@@ -275,6 +361,10 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
 
     void setRuleModellerPageCompleted() {
         this.ruleModellerPageCompleted = Boolean.TRUE;
+    }
+
+    public BRLConditionColumn getEditingCol() {
+        return editingCol;
     }
 
     @Override
@@ -295,7 +385,7 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
 
     @Override
     public GuidedDecisionTable52.TableFormat tableFormat() {
-        return presenter.getModel().getTableFormat();
+        return getModel().getTableFormat();
     }
 
     private AdditionalInfoPage additionalInfoPage() {

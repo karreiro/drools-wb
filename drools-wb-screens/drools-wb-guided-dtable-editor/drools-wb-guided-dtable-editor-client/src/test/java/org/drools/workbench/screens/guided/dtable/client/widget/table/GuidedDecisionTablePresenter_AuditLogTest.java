@@ -159,7 +159,7 @@ public class GuidedDecisionTablePresenter_AuditLogTest {
                                                         null,
                                                         null,
                                                         decisionTableAnalyzerProvider,
-                                                        enumLoaderUtilities ) {
+                                                        enumLoaderUtilities, null,null,null) {
             @Override
             void initialiseLockManager() {
                 //Do nothing for tests

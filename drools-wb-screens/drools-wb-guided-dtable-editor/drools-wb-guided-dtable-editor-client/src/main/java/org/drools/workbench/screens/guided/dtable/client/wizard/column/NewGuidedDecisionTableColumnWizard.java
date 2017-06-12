@@ -147,7 +147,11 @@ public class NewGuidedDecisionTableColumnWizard extends AbstractWizard {
 
     private void loadPages(final DecisionTableColumnPlugin plugin) {
         pages.clear();
-        pages.add(summaryPage);
+
+        if (plugin.isNewColumn()) {
+            pages.add(summaryPage);
+        }
+
         pages.addAll(plugin.getPages());
     }
 

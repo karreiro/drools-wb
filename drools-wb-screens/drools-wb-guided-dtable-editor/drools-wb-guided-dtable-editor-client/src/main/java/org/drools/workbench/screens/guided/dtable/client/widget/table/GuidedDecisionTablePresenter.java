@@ -60,7 +60,6 @@ import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
 import org.drools.workbench.models.guided.dtable.shared.model.DescriptionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryBRLActionColumn;
-import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryBRLConditionColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.MetadataCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.models.guided.dtable.shared.model.RowNumberCol52;
@@ -94,6 +93,10 @@ import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.
 import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.ColumnUtilities;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.DependentEnumsUtilities;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.EnumLoaderUtilities;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.BRLConditionColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.model.GuidedDecisionTableEditorContent;
 import org.drools.workbench.screens.guided.dtable.service.GuidedDecisionTableLinkManager;
 import org.drools.workbench.screens.guided.rule.client.util.GWTDateConverter;
@@ -101,6 +104,7 @@ import org.drools.workbench.services.verifier.api.client.reporting.Issue;
 import org.guvnor.common.services.shared.metadata.model.Overview;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
+import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.security.shared.api.identity.User;
@@ -156,6 +160,9 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
     private final EnumLoaderUtilities enumLoaderUtilities;
 
     private final Access access = new Access();
+    private final ManagedInstance<NewGuidedDecisionTableColumnWizard> wizardManagedInstance;
+    private final ManagedInstance<BRLConditionColumnPlugin> brlConditionColumnPlugin;
+    private final ManagedInstance<ConditionColumnPlugin> conditionColumnPlugin;
     protected CellUtilities cellUtilities;
     protected ColumnUtilities columnUtilities;
     protected DependentEnumsUtilities dependentEnumsUtilities;
@@ -173,10 +180,8 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
     private ObservablePath latestPath = null;
     private ObservablePath currentPath = null;
     private PlaceRequest placeRequest = null;
-
     private Integer originalHashCode = null;
     private ObservablePath.OnConcurrentUpdateEvent concurrentUpdateSessionInfo = null;
-
     //This EventBus is local to the screen and should be used for local operations, set data, add rows etc
     private EventBus eventBus = new SimpleEventBus();
     private Set<PortableWorkDefinition> workItemDefinitions;
@@ -202,7 +207,10 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
                                         final GuidedDecisionTableLinkManager linkManager,
                                         final Clipboard clipboard,
                                         final DecisionTableAnalyzerProvider decisionTableAnalyzerProvider,
-                                        final EnumLoaderUtilities enumLoaderUtilities) {
+                                        final EnumLoaderUtilities enumLoaderUtilities,
+                                        final ManagedInstance<NewGuidedDecisionTableColumnWizard> wizardManagedInstance,
+                                        final ManagedInstance<BRLConditionColumnPlugin> brlConditionColumnPlugin,
+                                        final ManagedInstance<ConditionColumnPlugin> conditionColumnPlugin) {
         this.identity = identity;
         this.resourceType = resourceType;
         this.ruleNameService = ruleNameService;
@@ -224,6 +232,9 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
         this.clipboard = clipboard;
         this.decisionTableAnalyzerProvider = decisionTableAnalyzerProvider;
         this.enumLoaderUtilities = enumLoaderUtilities;
+        this.wizardManagedInstance = wizardManagedInstance;
+        this.brlConditionColumnPlugin = brlConditionColumnPlugin;
+        this.conditionColumnPlugin = conditionColumnPlugin;
 
         CellUtilities.injectDateConvertor(getDateConverter());
     }
@@ -913,8 +924,14 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
         if (isReadOnly()) {
             return;
         }
-        view.editCondition(pattern,
-                           column);
+
+        final NewGuidedDecisionTableColumnWizard wizard = wizardManagedInstance.get();
+        final DecisionTableColumnPlugin plugin = conditionColumnPlugin.get();
+
+        wizard.init(this);
+
+        wizard.start(plugin.updating(pattern,
+                                     column));
     }
 
     @Override
@@ -922,11 +939,13 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
         if (isReadOnly()) {
             return;
         }
-        if (column instanceof LimitedEntryBRLConditionColumn) {
-            view.editLimitedEntryConditionBRLFragment((LimitedEntryBRLConditionColumn) column);
-        } else {
-            view.editExtendedEntryConditionBRLFragment(column);
-        }
+
+        final NewGuidedDecisionTableColumnWizard wizard = wizardManagedInstance.get();
+        final DecisionTableColumnPlugin plugin = brlConditionColumnPlugin.get();
+
+        wizard.init(this);
+
+        wizard.start(plugin.updating(column));
     }
 
     @Override

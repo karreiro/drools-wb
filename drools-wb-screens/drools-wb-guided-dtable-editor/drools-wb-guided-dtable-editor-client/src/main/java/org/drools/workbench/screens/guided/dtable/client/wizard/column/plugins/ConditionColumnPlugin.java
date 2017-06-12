@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
@@ -30,10 +31,12 @@ import com.google.gwt.user.client.ui.IsWidget;
 import org.drools.workbench.models.datamodel.oracle.DataType;
 import org.drools.workbench.models.datamodel.oracle.FieldAccessorsAndMutators;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
+import org.drools.workbench.models.guided.dtable.shared.model.BaseColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.CompositeColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
+import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryCol;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
@@ -157,8 +160,15 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     void appendColumn() {
         final Pattern52 pattern = editingPattern();
 
-        presenter.appendColumn(pattern,
-                               editingCol());
+        if (isNewColumn()) {
+            presenter.appendColumn(pattern,
+                                   editingCol());
+        } else {
+            presenter.updateColumn(getOriginalPattern(),
+                                   originalCondition(),
+                                   pattern,
+                                   editingCol());
+        }
     }
 
     public Pattern52 editingPattern() {
@@ -263,12 +273,21 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     @Override
     public Set<String> getAlreadyUsedColumnHeaders() {
-        Set<String> columnNames = new HashSet<>();
+        final List<CompositeColumn<? extends BaseColumn>> conditions = getPresenter().getModel().getConditions();
+        final Set<String> columnNames = new HashSet<>();
 
-        for (CompositeColumn<?> cc : getPresenter().getModel().getConditions()) {
-            for (int iChild = 0; iChild < cc.getChildColumns().size(); iChild++) {
-                columnNames.add(cc.getChildColumns().get(iChild).getHeader());
-            }
+        for (final CompositeColumn<?> condition : conditions) {
+            final List<String> headers = condition
+                    .getChildColumns()
+                    .stream()
+                    .map(BaseColumn::getHeader)
+                    .collect(Collectors.toList());
+
+            columnNames.addAll(headers);
+        }
+
+        if (!isNewColumn()) {
+            columnNames.remove(getOriginalCol().getHeader());
         }
 
         return columnNames;
@@ -430,12 +449,65 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     }
 
     void setupDefaultValues() {
-        editingPattern = emptyPattern();
-        editingCol = newConditionColumn();
-        constraintValue = BaseSingleFieldConstraint.TYPE_UNDEFINED;
-        valueOptionsPageCompleted = Boolean.FALSE;
+        if (isNewColumn()) {
+            editingPattern = emptyPattern();
+            editingCol = newConditionColumn();
 
-        resetFieldAndOperator();
+            constraintValue = BaseSingleFieldConstraint.TYPE_UNDEFINED;
+            valueOptionsPageCompleted = Boolean.FALSE;
+
+            resetFieldAndOperator();
+        } else {
+            editingPattern = getOriginalPattern().clonePattern();
+            editingCol = originalConditionClone();
+
+            patternWrapper = new PatternWrapper(editingPattern.getFactType(),
+                                                editingPattern.getBoundName(),
+                                                editingPattern.getEntryPointName(),
+                                                editingPattern.isNegated());
+
+            constraintValue = editingCol.getConstraintValueType();
+            valueOptionsPageCompleted = Boolean.TRUE;
+        }
+    }
+
+    private ConditionCol52 originalConditionClone() {
+        final ConditionCol52 col = originalCondition();
+        final ConditionCol52 clone;
+
+        if (col instanceof LimitedEntryConditionCol52) {
+            clone = new LimitedEntryConditionCol52();
+            DTCellValue52 dcv = cloneDTCellValue(((LimitedEntryCol) col).getValue());
+            ((LimitedEntryCol) clone).setValue(dcv);
+        } else {
+            clone = new ConditionCol52();
+        }
+
+        clone.setConstraintValueType(col.getConstraintValueType());
+        clone.setFactField(col.getFactField());
+        clone.setFieldType(col.getFieldType());
+        clone.setHeader(col.getHeader());
+        clone.setOperator(col.getOperator());
+        clone.setValueList(col.getValueList());
+        clone.setDefaultValue(cloneDTCellValue(col.getDefaultValue()));
+        clone.setHideColumn(col.isHideColumn());
+        clone.setParameters(col.getParameters());
+        clone.setWidth(col.getWidth());
+        clone.setBinding(col.getBinding());
+
+        return clone;
+    }
+
+    private DTCellValue52 cloneDTCellValue(DTCellValue52 dcv) {
+        if (dcv == null) {
+            return null;
+        }
+        DTCellValue52 clone = new DTCellValue52(dcv);
+        return clone;
+    }
+
+    private ConditionCol52 originalCondition() {
+        return (ConditionCol52) getOriginalCol();
     }
 
     void resetFieldAndOperator() {

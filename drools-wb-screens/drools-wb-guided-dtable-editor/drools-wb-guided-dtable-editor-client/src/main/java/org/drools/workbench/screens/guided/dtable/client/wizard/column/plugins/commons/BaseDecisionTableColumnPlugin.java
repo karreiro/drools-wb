@@ -16,8 +16,12 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons;
 
+import java.util.Optional;
 import javax.enterprise.event.Event;
 
+import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
+import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
@@ -25,7 +29,7 @@ import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
 
 /**
- * Base Plugin for the column wizard (Guided Decision Table Editor).
+ * Base Plugin for the originalCol wizard (Guided Decision Table Editor).
  * It has a 'DecisionTableColumnPlugin'  base implementation.
  */
 public abstract class BaseDecisionTableColumnPlugin implements DecisionTableColumnPlugin {
@@ -37,6 +41,10 @@ public abstract class BaseDecisionTableColumnPlugin implements DecisionTableColu
     private Event<WizardPageStatusChangeEvent> changeEvent;
 
     private TranslationService translationService;
+
+    private DTColumnConfig52 originalCol;
+
+    private Pattern52 originalPattern;
 
     protected BaseDecisionTableColumnPlugin(final Event<WizardPageStatusChangeEvent> changeEvent,
                                             final TranslationService translationService) {
@@ -86,5 +94,30 @@ public abstract class BaseDecisionTableColumnPlugin implements DecisionTableColu
 
     public GuidedDecisionTableView.Presenter getPresenter() {
         return presenter;
+    }
+
+    public Boolean isNewColumn() {
+        return !Optional.ofNullable(originalCol).isPresent();
+    }
+
+    public DecisionTableColumnPlugin updating(final DTColumnConfig52 column) {
+        this.originalCol = column;
+
+        return this;
+    }
+
+    public DecisionTableColumnPlugin updating(final Pattern52 pattern,
+                                              final ConditionCol52 column) {
+        this.originalPattern = pattern;
+
+        return updating(column);
+    }
+
+    public DTColumnConfig52 getOriginalCol() {
+        return originalCol;
+    }
+
+    public Pattern52 getOriginalPattern() {
+        return originalPattern;
     }
 }

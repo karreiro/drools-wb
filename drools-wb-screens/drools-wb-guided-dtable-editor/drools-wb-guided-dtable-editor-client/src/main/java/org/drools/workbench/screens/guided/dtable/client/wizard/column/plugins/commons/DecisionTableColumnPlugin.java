@@ -19,6 +19,9 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.
 import java.util.ArrayList;
 import java.util.List;
 
+import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
+import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 
@@ -61,6 +64,22 @@ public interface DecisionTableColumnPlugin {
         public Type getType() {
             return null;
         }
+
+        @Override
+        public Boolean isNewColumn() {
+            return true;
+        }
+
+        @Override
+        public DecisionTableColumnPlugin updating(final DTColumnConfig52 column) {
+            return null;
+        }
+
+        @Override
+        public DecisionTableColumnPlugin updating(final Pattern52 pattern,
+                                                  final ConditionCol52 column) {
+            return null;
+        }
     };
 
     /**
@@ -96,6 +115,23 @@ public interface DecisionTableColumnPlugin {
      * @return A enum representing the Type.
      */
     Type getType();
+
+    /**
+     * TODO
+     * Checks if the plugin is creating a new column or updating an existing column.
+     * @return 'true' when it's a new column, otherwise 'false'.
+     */
+    Boolean isNewColumn();
+
+    /**
+     * TODO
+     * Enable the updating mode
+     * @return the modified instance.
+     */
+    DecisionTableColumnPlugin updating(final DTColumnConfig52 column);
+
+    DecisionTableColumnPlugin updating(final Pattern52 pattern,
+                                       final ConditionCol52 column);
 
     /**
      * Plugin type for the column wizard.

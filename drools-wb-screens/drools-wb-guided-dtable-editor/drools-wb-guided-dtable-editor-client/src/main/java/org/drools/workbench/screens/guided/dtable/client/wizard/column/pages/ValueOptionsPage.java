@@ -95,11 +95,11 @@ public class ValueOptionsPage<T extends HasValueOptionsPage & DecisionTableColum
 
         if (!canSetupValueList()) {
             view.disableValueList();
+            view.setValueListText("");
         } else {
             view.enableValueList();
+            view.setValueListText(getValueList());
         }
-
-        view.setValueListText(getValueList());
     }
 
     private void setupCepOperators() {
