@@ -98,6 +98,7 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.A
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionSetFactPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionWorkItemPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionWorkItemSetFieldPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.BRLActionColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.BRLConditionColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
@@ -171,6 +172,7 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
     private final ManagedInstance<ActionSetFactPlugin> actionSetFactPlugin;
     private final ManagedInstance<ActionWorkItemSetFieldPlugin> actionWorkItemSetFieldPlugin;
     private final ManagedInstance<ActionWorkItemPlugin> actionWorkItemPlugin;
+    private final ManagedInstance<BRLActionColumnPlugin> brlActionColumnPlugin;
     protected CellUtilities cellUtilities;
     protected ColumnUtilities columnUtilities;
     protected DependentEnumsUtilities dependentEnumsUtilities;
@@ -222,7 +224,8 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
                                         final ManagedInstance<ActionRetractFactPlugin> actionRetractFactPlugin,
                                         final ManagedInstance<ActionSetFactPlugin> actionSetFactPlugin,
                                         final ManagedInstance<ActionWorkItemSetFieldPlugin> actionWorkItemSetFieldPlugin,
-                                        final ManagedInstance<ActionWorkItemPlugin> actionWorkItemPlugin) {
+                                        final ManagedInstance<ActionWorkItemPlugin> actionWorkItemPlugin,
+                                        final ManagedInstance<BRLActionColumnPlugin> brlActionColumnPlugin) {
         this.identity = identity;
         this.resourceType = resourceType;
         this.ruleNameService = ruleNameService;
@@ -251,6 +254,7 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
         this.actionSetFactPlugin = actionSetFactPlugin;
         this.actionWorkItemSetFieldPlugin = actionWorkItemSetFieldPlugin;
         this.actionWorkItemPlugin = actionWorkItemPlugin;
+        this.brlActionColumnPlugin = brlActionColumnPlugin;
 
         CellUtilities.injectDateConvertor(getDateConverter());
     }
@@ -983,9 +987,9 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
         } else if (column instanceof ActionWorkItemCol52) {
             wizard.start(actionWorkItemPlugin.get().updating(column));
         } else if (column instanceof LimitedEntryBRLActionColumn) {
-            view.editLimitedEntryActionBRLFragment((LimitedEntryBRLActionColumn) column);
+            wizard.start(brlActionColumnPlugin.get().updating(column));
         } else if (column instanceof BRLActionColumn) {
-            view.editExtendedEntryActionBRLFragment((BRLActionColumn) column);
+            wizard.start(brlActionColumnPlugin.get().updating(column));
         }
     }
 
