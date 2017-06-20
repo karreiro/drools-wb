@@ -96,6 +96,7 @@ import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionRetractFactPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionSetFactPlugin;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionWorkItemPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionWorkItemSetFieldPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.BRLConditionColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
@@ -169,6 +170,7 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
     private final ManagedInstance<ActionRetractFactPlugin> actionRetractFactPlugin;
     private final ManagedInstance<ActionSetFactPlugin> actionSetFactPlugin;
     private final ManagedInstance<ActionWorkItemSetFieldPlugin> actionWorkItemSetFieldPlugin;
+    private final ManagedInstance<ActionWorkItemPlugin> actionWorkItemPlugin;
     protected CellUtilities cellUtilities;
     protected ColumnUtilities columnUtilities;
     protected DependentEnumsUtilities dependentEnumsUtilities;
@@ -219,7 +221,8 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
                                         final ManagedInstance<ConditionColumnPlugin> conditionColumnPlugin,
                                         final ManagedInstance<ActionRetractFactPlugin> actionRetractFactPlugin,
                                         final ManagedInstance<ActionSetFactPlugin> actionSetFactPlugin,
-                                        final ManagedInstance<ActionWorkItemSetFieldPlugin> actionWorkItemSetFieldPlugin) {
+                                        final ManagedInstance<ActionWorkItemSetFieldPlugin> actionWorkItemSetFieldPlugin,
+                                        final ManagedInstance<ActionWorkItemPlugin> actionWorkItemPlugin) {
         this.identity = identity;
         this.resourceType = resourceType;
         this.ruleNameService = ruleNameService;
@@ -247,6 +250,7 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
         this.actionRetractFactPlugin = actionRetractFactPlugin;
         this.actionSetFactPlugin = actionSetFactPlugin;
         this.actionWorkItemSetFieldPlugin = actionWorkItemSetFieldPlugin;
+        this.actionWorkItemPlugin = actionWorkItemPlugin;
 
         CellUtilities.injectDateConvertor(getDateConverter());
     }
@@ -966,77 +970,23 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
             return;
         }
 
+        final NewGuidedDecisionTableColumnWizard wizard = wizardManagedInstance.get();
+
+        wizard.init(this);
+
         if (column instanceof ActionWorkItemSetFieldCol52 || column instanceof ActionWorkItemInsertFactCol52) {
-
-            final NewGuidedDecisionTableColumnWizard wizard = wizardManagedInstance.get();
-            final DecisionTableColumnPlugin plugin = actionWorkItemSetFieldPlugin.get();
-
-            wizard.init(this);
-
-            wizard.start(plugin.updating(column));
+            wizard.start(actionWorkItemSetFieldPlugin.get().updating(column));
         } else if (column instanceof ActionInsertFactCol52 || column instanceof ActionSetFieldCol52) {
-
-            final NewGuidedDecisionTableColumnWizard wizard = wizardManagedInstance.get();
-            final DecisionTableColumnPlugin plugin = actionSetFactPlugin.get();
-
-            wizard.init(this);
-
-            wizard.start(plugin.updating(column));
+            wizard.start(actionSetFactPlugin.get().updating(column));
         } else if (column instanceof ActionRetractFactCol52) {
-
-            final NewGuidedDecisionTableColumnWizard wizard = wizardManagedInstance.get();
-            final DecisionTableColumnPlugin plugin = actionRetractFactPlugin.get();
-
-            wizard.init(this);
-
-            wizard.start(plugin.updating(column));
+            wizard.start(actionRetractFactPlugin.get().updating(column));
         } else if (column instanceof ActionWorkItemCol52) {
-            view.editActionWorkItem((ActionWorkItemCol52) column);
+            wizard.start(actionWorkItemPlugin.get().updating(column));
         } else if (column instanceof LimitedEntryBRLActionColumn) {
             view.editLimitedEntryActionBRLFragment((LimitedEntryBRLActionColumn) column);
         } else if (column instanceof BRLActionColumn) {
             view.editExtendedEntryActionBRLFragment((BRLActionColumn) column);
         }
-
-//
-//
-//        if (column instanceof ActionInsertFactCol52 || column instanceof ActionSetFieldCol52) {
-//
-//
-//        }
-//
-//        if (column instanceof ActionWorkItemSetFieldCol52 || column instanceof ActionWorkItemInsertFactCol52) {
-////            view.editActionWorkItemSetField((ActionWorkItemSetFieldCol52) column);
-//
-//            final NewGuidedDecisionTableColumnWizard wizard = wizardManagedInstance.get();
-//            final DecisionTableColumnPlugin plugin = actionWorkItemSetFieldPlugin.get();
-//
-//            wizard.init(this);
-//
-//            wizard.start(plugin.updating(column));
-//
-//
-////        } else if (column instanceof ActionSetFieldCol52) {
-////            view.editActionSetField((ActionSetFieldCol52) column);
-//        } else if (column instanceof ActionWorkItemInsertFactCol52) {
-//            view.editActionWorkItemInsertFact((ActionWorkItemInsertFactCol52) column);
-////        } else if (column instanceof ActionInsertFactCol52) {
-////            view.editActionInsertFact((ActionInsertFactCol52) column);
-//        } else if (column instanceof ActionRetractFactCol52) {
-//
-//            final NewGuidedDecisionTableColumnWizard wizard = wizardManagedInstance.get();
-//            final DecisionTableColumnPlugin plugin = actionRetractFactPlugin.get();
-//
-//            wizard.init(this);
-//
-//            wizard.start(plugin.updating(column));
-//        } else if (column instanceof ActionWorkItemCol52) {
-//            view.editActionWorkItem((ActionWorkItemCol52) column);
-//        } else if (column instanceof LimitedEntryBRLActionColumn) {
-//            view.editLimitedEntryActionBRLFragment((LimitedEntryBRLActionColumn) column);
-//        } else if (column instanceof BRLActionColumn) {
-//            view.editExtendedEntryActionBRLFragment((BRLActionColumn) column);
-//        }
     }
 
     @Override

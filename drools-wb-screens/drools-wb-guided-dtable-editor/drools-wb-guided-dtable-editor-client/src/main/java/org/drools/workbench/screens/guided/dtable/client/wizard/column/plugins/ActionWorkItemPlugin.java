@@ -27,6 +27,7 @@ import javax.inject.Inject;
 
 import org.drools.workbench.models.datamodel.workitems.PortableWorkDefinition;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionWorkItemCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
@@ -80,7 +81,20 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
     public void init(final NewGuidedDecisionTableColumnWizard wizard) {
         super.init(wizard);
 
+        setupDefaultValues();
+    }
+
+    private void setupDefaultValues() {
         editingCol = new ActionWorkItemCol52();
+
+        if (!isNewColumn()) {
+            final ActionWorkItemCol52 originalCol = (ActionWorkItemCol52) getOriginalCol();
+
+            setHeader(originalCol.getHeader());
+
+            editingCol.setWorkItemDefinition(originalCol.getWorkItemDefinition());
+            editingCol.setHideColumn(originalCol.isHideColumn());
+        }
     }
 
     @Override
@@ -124,9 +138,18 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
 
     @Override
     public Set<String> getAlreadyUsedColumnHeaders() {
-        return presenter.getModel().getActionCols().stream()
-                .map(actionCol52 -> actionCol52.getHeader())
+        final Set<String> headers = presenter
+                .getModel()
+                .getActionCols()
+                .stream()
+                .map(DTColumnConfig52::getHeader)
                 .collect(Collectors.toSet());
+
+        if (!isNewColumn()) {
+            headers.remove(getOriginalCol().getHeader());
+        }
+
+        return headers;
     }
 
     @Override
@@ -195,7 +218,12 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
     @Override
     public Boolean generateColumn() {
 
-        presenter.appendColumn(editingCol());
+        if (isNewColumn()) {
+            presenter.appendColumn(editingCol());
+        } else {
+            presenter.updateColumn((ActionWorkItemCol52) getOriginalCol(),
+                                   editingCol());
+        }
 
         return true;
     }
