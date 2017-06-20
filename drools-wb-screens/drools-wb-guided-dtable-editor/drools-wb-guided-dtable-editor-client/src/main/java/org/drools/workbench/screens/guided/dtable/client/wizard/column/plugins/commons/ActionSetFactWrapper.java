@@ -16,17 +16,21 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons;
 
+import java.util.Optional;
+
+import org.drools.workbench.models.guided.dtable.shared.model.ActionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionSetFieldCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryActionSetFieldCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 
 public class ActionSetFactWrapper implements ActionWrapper {
 
-    private final ActionSetFieldCol52 actionCol52;
+    private ActionSetFieldCol52 actionCol52;
 
-    private final BaseDecisionTableColumnPlugin plugin;
+    private BaseDecisionTableColumnPlugin plugin;
 
     public ActionSetFactWrapper(final BaseDecisionTableColumnPlugin plugin) {
         this.plugin = plugin;
@@ -34,7 +38,7 @@ public class ActionSetFactWrapper implements ActionWrapper {
     }
 
     private ActionSetFieldCol52 newActionSetField() {
-        final GuidedDecisionTable52.TableFormat tableFormat = plugin.getPresenter().getModel().getTableFormat();
+        final GuidedDecisionTable52.TableFormat tableFormat = getModel().getTableFormat();
 
         switch (tableFormat) {
             case EXTENDED_ENTRY:
@@ -57,7 +61,7 @@ public class ActionSetFactWrapper implements ActionWrapper {
     }
 
     @Override
-    public boolean isUpdate() {
+    public boolean isUpdateEngine() {
         return getActionCol52().isUpdate();
     }
 
@@ -98,7 +102,13 @@ public class ActionSetFactWrapper implements ActionWrapper {
 
     @Override
     public String getFactType() {
-        return plugin.getPresenter().getModel().getConditionPattern(getBoundName()).getFactType();
+        final Optional<Pattern52> conditionPattern = getConditionPattern(getBoundName());
+
+        if (conditionPattern.isPresent()) {
+            return conditionPattern.get().getFactType();
+        }
+
+        return "";
     }
 
     @Override
@@ -139,6 +149,21 @@ public class ActionSetFactWrapper implements ActionWrapper {
     @Override
     public ActionSetFieldCol52 getActionCol52() {
         return actionCol52;
+    }
+
+    @Override
+    public void setActionCol52(final ActionCol52 actionCol52) {
+        this.actionCol52 = (ActionSetFieldCol52) actionCol52;
+    }
+
+    private Optional<Pattern52> getConditionPattern(final String boundName) {
+        final Pattern52 conditionPattern = getModel().getConditionPattern(boundName);
+
+        return Optional.ofNullable(conditionPattern);
+    }
+
+    private GuidedDecisionTable52 getModel() {
+        return presenter().getModel();
     }
 
     private GuidedDecisionTableView.Presenter presenter() {

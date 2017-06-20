@@ -30,10 +30,16 @@ import com.google.gwt.user.client.ui.IsWidget;
 import org.drools.workbench.models.datamodel.oracle.FieldAccessorsAndMutators;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.ActionInsertFactCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.ActionSetFieldCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
+import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
+import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryActionInsertFactCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryActionSetFieldCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasFieldPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasPatternPage;
@@ -95,6 +101,104 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
     }
 
     @Override
+    public void init(final NewGuidedDecisionTableColumnWizard wizard) {
+        super.init(wizard);
+
+        setupValues();
+    }
+
+    private void setupValues() {
+        if (!isNewColumn()) {
+            DTColumnConfig52 originalCol = getOriginalCol();
+
+            // TODO: remote ALL instanceof
+            if (originalCol instanceof ActionInsertFactCol52) {
+                ActionInsertFactCol52 col = (ActionInsertFactCol52) originalCol;
+                String boundName = col.getBoundName();
+                Optional<PatternWrapper> first = getPatterns()
+                        .stream()
+                        .filter(p -> p.getBoundName().equals(boundName))
+                        .findFirst();
+
+                if (first.isPresent()) {
+                    patternWrapper = first.get();
+                } else {
+                    patternWrapper = new PatternWrapper(col.getFactType(),
+                                                        col.getBoundName(),
+                                                        false);
+                }
+                setEditingPattern(patternWrapper);
+                editingWrapper = newActionInsertFactWrapper();
+                editingWrapper.setFactField(col.getFactField());
+                editingWrapper.setFactType(patternWrapper().getFactType());
+                editingWrapper.setBoundName(patternWrapper().getBoundName());
+                editingWrapper.setType(oracle().getFieldType(editingWrapper.getFactType(),
+                                                             editingWrapper.getFactField()));
+
+                setBinding(col.getBoundName());
+                setValueList(col.getValueList());
+                setHeader(col.getHeader());
+                setInsertLogical(col.isInsertLogical());
+                editingWrapper.setDefaultValue(col.getDefaultValue());
+                editingWrapper.setInsertLogical(col.isInsertLogical());
+
+                if (col instanceof LimitedEntryActionInsertFactCol52) {
+                    final LimitedEntryActionInsertFactCol52 limitedO = (LimitedEntryActionInsertFactCol52) originalCol;
+                    final LimitedEntryActionInsertFactCol52 limitedE = (LimitedEntryActionInsertFactCol52) editingWrapper.getActionCol52();
+
+                    limitedE.setValue(limitedO.getValue());
+                }
+            } else if (originalCol instanceof ActionSetFieldCol52) {
+
+                ActionSetFieldCol52 col = (ActionSetFieldCol52) originalCol;
+                String boundName = col.getBoundName();
+                Optional<PatternWrapper> first = getPatterns()
+                        .stream()
+                        .filter(p -> p.getBoundName().equals(boundName))
+                        .findFirst();
+
+                if (first.isPresent()) {
+                    patternWrapper = first.get();
+                } else {
+                    patternWrapper = new PatternWrapper(col.getFactField(),
+                                                        col.getBoundName(),
+                                                        false);
+                }
+                setEditingPattern(patternWrapper);
+                editingWrapper = newActionSetFactWrapper();
+                editingWrapper.setFactField(col.getFactField());
+                editingWrapper.setFactType(patternWrapper().getFactType());
+                editingWrapper.setBoundName(patternWrapper().getBoundName());
+                editingWrapper.setType(oracle().getFieldType(editingWrapper.getFactType(),
+                                                             editingWrapper.getFactField()));
+
+                setBinding(col.getBoundName());
+                setValueList(col.getValueList());
+                setHeader(col.getHeader());
+                setUpdate(col.isUpdate());
+                editingWrapper.setDefaultValue(col.getDefaultValue());
+                editingWrapper.setUpdate(col.isUpdate());
+
+                if (col instanceof LimitedEntryActionSetFieldCol52) {
+                    final LimitedEntryActionSetFieldCol52 limitedO = (LimitedEntryActionSetFieldCol52) originalCol;
+                    final LimitedEntryActionSetFieldCol52 limitedE = (LimitedEntryActionSetFieldCol52) editingWrapper.getActionCol52();
+
+                    limitedE.setValue(limitedO.getValue());
+                }
+            }
+
+            editingWrapper.getActionCol52().setHideColumn(originalCol.isHideColumn());
+
+            setValueOptionsPageAsCompleted();
+
+            fireChangeEvent(patternPage);
+            fireChangeEvent(fieldPage);
+            fireChangeEvent(valueOptionsPage);
+            fireChangeEvent(additionalInfoPage);
+        }
+    }
+
+    @Override
     public String getTitle() {
         return translate(GuidedDecisionTableErraiConstants.ActionInsertFactPlugin_SetTheValueOfAField);
     }
@@ -113,7 +217,12 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
     public Boolean generateColumn() {
         final ActionWrapper actionWrapper = editingWrapper();
 
-        presenter.appendColumn(actionWrapper.getActionCol52());
+        if (isNewColumn()) {
+            presenter.appendColumn(actionWrapper.getActionCol52());
+        } else {
+            presenter.updateColumn((ActionCol52) getOriginalCol(),
+                                   editingCol());
+        }
 
         return true;
     }
@@ -169,6 +278,15 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
             patterns.add(new PatternWrapper(pattern52));
         }
 
+        for (Object o : presenter.getModel().getActionCols()) {
+            ActionCol52 col = (ActionCol52) o;
+            if (col instanceof ActionInsertFactCol52) {
+                ActionInsertFactCol52 c = (ActionInsertFactCol52) col;
+
+                patterns.add(new PatternWrapper(c));
+            }
+        }
+
         return new ArrayList<>(patterns);
     }
 
@@ -199,11 +317,7 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
 
     @Override
     public void setFactField(final String selectedValue) {
-        if (isNewFactPattern()) {
-            editingWrapper = newActionInsertFactWrapper();
-        } else {
-            editingWrapper = newActionSetFactWrapper();
-        }
+        editingWrapper = newActionWrapper();
 
         editingWrapper.setFactField(selectedValue);
         editingWrapper.setFactType(patternWrapper().getFactType());
@@ -211,6 +325,14 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
         editingWrapper.setType(oracle().getFieldType(editingWrapper.getFactType(),
                                                      editingWrapper.getFactField()));
         fireChangeEvent(fieldPage);
+    }
+
+    private ActionWrapper newActionWrapper() {
+        if (isNewFactPattern()) {
+            return newActionInsertFactWrapper();
+        } else {
+            return newActionSetFactWrapper();
+        }
     }
 
     ActionSetFactWrapper newActionSetFactWrapper() {
@@ -250,9 +372,18 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
 
     @Override
     public Set<String> getAlreadyUsedColumnHeaders() {
-        return presenter.getModel().getActionCols().stream()
-                .map(actionCol52 -> actionCol52.getHeader())
+        final Set<String> headers = presenter
+                .getModel()
+                .getActionCols()
+                .stream()
+                .map(DTColumnConfig52::getHeader)
                 .collect(Collectors.toSet());
+
+        if (!isNewColumn()) {
+            headers.remove(getOriginalCol().getHeader());
+        }
+
+        return headers;
     }
 
     @Override
@@ -267,12 +398,22 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
 
     @Override
     public boolean showUpdateEngineWithChanges() {
-        return !isNewFactPattern();
+        return editingWrapper instanceof ActionSetFactWrapper;
     }
 
     @Override
     public boolean showLogicallyInsert() {
-        return isNewFactPattern();
+        return editingWrapper instanceof ActionInsertFactWrapper;
+    }
+
+    @Override
+    public boolean isLogicallyInsert() {
+        return editingWrapper.isInsertLogical();
+    }
+
+    @Override
+    public boolean isUpdateEngine() {
+        return editingWrapper.isUpdateEngine();
     }
 
     @Override
@@ -341,6 +482,7 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
 
     PatternPage initializedPatternPage() {
         patternPage.disableEntryPoint();
+        patternPage.disableNegatedPatterns();
 
         return patternPage;
     }

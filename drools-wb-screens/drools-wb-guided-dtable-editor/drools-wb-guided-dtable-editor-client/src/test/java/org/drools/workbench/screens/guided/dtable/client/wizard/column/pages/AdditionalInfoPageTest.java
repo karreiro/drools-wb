@@ -23,7 +23,6 @@ import com.google.gwt.junit.GWTMockUtilities;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
-import org.drools.workbench.models.guided.dtable.shared.model.ActionSetFieldCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
@@ -235,7 +234,7 @@ public class AdditionalInfoPageTest {
         page.enableLogicallyInsert();
         page.setupLogicallyInsert();
 
-        verify(view).showLogicallyInsert();
+        verify(view).showLogicallyInsert(false);
     }
 
     @Test
@@ -246,7 +245,7 @@ public class AdditionalInfoPageTest {
         page.setupLogicallyInsert();
 
         verify(view,
-               never()).showLogicallyInsert();
+               never()).showLogicallyInsert(false);
     }
 
     @Test
@@ -254,7 +253,7 @@ public class AdditionalInfoPageTest {
         page.setupLogicallyInsert();
 
         verify(view,
-               never()).showLogicallyInsert();
+               never()).showLogicallyInsert(false);
     }
 
     @Test
@@ -264,7 +263,7 @@ public class AdditionalInfoPageTest {
         page.enableUpdateEngineWithChanges();
         page.setupUpdateEngineWithChanges();
 
-        verify(view).showUpdateEngineWithChanges();
+        verify(view).showUpdateEngineWithChanges(false);
     }
 
     @Test
@@ -275,7 +274,7 @@ public class AdditionalInfoPageTest {
         page.setupUpdateEngineWithChanges();
 
         verify(view,
-               never()).showUpdateEngineWithChanges();
+               never()).showUpdateEngineWithChanges(false);
     }
 
     @Test
@@ -283,7 +282,7 @@ public class AdditionalInfoPageTest {
         page.setupUpdateEngineWithChanges();
 
         verify(view,
-               never()).showUpdateEngineWithChanges();
+               never()).showUpdateEngineWithChanges(false);
     }
 
     @Test

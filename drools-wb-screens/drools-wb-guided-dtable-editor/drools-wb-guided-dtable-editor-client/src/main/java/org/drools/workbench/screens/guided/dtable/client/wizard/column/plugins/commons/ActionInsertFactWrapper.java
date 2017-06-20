@@ -16,6 +16,7 @@
 
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons;
 
+import org.drools.workbench.models.guided.dtable.shared.model.ActionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionInsertFactCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
@@ -57,7 +58,7 @@ public class ActionInsertFactWrapper implements ActionWrapper {
     }
 
     @Override
-    public boolean isUpdate() {
+    public boolean isUpdateEngine() {
         return false;
     }
 
@@ -139,6 +140,11 @@ public class ActionInsertFactWrapper implements ActionWrapper {
     @Override
     public ActionInsertFactCol52 getActionCol52() {
         return actionCol52;
+    }
+
+    @Override
+    public void setActionCol52(final ActionCol52 actionCol52) {
+
     }
 
     private GuidedDecisionTableView.Presenter presenter() {

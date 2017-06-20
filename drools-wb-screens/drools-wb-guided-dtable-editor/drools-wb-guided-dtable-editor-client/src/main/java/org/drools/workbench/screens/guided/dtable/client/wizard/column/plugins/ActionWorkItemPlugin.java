@@ -172,6 +172,16 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
         return false;
     }
 
+    @Override
+    public boolean isLogicallyInsert() {
+        return false;
+    }
+
+    @Override
+    public boolean isUpdateEngine() {
+        return false;
+    }
+
     PortableWorkDefinition findWorkItemDefinition(final String workItem) {
         final List<PortableWorkDefinition> workItemDefinitions = new ArrayList<>(presenter.getWorkItemDefinitions());
 

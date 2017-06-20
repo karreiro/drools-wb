@@ -139,13 +139,13 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
 
     void setupLogicallyInsert() {
         if (logicallyInsertEnabled && plugin().showLogicallyInsert()) {
-            view.showLogicallyInsert();
+            view.showLogicallyInsert(plugin().isLogicallyInsert());
         }
     }
 
     void setupUpdateEngineWithChanges() {
         if (updateEngineWithChangesEnabled && plugin().showUpdateEngineWithChanges()) {
-            view.showUpdateEngineWithChanges();
+            view.showUpdateEngineWithChanges(plugin().isUpdateEngine());
         }
     }
 
@@ -173,9 +173,9 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
 
         void showHeader();
 
-        void showLogicallyInsert();
+        void showLogicallyInsert(final boolean isLogicallyInsert);
 
-        void showUpdateEngineWithChanges();
+        void showUpdateEngineWithChanges(final boolean isUpdateEngine);
 
         void showWarning(String message);
 

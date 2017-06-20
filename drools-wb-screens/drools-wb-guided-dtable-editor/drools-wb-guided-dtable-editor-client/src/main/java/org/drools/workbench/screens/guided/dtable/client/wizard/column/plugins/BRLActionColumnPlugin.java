@@ -224,6 +224,16 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     }
 
     @Override
+    public boolean isLogicallyInsert() {
+        return false;
+    }
+
+    @Override
+    public boolean isUpdateEngine() {
+        return false;
+    }
+
+    @Override
     public RuleModel getRuleModel() {
         ruleModel = Optional.ofNullable(ruleModel).orElse(newRuleModel());
 

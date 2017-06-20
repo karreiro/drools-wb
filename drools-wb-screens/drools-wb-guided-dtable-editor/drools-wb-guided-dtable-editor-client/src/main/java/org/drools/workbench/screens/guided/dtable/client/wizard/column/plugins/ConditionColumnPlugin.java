@@ -314,6 +314,16 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     }
 
     @Override
+    public boolean isLogicallyInsert() {
+        return false;
+    }
+
+    @Override
+    public boolean isUpdateEngine() {
+        return false;
+    }
+
+    @Override
     public String getFactField() {
         return editingCol().getFactField();
     }

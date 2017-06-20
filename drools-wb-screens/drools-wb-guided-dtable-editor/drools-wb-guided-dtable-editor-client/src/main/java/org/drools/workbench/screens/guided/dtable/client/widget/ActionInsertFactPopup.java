@@ -475,7 +475,6 @@ public class ActionInsertFactPopup extends FormStylePopup {
                     vars.add( c.getBoundName() );
                 }
             }
-
         }
 
         return patterns;

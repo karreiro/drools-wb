@@ -75,7 +75,8 @@ public class WorkItemPage<T extends HasWorkItemPage & DecisionTableColumnPlugin>
                                                     key));
 
         if (hasWorkItems()) {
-            view.selectWorkItem(currentWorkItem());
+            String currentWorkItem = currentWorkItem();
+            view.selectWorkItem(currentWorkItem);
 
             showParameters();
         } else {

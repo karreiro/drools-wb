@@ -89,7 +89,6 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
 
     @Override
     public Boolean generateColumn() {
-
         if (isNewColumn()) {
             presenter.appendColumn(editingCol);
         } else {
@@ -150,6 +149,16 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
 
     @Override
     public boolean showLogicallyInsert() {
+        return false;
+    }
+
+    @Override
+    public boolean isLogicallyInsert() {
+        return false;
+    }
+
+    @Override
+    public boolean isUpdateEngine() {
         return false;
     }
 

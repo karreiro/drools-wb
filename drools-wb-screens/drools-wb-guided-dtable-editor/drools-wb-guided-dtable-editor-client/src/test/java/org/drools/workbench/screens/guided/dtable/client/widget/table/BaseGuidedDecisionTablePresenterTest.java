@@ -247,16 +247,13 @@ public abstract class BaseGuidedDecisionTablePresenterTest {
 
     @Mock
     protected DefaultGridLayer gridLayer;
-
-    @Mock
-    private DecisionTableAnalyzerProvider decisionTableAnalyzerProvider;
-
     @Mock
     protected AnalyzerController analyzerController;
-
     protected GuidedDecisionTable52 model;
     protected GuidedDecisionTablePresenter dtPresenter;
     protected GuidedDecisionTableEditorContent dtContent;
+    @Mock
+    private DecisionTableAnalyzerProvider decisionTableAnalyzerProvider;
 
     @Before
     public void setup() {
@@ -309,7 +306,13 @@ public abstract class BaseGuidedDecisionTablePresenterTest {
                                                                                       linkManager,
                                                                                       clipboard,
                                                                                       decisionTableAnalyzerProvider,
-                                                                                      enumLoaderUtilities, null, null, null) {
+                                                                                      enumLoaderUtilities,
+                                                                                      null,
+                                                                                      null,
+                                                                                      null,
+                                                                                      null,
+                                                                                      null,
+                                                                                      null) {
             @Override
             void initialiseLockManager() {
                 //Do nothing for tests
@@ -393,10 +396,10 @@ public abstract class BaseGuidedDecisionTablePresenterTest {
         when(presenter.getModellerPresenter()).thenReturn(modellerPresenter);
 
         presenter.setContent(dtPath,
-                               dtPlaceRequest,
-                               dtContent,
-                               modellerPresenter,
-                               false);
+                             dtPlaceRequest,
+                             dtContent,
+                             modellerPresenter,
+                             false);
 
         return presenter;
     }
