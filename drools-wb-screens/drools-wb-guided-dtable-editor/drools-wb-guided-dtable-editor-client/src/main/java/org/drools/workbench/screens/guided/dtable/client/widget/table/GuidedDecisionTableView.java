@@ -200,29 +200,9 @@ public interface GuidedDecisionTableView extends GridWidget,
                             final DependentEnumsUtilities.Context context,
                             final Callback<Map<String, String>> callback);
 
-        void newAttributeOrMetaDataColumn();
-
         Set<String> getReservedAttributeNames();
 
         boolean isMetaDataUnique(final String metaDataName);
-
-        void newConditionColumn();
-
-        void newConditionBRLFragment();
-
-        void newActionInsertColumn();
-
-        void newActionSetColumn();
-
-        void newActionRetractFact();
-
-        void newActionWorkItem();
-
-        void newActionWorkItemSetField();
-
-        void newActionWorkItemInsertFact();
-
-        void newActionBRLFragment();
 
         void editCondition(final Pattern52 pattern,
                            final ConditionCol52 column);

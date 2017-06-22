@@ -160,13 +160,6 @@ public class GuidedDecisionTablePresenter_AuditLogTest {
                                                        null,
                                                        decisionTableAnalyzerProvider,
                                                        enumLoaderUtilities,
-                                                       null,
-                                                       null,
-                                                       null,
-                                                       null,
-                                                       null,
-                                                       null,
-                                                       null,
                                                        null) {
             @Override
             void initialiseLockManager() {

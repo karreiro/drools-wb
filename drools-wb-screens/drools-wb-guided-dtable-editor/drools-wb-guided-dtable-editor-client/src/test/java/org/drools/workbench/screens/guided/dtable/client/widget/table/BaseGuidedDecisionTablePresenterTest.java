@@ -307,13 +307,6 @@ public abstract class BaseGuidedDecisionTablePresenterTest {
                                                                                       clipboard,
                                                                                       decisionTableAnalyzerProvider,
                                                                                       enumLoaderUtilities,
-                                                                                      null,
-                                                                                      null,
-                                                                                      null,
-                                                                                      null,
-                                                                                      null,
-                                                                                      null,
-                                                                                      null,
                                                                                       null) {
             @Override
             void initialiseLockManager() {

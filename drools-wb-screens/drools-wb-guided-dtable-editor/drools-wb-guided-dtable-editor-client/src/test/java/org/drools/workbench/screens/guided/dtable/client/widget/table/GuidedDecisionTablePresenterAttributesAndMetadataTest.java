@@ -58,14 +58,6 @@ public class GuidedDecisionTablePresenterAttributesAndMetadataTest
     }
 
     @Test
-    public void newAttributeOrMetaDataColumn() {
-        dtPresenter.newAttributeOrMetaDataColumn();
-
-        verify(view,
-               times(1)).newAttributeOrMetaDataColumn(any());
-    }
-
-    @Test
     public void isMetaDataUnique() {
         final MetadataCol52 metadata = new MetadataCol52();
         metadata.setMetadata("metadata");
@@ -75,35 +67,6 @@ public class GuidedDecisionTablePresenterAttributesAndMetadataTest
 
         assertFalse(dtPresenter.isMetaDataUnique("metadata"));
         assertTrue(dtPresenter.isMetaDataUnique("cheese"));
-    }
-
-    @Test
-    public void getExistingAttributeNames() {
-        final AttributeCol52 attribute1 = new AttributeCol52();
-        attribute1.setAttribute(RuleAttributeWidget.ENABLED_ATTR);
-
-        final AttributeCol52 attribute2 = new AttributeCol52();
-        attribute2.setAttribute(RuleAttributeWidget.AUTO_FOCUS_ATTR);
-        dtPresenter.getModel()
-                .getAttributeCols()
-                .add(attribute1);
-        dtPresenter.getModel()
-                .getAttributeCols()
-                .add(attribute2);
-
-        dtPresenter.newAttributeOrMetaDataColumn();
-
-        ArgumentCaptor<Set> argumentCaptor = ArgumentCaptor.forClass(Set.class);
-
-        verify(view,
-               times(1)).newAttributeOrMetaDataColumn(argumentCaptor.capture());
-
-        final Set existingAttributeNames = argumentCaptor.getValue();
-
-        assertEquals(2,
-                     existingAttributeNames.size());
-        assertTrue(existingAttributeNames.contains(RuleAttributeWidget.ENABLED_ATTR));
-        assertTrue(existingAttributeNames.contains(RuleAttributeWidget.AUTO_FOCUS_ATTR));
     }
 
     @Test
@@ -214,36 +177,5 @@ public class GuidedDecisionTablePresenterAttributesAndMetadataTest
                                       eq(update));
         verify(modellerPresenter,
                times(1)).updateLinks();
-    }
-
-    @Test
-    public void testNewAttributeOrMetaDataColumnUniqueHitPolicy() throws Exception {
-        testReservedAttributes(HitPolicy.UNIQUE_HIT, "activation-group");
-    }
-
-    @Test
-    public void testNewAttributeOrMetaDataColumnFirstHitPolicy() throws Exception {
-        testReservedAttributes(HitPolicy.FIRST_HIT, "activation-group", "salience");
-    }
-
-    @Test
-    public void testNewAttributeOrMetaDataColumnResolvedHitPolicy() throws Exception {
-        testReservedAttributes(HitPolicy.RESOLVED_HIT, "activation-group", "salience");
-    }
-
-    @Test
-    public void testNewAttributeOrMetaDataColumnRuleOrderHitPolicy() throws Exception {
-        testReservedAttributes(HitPolicy.RULE_ORDER, "salience");
-    }
-
-    private void testReservedAttributes(HitPolicy policy, String... attributes) {
-        model.setHitPolicy(policy);
-        dtPresenter.newAttributeOrMetaDataColumn();
-        verify(view).newAttributeOrMetaDataColumn(reservedAttributesCaptor.capture());
-        assertEquals(attributes.length,
-                     reservedAttributesCaptor.getValue().size());
-        for(String attribute : attributes) {
-            assertTrue(reservedAttributesCaptor.getValue().contains(attribute));
-        }
     }
 }

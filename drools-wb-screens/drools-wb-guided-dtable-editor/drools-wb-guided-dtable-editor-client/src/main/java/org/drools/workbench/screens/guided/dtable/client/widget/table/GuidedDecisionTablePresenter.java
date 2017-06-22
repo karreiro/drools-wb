@@ -42,14 +42,7 @@ import org.drools.workbench.models.guided.dtable.shared.auditlog.InsertColumnAud
 import org.drools.workbench.models.guided.dtable.shared.auditlog.InsertRowAuditLogEntry;
 import org.drools.workbench.models.guided.dtable.shared.auditlog.UpdateColumnAuditLogEntry;
 import org.drools.workbench.models.guided.dtable.shared.model.ActionCol52;
-import org.drools.workbench.models.guided.dtable.shared.model.ActionInsertFactCol52;
-import org.drools.workbench.models.guided.dtable.shared.model.ActionRetractFactCol52;
-import org.drools.workbench.models.guided.dtable.shared.model.ActionSetFieldCol52;
-import org.drools.workbench.models.guided.dtable.shared.model.ActionWorkItemCol52;
-import org.drools.workbench.models.guided.dtable.shared.model.ActionWorkItemInsertFactCol52;
-import org.drools.workbench.models.guided.dtable.shared.model.ActionWorkItemSetFieldCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.AttributeCol52;
-import org.drools.workbench.models.guided.dtable.shared.model.BRLActionColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLConditionColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
 import org.drools.workbench.models.guided.dtable.shared.model.BaseColumn;
@@ -59,7 +52,6 @@ import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
 import org.drools.workbench.models.guided.dtable.shared.model.DescriptionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
-import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryBRLActionColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.MetadataCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.models.guided.dtable.shared.model.RowNumberCol52;
@@ -93,15 +85,6 @@ import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.
 import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.ColumnUtilities;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.DependentEnumsUtilities;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.utilities.EnumLoaderUtilities;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionRetractFactPlugin;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionSetFactPlugin;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionWorkItemPlugin;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ActionWorkItemSetFieldPlugin;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.BRLActionColumnPlugin;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.BRLConditionColumnPlugin;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.ConditionColumnPlugin;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.DecisionTableColumnPlugin;
 import org.drools.workbench.screens.guided.dtable.model.GuidedDecisionTableEditorContent;
 import org.drools.workbench.screens.guided.dtable.service.GuidedDecisionTableLinkManager;
 import org.drools.workbench.screens.guided.rule.client.util.GWTDateConverter;
@@ -109,7 +92,6 @@ import org.drools.workbench.services.verifier.api.client.reporting.Issue;
 import org.guvnor.common.services.shared.metadata.model.Overview;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
-import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.jboss.errai.ioc.client.container.SyncBeanDef;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.security.shared.api.identity.User;
@@ -165,18 +147,13 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
     private final EnumLoaderUtilities enumLoaderUtilities;
 
     private final Access access = new Access();
-    private final ManagedInstance<NewGuidedDecisionTableColumnWizard> wizardManagedInstance;
-    private final ManagedInstance<BRLConditionColumnPlugin> brlConditionColumnPlugin;
-    private final ManagedInstance<ConditionColumnPlugin> conditionColumnPlugin;
-    private final ManagedInstance<ActionRetractFactPlugin> actionRetractFactPlugin;
-    private final ManagedInstance<ActionSetFactPlugin> actionSetFactPlugin;
-    private final ManagedInstance<ActionWorkItemSetFieldPlugin> actionWorkItemSetFieldPlugin;
-    private final ManagedInstance<ActionWorkItemPlugin> actionWorkItemPlugin;
-    private final ManagedInstance<BRLActionColumnPlugin> brlActionColumnPlugin;
+    private final PluginHandler pluginHandler;
+
     protected CellUtilities cellUtilities;
     protected ColumnUtilities columnUtilities;
-    protected DependentEnumsUtilities dependentEnumsUtilities;
-    protected AnalyzerController analyzerController;
+
+    private DependentEnumsUtilities dependentEnumsUtilities;
+    private AnalyzerController analyzerController;
     private GuidedDecisionTable52 model;
     private Overview overview;
     private AsyncPackageDataModelOracle oracle;
@@ -192,6 +169,7 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
     private PlaceRequest placeRequest = null;
     private Integer originalHashCode = null;
     private ObservablePath.OnConcurrentUpdateEvent concurrentUpdateSessionInfo = null;
+
     //This EventBus is local to the screen and should be used for local operations, set data, add rows etc
     private EventBus eventBus = new SimpleEventBus();
     private Set<PortableWorkDefinition> workItemDefinitions;
@@ -218,14 +196,7 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
                                         final Clipboard clipboard,
                                         final DecisionTableAnalyzerProvider decisionTableAnalyzerProvider,
                                         final EnumLoaderUtilities enumLoaderUtilities,
-                                        final ManagedInstance<NewGuidedDecisionTableColumnWizard> wizardManagedInstance,
-                                        final ManagedInstance<BRLConditionColumnPlugin> brlConditionColumnPlugin,
-                                        final ManagedInstance<ConditionColumnPlugin> conditionColumnPlugin,
-                                        final ManagedInstance<ActionRetractFactPlugin> actionRetractFactPlugin,
-                                        final ManagedInstance<ActionSetFactPlugin> actionSetFactPlugin,
-                                        final ManagedInstance<ActionWorkItemSetFieldPlugin> actionWorkItemSetFieldPlugin,
-                                        final ManagedInstance<ActionWorkItemPlugin> actionWorkItemPlugin,
-                                        final ManagedInstance<BRLActionColumnPlugin> brlActionColumnPlugin) {
+                                        final PluginHandler pluginHandler) {
         this.identity = identity;
         this.resourceType = resourceType;
         this.ruleNameService = ruleNameService;
@@ -247,16 +218,11 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
         this.clipboard = clipboard;
         this.decisionTableAnalyzerProvider = decisionTableAnalyzerProvider;
         this.enumLoaderUtilities = enumLoaderUtilities;
-        this.wizardManagedInstance = wizardManagedInstance;
-        this.brlConditionColumnPlugin = brlConditionColumnPlugin;
-        this.conditionColumnPlugin = conditionColumnPlugin;
-        this.actionRetractFactPlugin = actionRetractFactPlugin;
-        this.actionSetFactPlugin = actionSetFactPlugin;
-        this.actionWorkItemSetFieldPlugin = actionWorkItemSetFieldPlugin;
-        this.actionWorkItemPlugin = actionWorkItemPlugin;
-        this.brlActionColumnPlugin = brlActionColumnPlugin;
+        this.pluginHandler = pluginHandler;
 
         CellUtilities.injectDateConvertor(getDateConverter());
+
+        pluginHandler.init(this);
     }
 
     @Override
@@ -789,14 +755,6 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
     }
 
     @Override
-    public void newAttributeOrMetaDataColumn() {
-        if (isReadOnly()) {
-            return;
-        }
-        view.newAttributeOrMetaDataColumn(getReservedAttributeNames());
-    }
-
-    @Override
     public Set<String> getReservedAttributeNames() {
         final Set<String> result = new HashSet<>();
 
@@ -825,172 +783,20 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
     }
 
     @Override
-    public void newConditionColumn() {
-        if (isReadOnly()) {
-            return;
-        }
-        switch (model.getTableFormat()) {
-            case EXTENDED_ENTRY:
-                view.newExtendedEntryConditionColumn();
-                break;
-            case LIMITED_ENTRY:
-                view.newLimitedEntryConditionColumn();
-                break;
-        }
-    }
-
-    @Override
-    public void newConditionBRLFragment() {
-        if (isReadOnly()) {
-            return;
-        }
-        switch (model.getTableFormat()) {
-            case EXTENDED_ENTRY:
-                view.newExtendedEntryConditionBRLFragment();
-                break;
-            case LIMITED_ENTRY:
-                view.newLimitedEntryConditionBRLFragment();
-                break;
-        }
-    }
-
-    @Override
-    public void newActionInsertColumn() {
-        if (isReadOnly()) {
-            return;
-        }
-        switch (model.getTableFormat()) {
-            case EXTENDED_ENTRY:
-                view.newExtendedEntryActionInsertColumn();
-                break;
-            case LIMITED_ENTRY:
-                view.newLimitedEntryActionInsertColumn();
-                break;
-        }
-    }
-
-    @Override
-    public void newActionSetColumn() {
-        if (isReadOnly()) {
-            return;
-        }
-        switch (model.getTableFormat()) {
-            case EXTENDED_ENTRY:
-                view.newExtendedEntryActionSetColumn();
-                break;
-            case LIMITED_ENTRY:
-                view.newLimitedEntryActionSetColumn();
-                break;
-        }
-    }
-
-    @Override
-    public void newActionRetractFact() {
-        if (isReadOnly()) {
-            return;
-        }
-        switch (model.getTableFormat()) {
-            case EXTENDED_ENTRY:
-                view.newExtendedEntryActionRetractFact();
-                break;
-            case LIMITED_ENTRY:
-                view.newLimitedEntryActionRetractFact();
-                break;
-        }
-    }
-
-    @Override
-    public void newActionWorkItem() {
-        if (isReadOnly()) {
-            return;
-        }
-        view.newActionWorkItem();
-    }
-
-    @Override
-    public void newActionWorkItemSetField() {
-        if (isReadOnly()) {
-            return;
-        }
-        view.newActionWorkItemSetField();
-    }
-
-    @Override
-    public void newActionWorkItemInsertFact() {
-        if (isReadOnly()) {
-            return;
-        }
-        view.newActionWorkItemInsertFact();
-    }
-
-    @Override
-    public void newActionBRLFragment() {
-        if (isReadOnly()) {
-            return;
-        }
-        switch (model.getTableFormat()) {
-            case EXTENDED_ENTRY:
-                view.newExtendedEntryActionBRLFragment();
-                break;
-            case LIMITED_ENTRY:
-                view.newLimitedEntryActionBRLFragment();
-                break;
-        }
-    }
-
-    @Override
     public void editCondition(final Pattern52 pattern,
                               final ConditionCol52 column) {
-        if (isReadOnly()) {
-            return;
-        }
-
-        final NewGuidedDecisionTableColumnWizard wizard = wizardManagedInstance.get();
-        final DecisionTableColumnPlugin plugin = conditionColumnPlugin.get();
-
-        wizard.init(this);
-
-        wizard.start(plugin.updating(pattern,
-                                     column));
+        pluginHandler.edit(pattern,
+                           column);
     }
 
     @Override
     public void editCondition(final BRLConditionColumn column) {
-        if (isReadOnly()) {
-            return;
-        }
-
-        final NewGuidedDecisionTableColumnWizard wizard = wizardManagedInstance.get();
-        final DecisionTableColumnPlugin plugin = brlConditionColumnPlugin.get();
-
-        wizard.init(this);
-
-        wizard.start(plugin.updating(column));
+        pluginHandler.edit(column);
     }
 
     @Override
     public void editAction(final ActionCol52 column) {
-        if (isReadOnly()) {
-            return;
-        }
-
-        final NewGuidedDecisionTableColumnWizard wizard = wizardManagedInstance.get();
-
-        wizard.init(this);
-
-        if (column instanceof ActionWorkItemSetFieldCol52 || column instanceof ActionWorkItemInsertFactCol52) {
-            wizard.start(actionWorkItemSetFieldPlugin.get().updating(column));
-        } else if (column instanceof ActionInsertFactCol52 || column instanceof ActionSetFieldCol52) {
-            wizard.start(actionSetFactPlugin.get().updating(column));
-        } else if (column instanceof ActionRetractFactCol52) {
-            wizard.start(actionRetractFactPlugin.get().updating(column));
-        } else if (column instanceof ActionWorkItemCol52) {
-            wizard.start(actionWorkItemPlugin.get().updating(column));
-        } else if (column instanceof LimitedEntryBRLActionColumn) {
-            wizard.start(brlActionColumnPlugin.get().updating(column));
-        } else if (column instanceof BRLActionColumn) {
-            wizard.start(brlActionColumnPlugin.get().updating(column));
-        }
+        pluginHandler.edit(column);
     }
 
     @Override
