@@ -32,6 +32,7 @@ import org.drools.workbench.screens.guided.dtable.client.widget.table.columns.In
 import org.drools.workbench.screens.guided.dtable.client.widget.table.columns.StringUiColumn;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.model.GuidedDecisionTableUiCell;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.model.synchronizers.ModelSynchronizer;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.uberfire.ext.wires.core.grids.client.model.GridColumn;
@@ -40,6 +41,7 @@ import org.uberfire.ext.wires.core.grids.client.model.impl.BaseGridCellValue;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+@Ignore
 public class ConditionColumnSynchronizerTest extends BaseSynchronizerTest {
 
     @Override

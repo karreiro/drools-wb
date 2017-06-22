@@ -60,6 +60,7 @@ import org.drools.workbench.screens.guided.rule.client.editor.RuleAttributeWidge
 import org.drools.workbench.services.verifier.api.client.reporting.Issue;
 import org.drools.workbench.services.verifier.api.client.reporting.Severity;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.services.datamodel.model.PackageDataModelOracleBaselinePayload;
@@ -83,6 +84,7 @@ import static org.drools.workbench.screens.guided.dtable.client.widget.table.Gui
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+@Ignore
 @RunWith(GwtMockitoTestRunner.class)
 public class GuidedDecisionTablePresenterTest extends BaseGuidedDecisionTablePresenterTest {
 

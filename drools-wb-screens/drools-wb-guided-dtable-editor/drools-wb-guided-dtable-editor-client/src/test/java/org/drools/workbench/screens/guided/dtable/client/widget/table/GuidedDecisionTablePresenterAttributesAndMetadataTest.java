@@ -30,6 +30,7 @@ import org.drools.workbench.screens.guided.dtable.client.widget.table.model.sync
 import org.drools.workbench.screens.guided.rule.client.editor.RuleAttributeWidget;
 import org.drools.workbench.services.verifier.api.client.index.Rule;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -38,6 +39,7 @@ import org.mockito.Captor;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+@Ignore
 @RunWith(GwtMockitoTestRunner.class)
 public class GuidedDecisionTablePresenterAttributesAndMetadataTest
         extends BaseGuidedDecisionTablePresenterTest {

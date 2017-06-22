@@ -53,6 +53,7 @@ import org.gwtbootstrap3.client.ui.html.Text;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.jboss.errai.security.shared.api.identity.User;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.services.datamodel.model.PackageDataModelOracleBaselinePayload;
@@ -69,6 +70,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
+@Ignore
 @WithClassesToStub({Text.class, DateTimeFormat.class})
 @RunWith(GwtMockitoTestRunner.class)
 public class GuidedDecisionTablePresenter_AuditLogTest {

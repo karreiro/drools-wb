@@ -58,6 +58,7 @@ import org.uberfire.mocks.EventSourceMock;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+@Ignore
 @RunWith(GwtMockitoTestRunner.class)
 @WithClassesToStub(BRLRuleModel.class)
 public class ActionWorkItemSetFieldPluginTest {
