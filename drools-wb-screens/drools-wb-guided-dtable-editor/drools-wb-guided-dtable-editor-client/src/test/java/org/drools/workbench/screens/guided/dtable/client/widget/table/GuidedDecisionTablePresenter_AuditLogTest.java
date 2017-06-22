@@ -165,6 +165,8 @@ public class GuidedDecisionTablePresenter_AuditLogTest {
                                                        null,
                                                        null,
                                                        null,
+                                                       null,
+                                                       null,
                                                        null) {
             @Override
             void initialiseLockManager() {

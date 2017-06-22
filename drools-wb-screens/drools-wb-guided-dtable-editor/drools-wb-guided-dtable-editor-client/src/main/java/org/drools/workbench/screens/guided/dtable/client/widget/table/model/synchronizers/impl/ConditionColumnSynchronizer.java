@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import javax.enterprise.context.Dependent;
 
-import com.google.gwt.core.client.GWT;
 import org.drools.workbench.models.datamodel.oracle.OperatorsOracle;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.datamodel.util.PortablePreconditions;
@@ -44,6 +43,22 @@ import static org.drools.workbench.screens.guided.dtable.client.widget.table.mod
 
 @Dependent
 public class ConditionColumnSynchronizer extends BaseColumnSynchronizer<PatternConditionMetaData, PatternConditionMetaData, BaseColumnSynchronizer.ColumnMetaData> {
+
+    public static class PatternConditionMetaData extends BaseColumnSynchronizer.ColumnMetaDataImpl {
+
+        private final Pattern52 pattern;
+
+        public PatternConditionMetaData(final Pattern52 pattern,
+                                        final ConditionCol52 column) {
+            super(column);
+            this.pattern = PortablePreconditions.checkNotNull("pattern",
+                                                              pattern);
+        }
+
+        public Pattern52 getPattern() {
+            return pattern;
+        }
+    }
 
     @Override
     public boolean handlesAppend(final MetaData metaData) {
@@ -107,22 +122,11 @@ public class ConditionColumnSynchronizer extends BaseColumnSynchronizer<PatternC
         final boolean isNewPattern = isNewPattern(editedPattern);
         final boolean isUpdatedPattern = BaseColumnFieldDiffImpl.hasChanged(Pattern52.FIELD_BOUND_NAME,
                                                                             diffs);
-
-        final boolean isUpdatedPattern2 = BaseColumnFieldDiffImpl.hasChanged(Pattern52.FIELD_ENTRY_POINT_NAME,
-                                                                             diffs);
-        if (isNewPattern || isUpdatedPattern || isUpdatedPattern2) {
-
-            GWT.log("---> 1");
+        if (isNewPattern || isUpdatedPattern) {
             append(editedMetaData);
-
-            GWT.log("---> 2");
             copyColumnData(originalColumn,
                            editedColumn,
                            diffs);
-
-            GWT.log("---> 3");
-            delete(originalMetaData);
-
             return diffs;
         }
 
@@ -496,22 +500,6 @@ public class ConditionColumnSynchronizer extends BaseColumnSynchronizer<PatternC
         originalColumn.setBinding(editedColumn.getBinding());
         if (originalColumn instanceof LimitedEntryCol && editedColumn instanceof LimitedEntryCol) {
             ((LimitedEntryCol) originalColumn).setValue(((LimitedEntryCol) editedColumn).getValue());
-        }
-    }
-
-    public static class PatternConditionMetaData extends BaseColumnSynchronizer.ColumnMetaDataImpl {
-
-        private final Pattern52 pattern;
-
-        public PatternConditionMetaData(final Pattern52 pattern,
-                                        final ConditionCol52 column) {
-            super(column);
-            this.pattern = PortablePreconditions.checkNotNull("pattern",
-                                                              pattern);
-        }
-
-        public Pattern52 getPattern() {
-            return pattern;
         }
     }
 }

@@ -126,6 +126,15 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         super.init(wizard);
 
         setupDefaultValues();
+
+        loadPattern();
+    }
+
+    private void loadPattern() {
+        patternWrapper = new PatternWrapper(editingPattern.getFactType(),
+                                            editingPattern.getBoundName(),
+                                            editingPattern.getEntryPointName(),
+                                            editingPattern.isNegated());
     }
 
     @Override
@@ -470,11 +479,6 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         } else {
             editingPattern = getOriginalPattern().clonePattern();
             editingCol = originalConditionClone();
-
-            patternWrapper = new PatternWrapper(editingPattern.getFactType(),
-                                                editingPattern.getBoundName(),
-                                                editingPattern.getEntryPointName(),
-                                                editingPattern.isNegated());
 
             constraintValue = editingCol.getConstraintValueType();
             valueOptionsPageCompleted = Boolean.TRUE;

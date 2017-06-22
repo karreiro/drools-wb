@@ -312,6 +312,8 @@ public abstract class BaseGuidedDecisionTablePresenterTest {
                                                                                       null,
                                                                                       null,
                                                                                       null,
+                                                                                      null,
+                                                                                      null,
                                                                                       null) {
             @Override
             void initialiseLockManager() {
