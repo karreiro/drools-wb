@@ -23,6 +23,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.ActionSetFieldCol5
 import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryActionSetFieldCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryCol;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
 
@@ -31,6 +32,12 @@ public class ActionSetFactWrapper implements ActionWrapper {
     private ActionSetFieldCol52 actionCol52;
 
     private BaseDecisionTableColumnPlugin plugin;
+
+    public ActionSetFactWrapper(final BaseDecisionTableColumnPlugin plugin,
+                                final ActionSetFieldCol52 actionCol52) {
+        this.plugin = plugin;
+        this.actionCol52 = clone(actionCol52);
+    }
 
     public ActionSetFactWrapper(final BaseDecisionTableColumnPlugin plugin) {
         this.plugin = plugin;
@@ -168,5 +175,29 @@ public class ActionSetFactWrapper implements ActionWrapper {
 
     private GuidedDecisionTableView.Presenter presenter() {
         return plugin.getPresenter();
+    }
+
+    public ActionSetFieldCol52 clone(final ActionSetFieldCol52 column) {
+        final ActionSetFieldCol52 clone;
+
+        if (column instanceof LimitedEntryCol) {
+            clone = new LimitedEntryActionSetFieldCol52() {{
+                final DTCellValue52 value = ((LimitedEntryCol) column).getValue();
+
+                setValue(value);
+            }};
+        } else {
+            clone = new ActionSetFieldCol52();
+        }
+
+        clone.setFactField(column.getFactField());
+        clone.setBoundName(column.getBoundName());
+        clone.setValueList(column.getValueList());
+        clone.setHeader(column.getHeader());
+        clone.setUpdate(column.isUpdate());
+        clone.setDefaultValue(column.getDefaultValue());
+        clone.setUpdate(column.isUpdate());
+
+        return column;
     }
 }

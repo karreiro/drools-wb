@@ -113,7 +113,7 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         editingCol = newBRLActionColumn();
 
         if (!isNewColumn()) {
-            final BRLActionColumn col = (BRLActionColumn) getOriginalCol();
+            final BRLActionColumn col = (BRLActionColumn) getOriginalColumnConfig52();
 
             setHeader(col.getHeader());
 
@@ -142,7 +142,7 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         if (isNewColumn()) {
             presenter.appendColumn(editingCol());
         } else {
-            presenter.updateColumn((BRLActionColumn) getOriginalCol(),
+            presenter.updateColumn((BRLActionColumn) getOriginalColumnConfig52(),
                                    editingCol());
         }
 
@@ -214,17 +214,12 @@ public class BRLActionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     @Override
     public Set<String> getAlreadyUsedColumnHeaders() {
-        final Set<String> headers = presenter.getModel()
+        return presenter
+                .getModel()
                 .getActionCols()
                 .stream()
                 .map(DTColumnConfig52::getHeader)
                 .collect(Collectors.toSet());
-
-        if (!isNewColumn()) {
-            headers.remove(getOriginalCol().getHeader());
-        }
-
-        return headers;
     }
 
     @Override

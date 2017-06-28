@@ -88,7 +88,7 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
         editingCol = new ActionWorkItemCol52();
 
         if (!isNewColumn()) {
-            final ActionWorkItemCol52 originalCol = (ActionWorkItemCol52) getOriginalCol();
+            final ActionWorkItemCol52 originalCol = (ActionWorkItemCol52) getOriginalColumnConfig52();
 
             setHeader(originalCol.getHeader());
 
@@ -138,18 +138,12 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
 
     @Override
     public Set<String> getAlreadyUsedColumnHeaders() {
-        final Set<String> headers = presenter
+        return presenter
                 .getModel()
                 .getActionCols()
                 .stream()
                 .map(DTColumnConfig52::getHeader)
                 .collect(Collectors.toSet());
-
-        if (!isNewColumn()) {
-            headers.remove(getOriginalCol().getHeader());
-        }
-
-        return headers;
     }
 
     @Override
@@ -221,7 +215,7 @@ public class ActionWorkItemPlugin extends BaseDecisionTableColumnPlugin implemen
         if (isNewColumn()) {
             presenter.appendColumn(editingCol());
         } else {
-            presenter.updateColumn((ActionWorkItemCol52) getOriginalCol(),
+            presenter.updateColumn((ActionWorkItemCol52) getOriginalColumnConfig52(),
                                    editingCol());
         }
 

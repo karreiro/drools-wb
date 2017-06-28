@@ -21,16 +21,12 @@ import java.util.Set;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.drools.workbench.models.guided.dtable.shared.model.AttributeCol52;
-import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52.HitPolicy;
 import org.drools.workbench.models.guided.dtable.shared.model.MetadataCol52;
-import org.drools.workbench.screens.guided.dtable.client.resources.HitPolicyInternationalizer;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi.RefreshAttributesPanelEvent;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi.RefreshMetaDataPanelEvent;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.model.synchronizers.ModelSynchronizer;
 import org.drools.workbench.screens.guided.rule.client.editor.RuleAttributeWidget;
-import org.drools.workbench.services.verifier.api.client.index.Rule;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -39,10 +35,8 @@ import org.mockito.Captor;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@Ignore
 @RunWith(GwtMockitoTestRunner.class)
-public class GuidedDecisionTablePresenterAttributesAndMetadataTest
-        extends BaseGuidedDecisionTablePresenterTest {
+public class GuidedDecisionTablePresenterAttributesAndMetadataTest extends BaseGuidedDecisionTablePresenterTest {
 
     @Captor
     private ArgumentCaptor<Set<String>> reservedAttributesCaptor;
@@ -62,6 +56,7 @@ public class GuidedDecisionTablePresenterAttributesAndMetadataTest
     @Test
     public void isMetaDataUnique() {
         final MetadataCol52 metadata = new MetadataCol52();
+
         metadata.setMetadata("metadata");
         dtPresenter.getModel()
                 .getMetadataCols()
@@ -72,8 +67,7 @@ public class GuidedDecisionTablePresenterAttributesAndMetadataTest
     }
 
     @Test
-    public void appendAttributeColumn() throws
-            ModelSynchronizer.MoveColumnVetoException {
+    public void appendAttributeColumn() throws ModelSynchronizer.MoveColumnVetoException {
         reset(modellerPresenter);
 
         final AttributeCol52 column = new AttributeCol52();
@@ -90,8 +84,7 @@ public class GuidedDecisionTablePresenterAttributesAndMetadataTest
     }
 
     @Test
-    public void appendMetadataColumn() throws
-            ModelSynchronizer.MoveColumnVetoException {
+    public void appendMetadataColumn() throws ModelSynchronizer.MoveColumnVetoException {
         reset(modellerPresenter);
 
         final MetadataCol52 column = new MetadataCol52();
@@ -108,8 +101,7 @@ public class GuidedDecisionTablePresenterAttributesAndMetadataTest
     }
 
     @Test
-    public void deleteAttributeColumn() throws
-            ModelSynchronizer.MoveColumnVetoException {
+    public void deleteAttributeColumn() throws ModelSynchronizer.MoveColumnVetoException {
         final AttributeCol52 column = new AttributeCol52();
         column.setAttribute(RuleAttributeWidget.AUTO_FOCUS_ATTR);
         dtPresenter.appendColumn(column);
@@ -124,8 +116,7 @@ public class GuidedDecisionTablePresenterAttributesAndMetadataTest
     }
 
     @Test
-    public void deleteMetadataColumn() throws
-            ModelSynchronizer.MoveColumnVetoException {
+    public void deleteMetadataColumn() throws ModelSynchronizer.MoveColumnVetoException {
         final MetadataCol52 column = new MetadataCol52();
         column.setMetadata("metadata");
         dtPresenter.appendColumn(column);
@@ -140,8 +131,7 @@ public class GuidedDecisionTablePresenterAttributesAndMetadataTest
     }
 
     @Test
-    public void updateAttributeColumn() throws
-            ModelSynchronizer.MoveColumnVetoException {
+    public void updateAttributeColumn() throws ModelSynchronizer.MoveColumnVetoException {
         final AttributeCol52 column = new AttributeCol52();
         column.setAttribute(RuleAttributeWidget.AUTO_FOCUS_ATTR);
         dtPresenter.appendColumn(column);
@@ -161,8 +151,7 @@ public class GuidedDecisionTablePresenterAttributesAndMetadataTest
     }
 
     @Test
-    public void updateMetadataColumn() throws
-            ModelSynchronizer.MoveColumnVetoException {
+    public void updateMetadataColumn() throws ModelSynchronizer.MoveColumnVetoException {
         final MetadataCol52 column = new MetadataCol52();
         column.setMetadata("metadata");
         dtPresenter.appendColumn(column);

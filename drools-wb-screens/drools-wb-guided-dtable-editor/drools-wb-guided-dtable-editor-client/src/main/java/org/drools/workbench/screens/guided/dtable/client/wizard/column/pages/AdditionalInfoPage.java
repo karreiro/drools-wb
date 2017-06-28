@@ -19,6 +19,7 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 
+import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.DTCellValueWidgetFactory;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
@@ -82,7 +83,6 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
         if (!isUnique) {
             view.showWarning(translate(GuidedDecisionTableErraiConstants.ThatColumnNameIsAlreadyInUsePleasePickAnother));
         }
-
 
         if (isValid) {
             view.hideWarning();
@@ -153,10 +153,18 @@ public class AdditionalInfoPage<T extends HasAdditionalInfoPage & DecisionTableC
         return headerEnabled && !nil(getHeader());
     }
 
-    private boolean isHeaderUnique() {
-        final String header = getHeader();
+    boolean isHeaderUnique() {
+        return !plugin()
+                .getAlreadyUsedColumnHeaders()
+                .stream()
+                .filter(header -> plugin().isNewColumn() || !originalColumnHeader().equals(header))
+                .anyMatch(header -> header.equals(getHeader()));
+    }
 
-        return !plugin().getAlreadyUsedColumnHeaders().contains(header);
+    private String originalColumnHeader() {
+        final DTColumnConfig52 originalCol = plugin().getOriginalColumnConfig52();
+
+        return originalCol.getHeader();
     }
 
     void setInsertLogical(final Boolean insertLogical) {

@@ -19,7 +19,6 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.
 import java.util.Optional;
 import javax.enterprise.event.Event;
 
-import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
@@ -29,7 +28,7 @@ import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPageStatusChangeEvent;
 
 /**
- * Base Plugin for the originalCol wizard (Guided Decision Table Editor).
+ * Base Plugin for the column wizard (Guided Decision Table Editor).
  * It has a 'DecisionTableColumnPlugin'  base implementation.
  */
 public abstract class BaseDecisionTableColumnPlugin implements DecisionTableColumnPlugin {
@@ -42,9 +41,9 @@ public abstract class BaseDecisionTableColumnPlugin implements DecisionTableColu
 
     private TranslationService translationService;
 
-    private DTColumnConfig52 originalCol;
+    private DTColumnConfig52 originalColumnConfig52;
 
-    private Pattern52 originalPattern;
+    private Pattern52 originalPattern52;
 
     protected BaseDecisionTableColumnPlugin(final Event<WizardPageStatusChangeEvent> changeEvent,
                                             final TranslationService translationService) {
@@ -63,6 +62,26 @@ public abstract class BaseDecisionTableColumnPlugin implements DecisionTableColu
     @Override
     public String getIdentifier() {
         return getClass().getSimpleName();
+    }
+
+    @Override
+    public Pattern52 getOriginalPattern52() {
+        return originalPattern52;
+    }
+
+    @Override
+    public void setOriginalPattern52(final Pattern52 originalPattern52) {
+        this.originalPattern52 = originalPattern52;
+    }
+
+    @Override
+    public DTColumnConfig52 getOriginalColumnConfig52() {
+        return originalColumnConfig52;
+    }
+
+    @Override
+    public void setOriginalColumnConfig52(final DTColumnConfig52 originalColumnConfig52) {
+        this.originalColumnConfig52 = originalColumnConfig52;
     }
 
     public void onClose() {
@@ -97,27 +116,6 @@ public abstract class BaseDecisionTableColumnPlugin implements DecisionTableColu
     }
 
     public Boolean isNewColumn() {
-        return !Optional.ofNullable(originalCol).isPresent();
-    }
-
-    public DecisionTableColumnPlugin updating(final DTColumnConfig52 column) {
-        this.originalCol = column;
-
-        return this;
-    }
-
-    public DecisionTableColumnPlugin updating(final Pattern52 pattern,
-                                              final ConditionCol52 column) {
-        this.originalPattern = pattern;
-
-        return updating(column);
-    }
-
-    public DTColumnConfig52 getOriginalCol() {
-        return originalCol;
-    }
-
-    public Pattern52 getOriginalPattern() {
-        return originalPattern;
+        return !Optional.ofNullable(originalColumnConfig52).isPresent();
     }
 }

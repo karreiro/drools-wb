@@ -29,7 +29,6 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
-import com.google.gwt.core.client.GWT;
 import org.drools.workbench.models.datamodel.oracle.FieldAccessorsAndMutators;
 import org.drools.workbench.models.datamodel.rule.BaseSingleFieldConstraint;
 import org.drools.workbench.models.datamodel.workitems.PortableParameterDefinition;
@@ -42,7 +41,6 @@ import org.drools.workbench.models.guided.dtable.shared.model.ActionWorkItemSetF
 import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
-import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.commons.HasAdditionalInfoPage;
@@ -53,8 +51,6 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.Add
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.FieldPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.PatternPage;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.WorkItemPage;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionInsertFactWrapper;
-import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionSetFactWrapper;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionWorkItemInsertWrapper;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionWorkItemSetWrapper;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.ActionWorkItemWrapper;
@@ -118,7 +114,7 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
     private void setupValues() {
 
         if (!isNewColumn()) {
-            DTColumnConfig52 originalCol = getOriginalCol();
+            DTColumnConfig52 originalCol = getOriginalColumnConfig52();
             workItemPageCompleted = true;
             // TODO: remote ALL instanceof
             if (originalCol instanceof ActionWorkItemInsertFactCol52) {
@@ -282,9 +278,7 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
     public void forEachWorkItem(BiConsumer<String, String> biConsumer) {
         workItems.clear();
 
-        List<ActionCol52> actionCol52s = actionWorkItems();
-
-        GWT.log(">> " + actionCol52s.size());
+        final List<ActionCol52> actionCol52s = actionWorkItems();
 
         actionCol52s.forEach(actionCol52 -> {
             final PortableWorkDefinition workItemDefinition = ((ActionWorkItemCol52) actionCol52).getWorkItemDefinition();
@@ -294,9 +288,6 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
                     final String name = workItemDefinition.getName() + " - " + parameterDefinition.getName();
                     final String key = (workItemDefinition.getDisplayName() + "" + parameterDefinition.getName()).replaceAll("\\s",
                                                                                                                              "");
-
-                    GWT.log("name : " + name);
-                    GWT.log(" key : " + key);
 
                     biConsumer.accept(name,
                                       key);
@@ -360,17 +351,12 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
 
     @Override
     public Set<String> getAlreadyUsedColumnHeaders() {
-        final Set<String> headers = presenter.getModel()
+        return presenter
+                .getModel()
                 .getActionCols()
                 .stream()
                 .map(DTColumnConfig52::getHeader)
                 .collect(Collectors.toSet());
-
-        if (!isNewColumn()) {
-            headers.remove(getOriginalCol().getHeader());
-        }
-
-        return headers;
     }
 
     @Override
@@ -405,7 +391,7 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
         if (isNewColumn()) {
             presenter.appendColumn(actionCol52);
         } else {
-            DTColumnConfig52 originalCol = getOriginalCol();
+            DTColumnConfig52 originalCol = getOriginalColumnConfig52();
             if (originalCol instanceof ActionWorkItemInsertFactCol52) {
                 presenter.updateColumn((ActionWorkItemInsertFactCol52) originalCol,
                                        actionCol52);
@@ -455,10 +441,6 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
             if (actionCol52 instanceof ActionInsertFactCol52) {
                 patterns.add(new PatternWrapper((ActionInsertFactCol52) actionCol52));
             }
-        }
-
-        for (Pattern52 pattern52 : model().getPatterns()) {
-            patterns.add(new PatternWrapper(pattern52));
         }
 
         return new ArrayList<>(patterns);
@@ -513,12 +495,12 @@ public class ActionWorkItemSetFieldPlugin extends BaseDecisionTableColumnPlugin 
 
     @Override
     public boolean showUpdateEngineWithChanges() {
-        return editingWrapper instanceof ActionSetFactWrapper;
+        return editingWrapper() instanceof ActionWorkItemSetWrapper;
     }
 
     @Override
     public boolean showLogicallyInsert() {
-        return editingWrapper instanceof ActionInsertFactWrapper;
+        return editingWrapper() instanceof ActionWorkItemInsertWrapper;
     }
 
     @Override

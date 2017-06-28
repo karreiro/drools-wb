@@ -90,17 +90,21 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
     @Override
     public Boolean generateColumn() {
         if (isNewColumn()) {
-            presenter.appendColumn(editingCol);
+            presenter.appendColumn(editingCol());
         } else {
-            presenter.updateColumn((ActionRetractFactCol52) getOriginalCol(),
-                                   (ActionRetractFactCol52) editingCol);
+            presenter.updateColumn(originalCol(),
+                                   editingCol());
         }
 
         return true;
     }
 
+    ActionRetractFactCol52 originalCol() {
+        return (ActionRetractFactCol52) getOriginalColumnConfig52();
+    }
+
     @Override
-    public DTColumnConfig52 editingCol() {
+    public ActionRetractFactCol52 editingCol() {
         return editingCol;
     }
 
@@ -118,18 +122,12 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
 
     @Override
     public Set<String> getAlreadyUsedColumnHeaders() {
-        final Set<String> headers = presenter
+        return presenter
                 .getModel()
                 .getActionCols()
                 .stream()
                 .map(DTColumnConfig52::getHeader)
                 .collect(Collectors.toSet());
-
-        if (!isNewColumn()) {
-            headers.remove(getOriginalCol().getHeader());
-        }
-
-        return headers;
     }
 
     @Override
@@ -183,14 +181,10 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
     }
 
     void setupDefaultValues() {
-        if (isNewColumn()) {
-            editingCol = clone(newActionRetractFactColumn());
-        } else {
-            editingCol = clone((ActionRetractFactCol52) getOriginalCol());
-        }
+        editingCol = clone(isNewColumn() ? newColumn() : originalCol());
     }
 
-    void setPatternToDeletePageCompleted(Boolean completed) {
+    void setPatternToDeletePageCompleted(final Boolean completed) {
         patternToDeletePageCompleted = completed;
     }
 
@@ -207,7 +201,7 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
         return (LimitedEntryActionRetractFactCol52) editingCol();
     }
 
-    private ActionRetractFactCol52 newActionRetractFactColumn() {
+    ActionRetractFactCol52 newColumn() {
         switch (tableFormat()) {
             case EXTENDED_ENTRY:
                 return new ActionRetractFactCol52();
@@ -222,7 +216,7 @@ public class ActionRetractFactPlugin extends BaseDecisionTableColumnPlugin imple
         }
     }
 
-    private ActionRetractFactCol52 clone(final ActionRetractFactCol52 col52) {
+    ActionRetractFactCol52 clone(final ActionRetractFactCol52 col52) {
         final ActionRetractFactCol52 clone;
 
         if (col52 instanceof LimitedEntryCol) {

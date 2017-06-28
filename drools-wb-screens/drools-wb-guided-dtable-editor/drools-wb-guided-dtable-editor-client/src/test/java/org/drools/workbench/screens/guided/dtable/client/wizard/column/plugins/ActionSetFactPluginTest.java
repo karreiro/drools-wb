@@ -41,7 +41,6 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.c
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.LimitedWidgetFactory;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.commons.PatternWrapper;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
@@ -54,7 +53,6 @@ import org.uberfire.mocks.EventSourceMock;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@Ignore
 @RunWith(GwtMockitoTestRunner.class)
 @WithClassesToStub({DefaultWidgetFactory.class, LimitedWidgetFactory.class})
 public class ActionSetFactPluginTest {
@@ -403,7 +401,7 @@ public class ActionSetFactPluginTest {
 
     @Test
     public void testShowUpdateEngineWithChangesWhenFactPatternIsNotNew() {
-        doReturn(false).when(plugin).isNewFactPattern();
+        doReturn(mock(ActionSetFactWrapper.class)).when(plugin).editingWrapper();
 
         final boolean showUpdateEngineWithChanges = plugin.showUpdateEngineWithChanges();
 
@@ -413,7 +411,7 @@ public class ActionSetFactPluginTest {
 
     @Test
     public void testShowLogicallyInsertWhenFactPatternIsNew() {
-        doReturn(true).when(plugin).isNewFactPattern();
+        doReturn(mock(ActionInsertFactWrapper.class)).when(plugin).editingWrapper();
 
         final boolean showLogicallyInsert = plugin.showLogicallyInsert();
 

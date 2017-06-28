@@ -37,6 +37,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryActionInsertFactCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryActionSetFieldCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryCol;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
@@ -109,7 +110,7 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
 
     private void setupValues() {
         if (!isNewColumn()) {
-            DTColumnConfig52 originalCol = getOriginalCol();
+            DTColumnConfig52 originalCol = getOriginalColumnConfig52();
 
             // TODO: remote ALL instanceof
             if (originalCol instanceof ActionInsertFactCol52) {
@@ -128,6 +129,7 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
                                                         false);
                 }
                 setEditingPattern(patternWrapper);
+
                 editingWrapper = newActionInsertFactWrapper();
                 editingWrapper.setFactField(col.getFactField());
                 editingWrapper.setFactType(patternWrapper().getFactType());
@@ -165,26 +167,29 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
                                                         false);
                 }
                 setEditingPattern(patternWrapper);
+
+//                new ActionSetFactWrapper(this).clone(col);
+
                 editingWrapper = newActionSetFactWrapper();
-                editingWrapper.setFactField(col.getFactField());
+//                editingWrapper.setFactField(col.getFactField());
                 editingWrapper.setFactType(patternWrapper().getFactType());
                 editingWrapper.setBoundName(patternWrapper().getBoundName());
                 editingWrapper.setType(oracle().getFieldType(editingWrapper.getFactType(),
                                                              editingWrapper.getFactField()));
 
-                setBinding(col.getBoundName());
-                setValueList(col.getValueList());
-                setHeader(col.getHeader());
-                setUpdate(col.isUpdate());
+//                setBinding(col.getBoundName());
+//                setValueList(col.getValueList());
+//                setHeader(col.getHeader());
+//                setUpdate(col.isUpdate());
                 editingWrapper.setDefaultValue(col.getDefaultValue());
                 editingWrapper.setUpdate(col.isUpdate());
 
-                if (col instanceof LimitedEntryActionSetFieldCol52) {
-                    final LimitedEntryActionSetFieldCol52 limitedO = (LimitedEntryActionSetFieldCol52) originalCol;
-                    final LimitedEntryActionSetFieldCol52 limitedE = (LimitedEntryActionSetFieldCol52) editingWrapper.getActionCol52();
-
-                    limitedE.setValue(limitedO.getValue());
-                }
+//                if (col instanceof LimitedEntryCol) {
+//                    final LimitedEntryActionSetFieldCol52 limitedO = (LimitedEntryActionSetFieldCol52) originalCol;
+//                    final LimitedEntryActionSetFieldCol52 limitedE = (LimitedEntryActionSetFieldCol52) editingWrapper.getActionCol52();
+//
+//                    limitedE.setValue(limitedO.getValue());
+//                }
             }
 
             editingWrapper.getActionCol52().setHideColumn(originalCol.isHideColumn());
@@ -220,7 +225,7 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
         if (isNewColumn()) {
             presenter.appendColumn(actionWrapper.getActionCol52());
         } else {
-            presenter.updateColumn((ActionCol52) getOriginalCol(),
+            presenter.updateColumn((ActionCol52) getOriginalColumnConfig52(),
                                    editingCol());
         }
 
@@ -372,18 +377,12 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
 
     @Override
     public Set<String> getAlreadyUsedColumnHeaders() {
-        final Set<String> headers = presenter
+        return presenter
                 .getModel()
                 .getActionCols()
                 .stream()
                 .map(DTColumnConfig52::getHeader)
                 .collect(Collectors.toSet());
-
-        if (!isNewColumn()) {
-            headers.remove(getOriginalCol().getHeader());
-        }
-
-        return headers;
     }
 
     @Override
@@ -398,12 +397,12 @@ public class ActionSetFactPlugin extends BaseDecisionTableColumnPlugin implement
 
     @Override
     public boolean showUpdateEngineWithChanges() {
-        return editingWrapper instanceof ActionSetFactWrapper;
+        return editingWrapper() instanceof ActionSetFactWrapper;
     }
 
     @Override
     public boolean showLogicallyInsert() {
-        return editingWrapper instanceof ActionInsertFactWrapper;
+        return editingWrapper() instanceof ActionInsertFactWrapper;
     }
 
     @Override

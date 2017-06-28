@@ -41,6 +41,8 @@ import org.drools.workbench.models.guided.dtable.shared.model.BRLConditionVariab
 import org.drools.workbench.models.guided.dtable.shared.model.BRLRuleModel;
 import org.drools.workbench.models.guided.dtable.shared.model.BaseColumn;
 import org.drools.workbench.models.guided.dtable.shared.model.CompositeColumn;
+import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryBRLConditionColumn;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
@@ -121,23 +123,18 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
 
         editingCol.setDefinition(Arrays.asList(getRuleModel().lhs));
 
-        if (getOriginalCol() instanceof LimitedEntryBRLConditionColumn) {
-            if (isNewColumn()) {
-                presenter.appendColumn((LimitedEntryBRLConditionColumn) getEditingCol());
-            } else {
-                presenter.updateColumn(originalBRLCondition(),
-                                       (LimitedEntryBRLConditionColumn) getEditingCol());
-            }
+        if (isNewColumn()) {
+            presenter.appendColumn(editingCol);
         } else {
-            if (isNewColumn()) {
-                presenter.appendColumn(getEditingCol());
-            } else {
-                presenter.updateColumn(originalBRLCondition(),
-                                       getEditingCol());
-            }
+            presenter.updateColumn(getOriginalColumn(),
+                                   editingCol);
         }
 
         return true;
+    }
+
+    ConditionCol52 getOriginalColumn() {
+        return (ConditionCol52) getOriginalColumnConfig52();
     }
 
     @Override
@@ -223,10 +220,6 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
             columnNames.addAll(headers);
         }
 
-        if (!isNewColumn()) {
-            columnNames.remove(getOriginalCol().getHeader());
-        }
-
         return columnNames;
     }
 
@@ -306,48 +299,50 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
         if (isNewColumn()) {
             editingCol = newBRLCondition();
         } else {
-            editingCol = originalBRLConditionClone();
+            editingCol = clone(getOriginalColumnConfig52());
         }
     }
 
-    private BRLConditionColumn originalBRLCondition() {
-        return (BRLConditionColumn) getOriginalCol();
-    }
-
-    private BRLConditionColumn originalBRLConditionClone() {
-        final BRLConditionColumn originalCol = originalBRLCondition();
+    BRLConditionColumn clone(final DTColumnConfig52 column) {
+        final BRLConditionColumn brlConditionColumn = (BRLConditionColumn) column;
         final BRLConditionColumn clone;
 
-        if (originalCol instanceof LimitedEntryBRLConditionColumn) {
+        if (column instanceof LimitedEntryBRLConditionColumn) {
             clone = new LimitedEntryBRLConditionColumn();
         } else {
-            clone = new BRLConditionColumn();
-            clone.setChildColumns(cloneVariables(originalCol.getChildColumns()));
+            clone = new BRLConditionColumn() {{
+                setChildColumns(cloneVariables(brlConditionColumn.getChildColumns()));
+            }};
         }
 
-        clone.setHeader(originalCol.getHeader());
-        clone.setHideColumn(originalCol.isHideColumn());
-        clone.setDefinition(cloneDefinition(originalCol.getDefinition()));
+        clone.setHeader(column.getHeader());
+        clone.setHideColumn(column.isHideColumn());
+        clone.setDefinition(cloneDefinition(brlConditionColumn.getDefinition()));
 
         return clone;
     }
 
-    private List<BRLConditionVariableColumn> cloneVariables(List<BRLConditionVariableColumn> variables) {
-        return variables.stream().map(this::cloneVariable).collect(Collectors.toList());
+    List<BRLConditionVariableColumn> cloneVariables(List<BRLConditionVariableColumn> variables) {
+        return variables
+                .stream()
+                .map(this::cloneVariable)
+                .collect(Collectors.toList());
     }
 
-    private BRLConditionVariableColumn cloneVariable(BRLConditionVariableColumn variable) {
+    BRLConditionVariableColumn cloneVariable(BRLConditionVariableColumn variable) {
         final BRLConditionVariableColumn clone = new BRLConditionVariableColumn(variable.getVarName(),
                                                                                 variable.getFieldType(),
                                                                                 variable.getFactType(),
                                                                                 variable.getFactField());
+
         clone.setHeader(variable.getHeader());
         clone.setHideColumn(variable.isHideColumn());
         clone.setWidth(variable.getWidth());
+
         return clone;
     }
 
-    private List<IPattern> cloneDefinition(List<IPattern> definition) {
+    private List<IPattern> cloneDefinition(final List<IPattern> definition) {
         final RuleModelCloneVisitor visitor = new RuleModelCloneVisitor();
         final RuleModel rm = new RuleModel();
 
@@ -371,10 +366,6 @@ public class BRLConditionColumnPlugin extends BaseDecisionTableColumnPlugin impl
 
     void setRuleModellerPageCompleted() {
         this.ruleModellerPageCompleted = Boolean.TRUE;
-    }
-
-    public BRLConditionColumn getEditingCol() {
-        return editingCol;
     }
 
     @Override

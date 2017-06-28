@@ -19,7 +19,6 @@ package org.drools.workbench.screens.guided.dtable.client.wizard.column.plugins.
 import java.util.ArrayList;
 import java.util.List;
 
-import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
@@ -65,20 +64,28 @@ public interface DecisionTableColumnPlugin {
             return null;
         }
 
+        public DTColumnConfig52 getOriginalColumnConfig52() {
+            return null;
+        }
+
+        @Override
+        public void setOriginalColumnConfig52(final DTColumnConfig52 originalColumnConfig52) {
+
+        }
+
         @Override
         public Boolean isNewColumn() {
             return true;
         }
 
         @Override
-        public DecisionTableColumnPlugin updating(final DTColumnConfig52 column) {
+        public Pattern52 getOriginalPattern52() {
             return null;
         }
 
         @Override
-        public DecisionTableColumnPlugin updating(final Pattern52 pattern,
-                                                  final ConditionCol52 column) {
-            return null;
+        public void setOriginalPattern52(final Pattern52 originalPattern52) {
+
         }
     };
 
@@ -116,6 +123,10 @@ public interface DecisionTableColumnPlugin {
      */
     Type getType();
 
+    DTColumnConfig52 getOriginalColumnConfig52();
+
+    void setOriginalColumnConfig52(DTColumnConfig52 originalColumnConfig52);
+
     /**
      * TODO
      * Checks if the plugin is creating a new column or updating an existing column.
@@ -123,15 +134,9 @@ public interface DecisionTableColumnPlugin {
      */
     Boolean isNewColumn();
 
-    /**
-     * TODO
-     * Enable the updating mode
-     * @return the modified instance.
-     */
-    DecisionTableColumnPlugin updating(final DTColumnConfig52 column);
+    Pattern52 getOriginalPattern52();
 
-    DecisionTableColumnPlugin updating(final Pattern52 pattern,
-                                       final ConditionCol52 column);
+    void setOriginalPattern52(Pattern52 originalPattern52);
 
     /**
      * Plugin type for the column wizard.

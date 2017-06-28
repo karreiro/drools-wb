@@ -81,32 +81,48 @@ public class PluginHandler {
     }
 
     public void edit(final BRLConditionColumn column) {
-        openWizard(brlConditionColumnPlugin.get().updating(column));
+        final BRLConditionColumnPlugin plugin = brlConditionColumnPlugin.get();
+
+        plugin.setOriginalColumnConfig52(column);
+
+        openWizard(plugin);
     }
 
     public void edit(final ActionCol52 column) {
+        final DecisionTableColumnPlugin plugin;
+
         if (column instanceof ActionWorkItemSetFieldCol52 || column instanceof ActionWorkItemInsertFactCol52) {
-            openWizard(actionWorkItemSetFieldPlugin.get().updating(column));
+            plugin = actionWorkItemSetFieldPlugin.get();
         } else if (column instanceof ActionInsertFactCol52 || column instanceof ActionSetFieldCol52) {
-            openWizard(actionSetFactPlugin.get().updating(column));
+            plugin = actionSetFactPlugin.get();
         } else if (column instanceof ActionRetractFactCol52) {
-            openWizard(actionRetractFactPlugin.get().updating(column));
+            plugin = actionRetractFactPlugin.get();
         } else if (column instanceof ActionWorkItemCol52) {
-            openWizard(actionWorkItemPlugin.get().updating(column));
+            plugin = actionWorkItemPlugin.get();
         } else if (column instanceof LimitedEntryBRLActionColumn) {
-            openWizard(brlActionColumnPlugin.get().updating(column));
+            plugin = brlActionColumnPlugin.get();
         } else if (column instanceof BRLActionColumn) {
-            openWizard(brlActionColumnPlugin.get().updating(column));
+            plugin = brlActionColumnPlugin.get();
+        } else {
+            return;
         }
+
+        plugin.setOriginalColumnConfig52(column);
+
+        openWizard(plugin);
     }
 
     public void edit(final Pattern52 pattern,
                      final ConditionCol52 column) {
-        openWizard(conditionColumnPlugin.get().updating(pattern,
-                                                        column));
+        final ConditionColumnPlugin plugin = conditionColumnPlugin.get();
+
+        plugin.setOriginalPattern52(pattern);
+        plugin.setOriginalColumnConfig52(column);
+
+        openWizard(plugin);
     }
 
-    private void openWizard(final DecisionTableColumnPlugin updating) {
+    private void openWizard(final DecisionTableColumnPlugin plugin) {
         if (presenter.isReadOnly()) {
             return;
         }
@@ -114,6 +130,6 @@ public class PluginHandler {
         final NewGuidedDecisionTableColumnWizard wizard = wizardManagedInstance.get();
 
         wizard.init(presenter);
-        wizard.start(updating);
+        wizard.start(plugin);
     }
 }

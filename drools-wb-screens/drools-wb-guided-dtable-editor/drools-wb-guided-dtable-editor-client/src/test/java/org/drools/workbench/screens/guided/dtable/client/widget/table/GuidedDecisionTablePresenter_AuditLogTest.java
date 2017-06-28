@@ -70,7 +70,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
-@Ignore
 @WithClassesToStub({Text.class, DateTimeFormat.class})
 @RunWith(GwtMockitoTestRunner.class)
 public class GuidedDecisionTablePresenter_AuditLogTest {
@@ -113,6 +112,9 @@ public class GuidedDecisionTablePresenter_AuditLogTest {
 
     @Mock
     private EnumLoaderUtilities enumLoaderUtilities;
+
+    @Mock
+    private PluginHandler pluginHandler;
 
     private GridWidgetColumnFactory gridWidgetColumnFactory = new GridWidgetColumnFactoryImpl();
     private GuidedDecisionTablePresenter dtPresenter;
@@ -162,7 +164,7 @@ public class GuidedDecisionTablePresenter_AuditLogTest {
                                                        null,
                                                        decisionTableAnalyzerProvider,
                                                        enumLoaderUtilities,
-                                                       null) {
+                                                       pluginHandler) {
             @Override
             void initialiseLockManager() {
                 //Do nothing for tests

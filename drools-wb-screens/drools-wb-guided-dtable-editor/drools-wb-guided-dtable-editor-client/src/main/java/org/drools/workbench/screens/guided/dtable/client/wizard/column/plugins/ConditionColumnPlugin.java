@@ -167,15 +167,13 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
     }
 
     void appendColumn() {
-        final Pattern52 pattern = editingPattern();
-
         if (isNewColumn()) {
-            presenter.appendColumn(pattern,
+            presenter.appendColumn(editingPattern(),
                                    editingCol());
         } else {
-            presenter.updateColumn(getOriginalPattern(),
+            presenter.updateColumn(getOriginalPattern52(),
                                    originalCondition(),
-                                   pattern,
+                                   editingPattern(),
                                    editingCol());
         }
     }
@@ -293,10 +291,6 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
                     .collect(Collectors.toList());
 
             columnNames.addAll(headers);
-        }
-
-        if (!isNewColumn()) {
-            columnNames.remove(getOriginalCol().getHeader());
         }
 
         return columnNames;
@@ -477,51 +471,52 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
             resetFieldAndOperator();
         } else {
-            editingPattern = getOriginalPattern().clonePattern();
-            editingCol = originalConditionClone();
+            editingPattern = getOriginalPattern52().clonePattern();
+            editingCol = clone(originalCondition());
 
             constraintValue = editingCol.getConstraintValueType();
             valueOptionsPageCompleted = Boolean.TRUE;
         }
     }
 
-    private ConditionCol52 originalConditionClone() {
-        final ConditionCol52 col = originalCondition();
+    ConditionCol52 clone(final ConditionCol52 column) {
         final ConditionCol52 clone;
 
-        if (col instanceof LimitedEntryConditionCol52) {
-            clone = new LimitedEntryConditionCol52();
-            DTCellValue52 dcv = cloneDTCellValue(((LimitedEntryCol) col).getValue());
-            ((LimitedEntryCol) clone).setValue(dcv);
+        if (column instanceof LimitedEntryConditionCol52) {
+            clone = new LimitedEntryConditionCol52() {{
+                final DTCellValue52 dcv = cloneDTCellValue(((LimitedEntryCol) column).getValue());
+
+                setValue(dcv);
+            }};
         } else {
             clone = new ConditionCol52();
         }
 
-        clone.setConstraintValueType(col.getConstraintValueType());
-        clone.setFactField(col.getFactField());
-        clone.setFieldType(col.getFieldType());
-        clone.setHeader(col.getHeader());
-        clone.setOperator(col.getOperator());
-        clone.setValueList(col.getValueList());
-        clone.setDefaultValue(cloneDTCellValue(col.getDefaultValue()));
-        clone.setHideColumn(col.isHideColumn());
-        clone.setParameters(col.getParameters());
-        clone.setWidth(col.getWidth());
-        clone.setBinding(col.getBinding());
+        clone.setConstraintValueType(column.getConstraintValueType());
+        clone.setFactField(column.getFactField());
+        clone.setFieldType(column.getFieldType());
+        clone.setHeader(column.getHeader());
+        clone.setOperator(column.getOperator());
+        clone.setValueList(column.getValueList());
+        clone.setDefaultValue(cloneDTCellValue(column.getDefaultValue()));
+        clone.setHideColumn(column.isHideColumn());
+        clone.setParameters(column.getParameters());
+        clone.setWidth(column.getWidth());
+        clone.setBinding(column.getBinding());
 
         return clone;
     }
 
-    private DTCellValue52 cloneDTCellValue(DTCellValue52 dcv) {
+    DTCellValue52 cloneDTCellValue(final DTCellValue52 dcv) {
         if (dcv == null) {
             return null;
         }
-        DTCellValue52 clone = new DTCellValue52(dcv);
-        return clone;
+
+        return new DTCellValue52(dcv);
     }
 
-    private ConditionCol52 originalCondition() {
-        return (ConditionCol52) getOriginalCol();
+    ConditionCol52 originalCondition() {
+        return (ConditionCol52) getOriginalColumnConfig52();
     }
 
     void resetFieldAndOperator() {
@@ -568,7 +563,7 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
                                                 this);
     }
 
-    private ConditionCol52 newConditionColumn() {
+    ConditionCol52 newConditionColumn() {
         switch (tableFormat()) {
             case EXTENDED_ENTRY:
                 return new ConditionCol52();
@@ -587,7 +582,7 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         return presenter.getModel();
     }
 
-    private Pattern52 emptyPattern() {
+    Pattern52 emptyPattern() {
         return new Pattern52().clonePattern();
     }
 

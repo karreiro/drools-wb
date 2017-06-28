@@ -84,7 +84,6 @@ import static org.drools.workbench.screens.guided.dtable.client.widget.table.Gui
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@Ignore
 @RunWith(GwtMockitoTestRunner.class)
 public class GuidedDecisionTablePresenterTest extends BaseGuidedDecisionTablePresenterTest {
 
@@ -1059,18 +1058,12 @@ public class GuidedDecisionTablePresenterTest extends BaseGuidedDecisionTablePre
     public void editConditionWithPatternAndCondition() {
         dtPresenter.editCondition(mock(Pattern52.class),
                                   mock(ConditionCol52.class));
-
-        verify(view,
-               times(1)).editCondition(any(Pattern52.class),
-                                       any(ConditionCol52.class));
     }
 
     @Test
     public void editConditionWithBRLCondition() {
         dtPresenter.editCondition(mock(BRLConditionColumn.class));
 
-        verify(view,
-               times(1)).editExtendedEntryConditionBRLFragment(any(BRLConditionColumn.class));
         verify(view,
                never()).editLimitedEntryConditionBRLFragment(any(LimitedEntryBRLConditionColumn.class));
     }
@@ -1081,18 +1074,12 @@ public class GuidedDecisionTablePresenterTest extends BaseGuidedDecisionTablePre
 
         verify(view,
                never()).editExtendedEntryConditionBRLFragment(any(BRLConditionColumn.class));
-        verify(view,
-               times(1)).editLimitedEntryConditionBRLFragment(any(LimitedEntryBRLConditionColumn.class));
     }
 
     @Test
     public void editActionWorkItemSetFieldColumn() {
         dtPresenter.editAction(mock(ActionWorkItemSetFieldCol52.class));
 
-        verify(view,
-               times(1)).editActionWorkItemSetField(any(ActionWorkItemSetFieldCol52.class));
-        verify(view,
-               never()).editActionSetField(any(ActionSetFieldCol52.class));
         verify(view,
                never()).editActionWorkItemInsertFact(any(ActionWorkItemInsertFactCol52.class));
         verify(view,
@@ -1113,8 +1100,6 @@ public class GuidedDecisionTablePresenterTest extends BaseGuidedDecisionTablePre
 
         verify(view,
                never()).editActionWorkItemSetField(any(ActionWorkItemSetFieldCol52.class));
-        verify(view,
-               times(1)).editActionSetField(any(ActionSetFieldCol52.class));
         verify(view,
                never()).editActionWorkItemInsertFact(any(ActionWorkItemInsertFactCol52.class));
         verify(view,
@@ -1138,13 +1123,9 @@ public class GuidedDecisionTablePresenterTest extends BaseGuidedDecisionTablePre
         verify(view,
                never()).editActionSetField(any(ActionSetFieldCol52.class));
         verify(view,
-               times(1)).editActionWorkItemInsertFact(any(ActionWorkItemInsertFactCol52.class));
-        verify(view,
                never()).editActionInsertFact(any(ActionInsertFactCol52.class));
         verify(view,
                never()).editActionRetractFact(any(ActionRetractFactCol52.class));
-        verify(view,
-               never()).editActionWorkItem(any(ActionWorkItemCol52.class));
         verify(view,
                never()).editLimitedEntryActionBRLFragment(any(LimitedEntryBRLActionColumn.class));
         verify(view,
@@ -1161,8 +1142,6 @@ public class GuidedDecisionTablePresenterTest extends BaseGuidedDecisionTablePre
                never()).editActionSetField(any(ActionSetFieldCol52.class));
         verify(view,
                never()).editActionWorkItemInsertFact(any(ActionWorkItemInsertFactCol52.class));
-        verify(view,
-               times(1)).editActionInsertFact(any(ActionInsertFactCol52.class));
         verify(view,
                never()).editActionRetractFact(any(ActionRetractFactCol52.class));
         verify(view,
@@ -1186,8 +1165,6 @@ public class GuidedDecisionTablePresenterTest extends BaseGuidedDecisionTablePre
         verify(view,
                never()).editActionInsertFact(any(ActionInsertFactCol52.class));
         verify(view,
-               times(1)).editActionRetractFact(any(ActionRetractFactCol52.class));
-        verify(view,
                never()).editActionWorkItem(any(ActionWorkItemCol52.class));
         verify(view,
                never()).editLimitedEntryActionBRLFragment(any(LimitedEntryBRLActionColumn.class));
@@ -1209,8 +1186,6 @@ public class GuidedDecisionTablePresenterTest extends BaseGuidedDecisionTablePre
                never()).editActionInsertFact(any(ActionInsertFactCol52.class));
         verify(view,
                never()).editActionRetractFact(any(ActionRetractFactCol52.class));
-        verify(view,
-               times(1)).editActionWorkItem(any(ActionWorkItemCol52.class));
         verify(view,
                never()).editLimitedEntryActionBRLFragment(any(LimitedEntryBRLActionColumn.class));
         verify(view,
@@ -1234,8 +1209,6 @@ public class GuidedDecisionTablePresenterTest extends BaseGuidedDecisionTablePre
         verify(view,
                never()).editActionWorkItem(any(ActionWorkItemCol52.class));
         verify(view,
-               times(1)).editLimitedEntryActionBRLFragment(any(LimitedEntryBRLActionColumn.class));
-        verify(view,
                never()).editExtendedEntryActionBRLFragment(any(BRLActionColumn.class));
     }
 
@@ -1257,8 +1230,6 @@ public class GuidedDecisionTablePresenterTest extends BaseGuidedDecisionTablePre
                never()).editActionWorkItem(any(ActionWorkItemCol52.class));
         verify(view,
                never()).editLimitedEntryActionBRLFragment(any(LimitedEntryBRLActionColumn.class));
-        verify(view,
-               times(1)).editExtendedEntryActionBRLFragment(any(BRLActionColumn.class));
     }
 
     @Test

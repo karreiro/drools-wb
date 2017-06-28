@@ -255,6 +255,9 @@ public abstract class BaseGuidedDecisionTablePresenterTest {
     @Mock
     private DecisionTableAnalyzerProvider decisionTableAnalyzerProvider;
 
+    @Mock
+    private PluginHandler pluginHandler;
+
     @Before
     public void setup() {
         setupPreferences();
@@ -307,7 +310,7 @@ public abstract class BaseGuidedDecisionTablePresenterTest {
                                                                                       clipboard,
                                                                                       decisionTableAnalyzerProvider,
                                                                                       enumLoaderUtilities,
-                                                                                      null) {
+                                                                                      pluginHandler) {
             @Override
             void initialiseLockManager() {
                 //Do nothing for tests

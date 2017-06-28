@@ -17,6 +17,7 @@
 package org.drools.workbench.screens.guided.dtable.client.wizard.column.pages;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import com.google.gwt.junit.GWTMockUtilities;
@@ -24,6 +25,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwtmockito.GwtMockitoTestRunner;
 import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
+import org.drools.workbench.models.guided.dtable.shared.model.DTColumnConfig52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
@@ -35,25 +37,26 @@ import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.services.shared.preferences.ApplicationPreferences;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import static org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants.YouMustEnterAColumnHeaderValueDescription;
 import static org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants.ThatColumnNameIsAlreadyInUsePleasePickAnother;
-
+import static org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants.YouMustEnterAColumnHeaderValueDescription;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-@Ignore
 @RunWith(GwtMockitoTestRunner.class)
 public class AdditionalInfoPageTest {
 
     private static final String ENTER_COLUMN_DESCRIPTION = "EnterColumnDescription";
+
     private static final String PICK_ANOTHER = "PickAnother";
+
+    @Mock
+    NewGuidedDecisionTableColumnWizard wizard;
 
     @Mock
     private ConditionColumnPlugin plugin;
@@ -72,9 +75,6 @@ public class AdditionalInfoPageTest {
 
     @Mock
     private GuidedDecisionTableView.Presenter presenter;
-
-    @Mock
-    NewGuidedDecisionTableColumnWizard wizard;
 
     private GuidedDecisionTable52 model;
 
@@ -144,8 +144,10 @@ public class AdditionalInfoPageTest {
         page.enableHeader();
 
         page.isComplete(Assert::assertTrue);
-        verify(view, never()).showWarning(ENTER_COLUMN_DESCRIPTION);
-        verify(view, never()).showWarning(PICK_ANOTHER);
+        verify(view,
+               never()).showWarning(ENTER_COLUMN_DESCRIPTION);
+        verify(view,
+               never()).showWarning(PICK_ANOTHER);
         verify(view).hideWarning();
     }
 
@@ -159,12 +161,14 @@ public class AdditionalInfoPageTest {
         model.getConditions().add(parentCondition);
 
         when(plugin.getHeader()).thenReturn("header");
+        when(plugin.isNewColumn()).thenReturn(true);
         doCallRealMethod().when(plugin).getAlreadyUsedColumnHeaders();
 
         page.enableHeader();
 
         page.isComplete(Assert::assertFalse);
-        verify(view, never()).showWarning(ENTER_COLUMN_DESCRIPTION);
+        verify(view,
+               never()).showWarning(ENTER_COLUMN_DESCRIPTION);
         verify(view).showWarning(PICK_ANOTHER);
     }
 
@@ -331,5 +335,75 @@ public class AdditionalInfoPageTest {
 
         assertEquals(contentWidget,
                      content);
+    }
+
+    @Test
+    public void testIsHeaderUniqueWhenColumnIsNewAndHeaderIsUnique() {
+        final HashSet<String> headers = set("header1",
+                                            "header2");
+
+        when(plugin.getOriginalColumnConfig52()).thenReturn(null);
+        when(plugin.isNewColumn()).thenReturn(true);
+        when(plugin.getAlreadyUsedColumnHeaders()).thenReturn(headers);
+        when(page.getHeader()).thenReturn("header3");
+
+        assertTrue(page.isHeaderUnique());
+    }
+
+    @Test
+    public void testIsHeaderUniqueWhenColumnIsNewAndHeaderIsNotUnique() {
+        final HashSet<String> headers = set("header1",
+                                            "header2");
+
+        when(plugin.getOriginalColumnConfig52()).thenReturn(null);
+        when(plugin.isNewColumn()).thenReturn(true);
+        when(plugin.getAlreadyUsedColumnHeaders()).thenReturn(headers);
+        when(page.getHeader()).thenReturn("header2");
+
+        assertFalse(page.isHeaderUnique());
+    }
+
+    @Test
+    public void testIsHeaderUniqueWhenColumnIsNotNewAndHeaderIsUnique() {
+        final HashSet<String> headers = set("header1",
+                                            "header2",
+                                            "header3");
+
+        when(plugin.getOriginalColumnConfig52()).thenReturn(column("header3"));
+        when(plugin.isNewColumn()).thenReturn(false);
+        when(plugin.getAlreadyUsedColumnHeaders()).thenReturn(headers);
+        when(page.getHeader()).thenReturn("header3");
+
+        assertTrue(page.isHeaderUnique());
+    }
+
+    @Test
+    public void testIsHeaderUniqueWhenColumnIsNotNewAndHeaderIsNotUnique() {
+        final HashSet<String> headers = set("header1",
+                                            "header2",
+                                            "header3");
+
+        when(plugin.getOriginalColumnConfig52()).thenReturn(column("header3"));
+        when(plugin.isNewColumn()).thenReturn(false);
+        when(plugin.getAlreadyUsedColumnHeaders()).thenReturn(headers);
+        when(page.getHeader()).thenReturn("header2");
+
+        assertFalse(page.isHeaderUnique());
+    }
+
+    private DTColumnConfig52 column(final String header) {
+        final DTColumnConfig52 dtColumnConfig52 = new DTColumnConfig52();
+
+        dtColumnConfig52.setHeader(header);
+
+        return dtColumnConfig52;
+    }
+
+    private HashSet<String> set(String... items) {
+        return new HashSet<String>() {{
+            for (final String item : items) {
+                add(item);
+            }
+        }};
     }
 }
