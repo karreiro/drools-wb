@@ -555,7 +555,7 @@ public class ConditionColumnPluginTest {
         final ConditionCol52 originalConditionCol52 = mock(ConditionCol52.class);
         final ConditionCol52 clonedConditionCol52 = mock(ConditionCol52.class);
 
-        doReturn(BaseSingleFieldConstraint.TYPE_LITERAL).when(clonedConditionCol52).getConstraintValueType();
+        doReturn(BaseSingleFieldConstraint.TYPE_LITERAL).when(originalConditionCol52).getConstraintValueType();
         doReturn(originalConditionCol52).when(plugin).getOriginalColumnConfig52();
         doReturn(clonedConditionCol52).when(plugin).clone(originalConditionCol52);
         doReturn(originalPattern52).when(plugin).getOriginalPattern52();
@@ -651,6 +651,31 @@ public class ConditionColumnPluginTest {
                      clone.getBinding());
         assertNotSame(column,
                       clone);
+    }
+
+    @Test
+    public void testSetupPatternWrapper() throws Exception {
+        final Pattern52 pattern52 = new Pattern52() {{
+            setFactType("FactType");
+            setBoundName("BoundName");
+            setEntryPointName("EntryPointName");
+            setNegated(true);
+        }};
+
+        when(plugin.getEditingPattern()).thenReturn(pattern52);
+
+        plugin.setupPatternWrapper();
+
+        final PatternWrapper patternWrapper = plugin.patternWrapper();
+
+        assertEquals(patternWrapper.getFactType(),
+                     "FactType");
+        assertEquals(patternWrapper.getBoundName(),
+                     "BoundName");
+        assertEquals(patternWrapper.getEntryPointName(),
+                     "EntryPointName");
+        assertEquals(patternWrapper.isNegated(),
+                     true);
     }
 
     private ConditionCol52 makeConditionCol52(final int constraintValueType,
