@@ -41,6 +41,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.uberfire.ext.widgets.core.client.wizards.WizardPage;
@@ -223,10 +224,13 @@ public class ConditionColumnPluginTest {
     @Test
     public void testGetEditingPattern() throws Exception {
         final PatternWrapper patternWrapper = mock(PatternWrapper.class);
+        final InOrder inOrder = inOrder(plugin);
 
         plugin.setEditingPattern(patternWrapper);
 
-        verify(plugin).setupDefaultValues();
+        inOrder.verify(plugin).setupDefaultValues();
+        inOrder.verify(plugin).setPatternWrapper(patternWrapper);
+
         verify(plugin).fireChangeEvent(patternPage);
         verify(plugin).fireChangeEvent(calculationTypePage);
         verify(plugin).fireChangeEvent(fieldPage);

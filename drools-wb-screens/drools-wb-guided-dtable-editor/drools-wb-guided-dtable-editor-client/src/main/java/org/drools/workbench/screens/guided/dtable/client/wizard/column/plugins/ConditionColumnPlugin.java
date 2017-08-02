@@ -225,10 +225,8 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
 
     @Override
     public void setEditingPattern(final PatternWrapper patternWrapper) {
-        this.patternWrapper = patternWrapper;
-        this.editingPattern = extractEditingPattern();
-
         setupDefaultValues();
+        setPatternWrapper(patternWrapper);
 
         fireChangeEvent(patternPage);
         fireChangeEvent(calculationTypePage);
@@ -236,6 +234,11 @@ public class ConditionColumnPlugin extends BaseDecisionTableColumnPlugin impleme
         fireChangeEvent(operatorPage);
         fireChangeEvent(valueOptionsPage);
         fireChangeEvent(additionalInfoPage);
+    }
+
+    void setPatternWrapper(final PatternWrapper patternWrapper) {
+        this.patternWrapper = patternWrapper;
+        this.editingPattern = extractEditingPattern();
     }
 
     @Override
