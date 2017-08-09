@@ -8,8 +8,10 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import com.ait.lienzo.client.core.event.NodeMouseMoveEvent;
+import com.ait.lienzo.client.core.shape.Rectangle;
 import com.ait.lienzo.client.core.types.Point2D;
 import com.ait.lienzo.client.core.types.Transform;
+import com.ait.lienzo.shared.core.types.ColorName;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
@@ -19,14 +21,18 @@ import com.google.gwt.event.dom.client.ContextMenuEvent;
 import com.google.gwt.event.dom.client.ContextMenuHandler;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.dom.client.MouseDownHandler;
+import com.google.gwt.event.dom.client.ScrollEvent;
+import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -62,6 +68,9 @@ import org.uberfire.ext.wires.core.grids.client.widget.layer.pinning.TransformMe
 import org.uberfire.ext.wires.core.grids.client.widget.layer.pinning.impl.RestrictedMousePanMediator;
 import org.uberfire.mvp.ParameterizedCommand;
 
+import static org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableModellerBoundsHelper.BOUNDS_MAX_X;
+import static org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableModellerBoundsHelper.BOUNDS_MAX_Y;
+
 public class GuidedDecisionTableModellerViewImpl extends Composite implements GuidedDecisionTableModellerView {
 
     private static final double VP_SCALE = 1.0;
@@ -80,6 +89,12 @@ public class GuidedDecisionTableModellerViewImpl extends Composite implements Gu
 
     @UiField
     Button editColumns;
+
+    @UiField
+    FlowPanel scrollDiv;
+
+    @UiField
+    HTMLPanel containerPanel;
 
     @UiField(provided = true)
     GridLienzoPanel gridPanel = new GridLienzoPanel() {
@@ -108,25 +123,22 @@ public class GuidedDecisionTableModellerViewImpl extends Composite implements Gu
         }
     };
 
+    Double initialWidth = null;
+    Double xF = null;
+
+    Double initialHeight = null;
+    Double yF = null;
+
     @Inject
     private GuidedDecisionTableAccordion guidedDecisionTableAccordion;
-
     private VerticalPanel attributeConfigWidget = makeDefaultPanel();
-
     private VerticalPanel metaDataConfigWidget = makeDefaultPanel();
-
     private VerticalPanel conditionsConfigWidget = makeDefaultPanel();
-
     private VerticalPanel actionsConfigWidget = makeDefaultPanel();
-
     private GuidedDecisionTableAccordion accordion;
-
     private TransformMediator defaultTransformMediator;
-
     private GuidedDecisionTableModellerView.Presenter presenter;
-
     private final DefaultGridLayer gridLayer = defaultGridLayer();
-
     private final RestrictedMousePanMediator mousePanMediator = restrictedMousePanMediator();
 
     public GuidedDecisionTableModellerViewImpl() {
@@ -134,7 +146,7 @@ public class GuidedDecisionTableModellerViewImpl extends Composite implements Gu
     }
 
     DefaultGridLayer defaultGridLayer() {
-        return new DefaultGridLayer() {
+        DefaultGridLayer defaultGridLayer = new DefaultGridLayer() {
             @Override
             public void enterPinnedMode(final GridWidget gridWidget,
                                         final Command onStartCommand) {
@@ -164,6 +176,25 @@ public class GuidedDecisionTableModellerViewImpl extends Composite implements Gu
                 return defaultTransformMediator;
             }
         };
+
+        defaultGridLayer.setOnLayerAfterDraw(layer -> {
+            double xIni = gridLayer.getViewport().getTransform().getTranslateX();
+            double yIni = gridLayer.getViewport().getTransform().getTranslateY();
+            double xEnd = getBounds().getWidth();
+            double yEnd = getBounds().getHeight();
+
+            if (xIni > 0 && initialWidth == null && xEnd > 0 && xF == null) {
+                GWT.log("-----------> setOnLayerAfterDraw");
+
+                initialWidth = xIni;
+                xF = xEnd;
+
+                initialHeight = yIni;
+                yF = yEnd;
+            }
+        });
+
+        return defaultGridLayer;
     }
 
     RestrictedMousePanMediator restrictedMousePanMediator() {
@@ -172,6 +203,78 @@ public class GuidedDecisionTableModellerViewImpl extends Composite implements Gu
             protected void onMouseMove(final NodeMouseMoveEvent event) {
                 super.onMouseMove(event);
                 presenter.updateRadar();
+
+//                GuidedDecisionTableView.Presenter activeDecisionTable = presenter.getActiveDecisionTable();
+
+// ----------------------------------------------------------------
+//                double xIni = gridLayer.getViewport().getTransform().getTranslateX();
+//                double xEnd = getBounds().getWidth();
+//
+//                if (xIni > 0 && xEnd > 0) {
+//                    if (initialWidth == null) {
+//                        initialWidth = xIni;
+//                    }
+//
+//                    if (xF == null) {
+//                        xF = xEnd;
+//                    }
+//
+//
+//                }
+// ----------------------------------------------------------------
+
+                double currentX = gridLayer.getViewport().getTransform().getTranslateX();
+                double currentY = gridLayer.getViewport().getTransform().getTranslateY();
+
+                double pctX = horizontalGDTPositionToPct(currentX);
+                double pctY = verticalGDTPositionToPct(currentY);
+//
+//                GWT.log("-> " + pctX);
+                GWT.log("DRAG");
+                scrollLock = true;
+                horizontalPctToScroll(pctX);
+                verticalPctToScroll(pctY);
+
+                scrollLock = false;
+
+
+
+
+
+//            double pctH = (100D * element.getScrollTop()) / (element.getScrollHeight() - element.getClientHeight());
+//            double rangeH = getBounds().getHeight() - initialHeight;
+//            double posH = ((rangeH * pctH) / 100) + initialHeight;
+//
+//            double pctW = (100D * element.getScrollLeft()) / (element.getScrollWidth() - element.getClientWidth());
+//            double rangeW = getBounds().getWidth() - initialWidth;
+//            double posW = ((rangeW * pctW) / 100) + initialWidth;
+//
+//            Transform transform = gridPanel.getViewport().getTransform();
+//            Transform translate = transform.translate(posW - transform.getTranslateX(),
+//                                                      posH - transform.getTranslateY());
+//
+// -------------------------------------
+//                GWT.log("W -> " + getBounds().getWidth() + " | H ->" + getBounds().getHeight());
+//                GWT.log("X -> " + getBounds().getX() + " | Y ->" + getBounds().getY());
+
+//                if (null != activeDecisionTable) {
+//                    GuidedDecisionTableView view = activeDecisionTable.getView();
+//
+//                    if (null != view) {
+//                        Point2DArray boundingBox = view.getBoundingPoints().getArray();
+//                        Style style = scrollDiv.getElement().getStyle();
+//                        Transform transform = gridPanel.getViewport().getTransform();
+//
+//                        style.setTop(transform.getTranslateY() - 1000,
+//                                     Style.Unit.PX);
+//                        style.setLeft(transform.getTranslateX() - 500,
+//                                      Style.Unit.PX);
+//                        style.setHeight(boundingBox.get(2).getY() - boundingBox.get(0).getY(),
+//                                        Style.Unit.PX);
+//                        style.setWidth(boundingBox.get(1).getX() - boundingBox.get(0).getX(),
+//                                       Style.Unit.PX);
+//                    }
+//                }
             }
         };
     }
@@ -187,15 +290,104 @@ public class GuidedDecisionTableModellerViewImpl extends Composite implements Gu
         setupAccordion(presenter);
     }
 
+    boolean scrollLock = false;
+
     @PostConstruct
     public void setup() {
         setupSubMenu();
         setupGridPanel();
+
+        GWT.log(":::: getTranslateX => " + gridLayer.getViewport().getTransform());
+
+        gridLayer.getAttributes().setStrokeColor("black");
+
+//        GWT.log("getTranslateX => " + view.getTransform().getTranslateX());
+
+        final ScrollHandler handler = (ScrollEvent event) -> {
+
+
+            if (!scrollLock) {
+                GWT.log("SCROLL");
+                Element element = containerPanel.getElement();
+//
+//            double pctH = (100D * element.getScrollTop()) / (element.getScrollHeight() - element.getClientHeight());
+//            double rangeH = getBounds().getHeight() - initialHeight;
+//            double posH = ((rangeH * pctH) / 100) + initialHeight;
+//
+//            double pctW = (100D * element.getScrollLeft()) / (element.getScrollWidth() - element.getClientWidth());
+//            double rangeW = getBounds().getWidth() - initialWidth;
+//            double posW = ((rangeW * pctW) / 100) + initialWidth;
+//
+                double xPos = horizontalPctToGDTPosition(horizontalScrollToPct());
+                double yPos = verticalPctToGDTPosition(verticalScrollToPct());
+
+                Transform transform = gridPanel.getViewport().getTransform();
+
+                gridPanel.getViewport().setTransform(new Transform(transform.getScaleX(),
+                                                                   transform.getShearX(),
+                                                                   transform.getShearY(),
+                                                                   transform.getScaleY(),
+                                                                   xPos,
+                                                                   yPos));
+                gridLayer.draw();
+            }
+        };
+
+        containerPanel.addDomHandler(handler,
+                                     ScrollEvent.getType());
+    }
+
+    private double horizontalScrollToPct() {
+        Element element = containerPanel.getElement();
+
+        return (100 * element.getScrollLeft()) / (element.getScrollWidth() - element.getClientWidth());
+    }
+
+    private double verticalScrollToPct() {
+        Element element = containerPanel.getElement();
+
+        return (100 * element.getScrollTop()) / (element.getScrollHeight() - element.getClientHeight());
+    }
+
+    private double horizontalPctToGDTPosition(double pct) {
+        double range = BOUNDS_MAX_X;
+
+        return ((range * pct) / 100D);
+    }
+
+    private double verticalPctToGDTPosition(double pct) {
+        double range = BOUNDS_MAX_Y;
+
+        return ((range * pct) / 100D);
+    }
+
+    private double horizontalGDTPositionToPct(double position) {
+        return (100D * position) / BOUNDS_MAX_X;
+    }
+
+    private double verticalGDTPositionToPct(double position) {
+        return (100D * position) / BOUNDS_MAX_Y;
+    }
+
+    private void horizontalPctToScroll(double pct) {
+        Element element = containerPanel.getElement();
+        int max = element.getScrollWidth() - element.getClientWidth();
+
+        element.setScrollLeft((int) ((max * pct) / 100));
+    }
+
+    private void verticalPctToScroll(double pct) {
+        Element element = containerPanel.getElement();
+        int max = element.getScrollHeight() - element.getClientHeight();
+
+        element.setScrollTop((int) ((max * pct) / 100));
     }
 
     void setupGridPanel() {
         //Lienzo stuff - Set default scale
-        final Transform transform = new Transform().scale(VP_SCALE);
+        final Transform transform =
+                new Transform()
+                        .scale(VP_SCALE);
         gridPanel.getViewport().setTransform(transform);
 
         //Lienzo stuff - Add mouse pan support
