@@ -624,7 +624,7 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
             } else {
                 access.setLock(NOBODY);
             }
-            parent.onLockStatusUpdated(this);
+            // FIX FIRE UPDATE COLS PASSING this
         }
     }
 

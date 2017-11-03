@@ -294,7 +294,7 @@ public class GuidedDecisionTableEditorMenusTest {
                                                    popoverUtils);
         this.editMenuBuilder.setup();
         this.insertMenuBuilder = new InsertMenuBuilder(ts,
-                                                       menuItemFactory);
+                                                       menuItemFactory, null); //FIXME
         this.insertMenuBuilder.setup();
         this.insertMenuBuilder.setModeller(modeller);
         this.viewMenuBuilder = new ViewMenuBuilder(ts,

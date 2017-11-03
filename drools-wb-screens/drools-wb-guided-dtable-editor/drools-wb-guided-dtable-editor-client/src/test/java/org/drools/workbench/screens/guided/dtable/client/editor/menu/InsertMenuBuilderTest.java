@@ -107,7 +107,7 @@ public class InsertMenuBuilderTest {
         uiModel.appendRow(new BaseGridRow());
         uiModel.appendRow(new BaseGridRow());
 
-        builder = new InsertMenuBuilder(translationService, menuItemFactory);
+        builder = new InsertMenuBuilder(translationService, menuItemFactory, null);
         builder.setup();
         builder.setModeller(modeller);
     }

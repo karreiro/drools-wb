@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -352,6 +353,13 @@ public class GuidedDecisionTableGraphEditorPresenter extends BaseGuidedDecisionT
 
     @Override
     protected void onDecisionTableSelected(final @Observes DecisionTableSelectedEvent event) {
+
+        final Optional<GuidedDecisionTableView.Presenter> dtPresenter = event.getPresenter();
+
+        if (!dtPresenter.isPresent()) {
+            initialiseEditorTabsWhenNoDocuments();
+        }
+
         super.onDecisionTableSelected(event);
 
         if (event.isLockRequired()) {

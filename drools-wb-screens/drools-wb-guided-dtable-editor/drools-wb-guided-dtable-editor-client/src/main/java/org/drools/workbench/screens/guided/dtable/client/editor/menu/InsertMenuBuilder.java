@@ -28,8 +28,12 @@ import javax.inject.Inject;
 
 import org.drools.workbench.screens.guided.dtable.client.resources.i18n.GuidedDecisionTableErraiConstants;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableModellerView;
+import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTableView;
+import org.drools.workbench.screens.guided.dtable.client.widget.table.accordion.GuidedDecisionTableAccordion;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi.DecisionTableSelectedEvent;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi.DecisionTableSelectionsChangedEvent;
+import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuidedDecisionTableColumnWizard;
+import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.jboss.errai.ui.client.local.spi.TranslationService;
 import org.uberfire.ext.widgets.common.client.menu.MenuItemFactory;
 import org.uberfire.ext.widgets.common.client.menu.MenuItemFactory.MenuItemViewHolder;
@@ -64,6 +68,7 @@ public class InsertMenuBuilder extends BaseMenu implements MenuFactory.CustomMen
     private TranslationService ts;
     private MenuItemFactory menuItemFactory;
     private GuidedDecisionTableModellerView.Presenter modeller;
+    private GuidedDecisionTableAccordion accordion;
 
     MenuItemViewHolder<MenuItemWithIconView> miAppendRow;
     MenuItemViewHolder<MenuItemWithIconView> miInsertRowAbove;
@@ -72,9 +77,11 @@ public class InsertMenuBuilder extends BaseMenu implements MenuFactory.CustomMen
 
     @Inject
     public InsertMenuBuilder(final TranslationService ts,
-                             final MenuItemFactory menuItemFactory) {
+                             final MenuItemFactory menuItemFactory,
+                             final GuidedDecisionTableAccordion accordion) {
         this.ts = ts;
         this.menuItemFactory = menuItemFactory;
+        this.accordion = accordion;
     }
 
     @PostConstruct
@@ -175,7 +182,9 @@ public class InsertMenuBuilder extends BaseMenu implements MenuFactory.CustomMen
 
     void onAppendColumn() {
         if (modeller != null) {
-            modeller.onInsertColumn();
+            accordion.init(modeller);
+
+            accordion.openNewGuidedDecisionTableColumnWizard();
         }
     }
 

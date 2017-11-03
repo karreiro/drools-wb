@@ -47,7 +47,8 @@ public class GuidedDecisionTableAccordionTest {
     @Before
     public void setup() throws Exception {
         accordion = spy(new GuidedDecisionTableAccordion(view,
-                                                         itemManagedInstance));
+                                                         itemManagedInstance,
+                                                         null));//FIXME
     }
 
     @Test

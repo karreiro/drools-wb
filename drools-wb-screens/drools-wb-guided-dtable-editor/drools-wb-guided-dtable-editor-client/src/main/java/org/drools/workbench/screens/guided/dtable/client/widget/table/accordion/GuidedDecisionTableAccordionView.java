@@ -18,12 +18,17 @@ package org.drools.workbench.screens.guided.dtable.client.widget.table.accordion
 
 import javax.inject.Inject;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.user.client.ui.IsWidget;
+import org.gwtbootstrap3.client.ui.Button;
+import org.jboss.errai.common.client.dom.DOMUtil;
 import org.jboss.errai.common.client.dom.Div;
 import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.common.client.dom.UnorderedList;
 import org.jboss.errai.ioc.client.api.ManagedInstance;
 import org.jboss.errai.ui.client.local.api.IsElement;
 import org.jboss.errai.ui.shared.api.annotations.DataField;
+import org.jboss.errai.ui.shared.api.annotations.EventHandler;
 import org.jboss.errai.ui.shared.api.annotations.Templated;
 
 @Templated
@@ -36,6 +41,12 @@ public class GuidedDecisionTableAccordionView implements GuidedDecisionTableAcco
     @DataField("columnsNoteInfo")
     private Div columnsNoteInfo;
 
+    @DataField("insert-column")
+    private Button insertColumn;
+
+    @DataField("ruleInheritanceContainer")
+    private Div ruleInheritanceContainer;
+
     private ManagedInstance<GuidedDecisionTableAccordionItem> itemManagedInstance;
 
     private GuidedDecisionTableAccordion presenter;
@@ -43,16 +54,25 @@ public class GuidedDecisionTableAccordionView implements GuidedDecisionTableAcco
     @Inject
     public GuidedDecisionTableAccordionView(final UnorderedList items,
                                             final Div columnsNoteInfo,
-                                            final ManagedInstance<GuidedDecisionTableAccordionItem> itemManagedInstance) {
+                                            final ManagedInstance<GuidedDecisionTableAccordionItem> itemManagedInstance,
+                                            final Button insertColumn,
+                                            final Div ruleInheritanceContainer) {
         this.items = items;
         this.columnsNoteInfo = columnsNoteInfo;
         this.itemManagedInstance = itemManagedInstance;
+        this.insertColumn = insertColumn;
+        this.ruleInheritanceContainer = ruleInheritanceContainer;
     }
 
     @Override
     public void init(final GuidedDecisionTableAccordion presenter) {
         this.presenter = presenter;
         this.columnsNoteInfo.setHidden(true);
+    }
+
+    @EventHandler("insert-column")
+    public void onInsertColumnClick(final ClickEvent event) {
+        presenter.openNewGuidedDecisionTableColumnWizard();
     }
 
     @Override
@@ -68,6 +88,12 @@ public class GuidedDecisionTableAccordionView implements GuidedDecisionTableAcco
     @Override
     public void setParentId(final String parentId) {
         items.setId(parentId);
+    }
+
+    @Override
+    public void setRuleInheritance(final IsWidget widget) {
+        DOMUtil.removeAllChildren(ruleInheritanceContainer);
+        DOMUtil.appendWidgetToElement(ruleInheritanceContainer, widget);
     }
 
     private HTMLElement getViewElement(final GuidedDecisionTableAccordionItem accordionItem) {
