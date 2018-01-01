@@ -17,6 +17,7 @@
 package org.drools.workbench.screens.testscenario.client;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
@@ -52,7 +53,7 @@ import org.uberfire.workbench.model.menu.Menus;
 
 @WorkbenchEditor(identifier = "ScenarioEditorPresenter", supportedTypes = {TestScenarioResourceType.class})
 public class ScenarioEditorPresenter
-        extends KieEditor
+        extends KieEditor<Scenario>
         implements ScenarioEditorView.Presenter {
 
     private final TestScenarioResourceType type;
@@ -104,6 +105,11 @@ public class ScenarioEditorPresenter
         view.showLoading();
         service.call(getModelSuccessCallback(),
                      getNoSuchFileExceptionErrorCallback()).loadContent(versionRecordManager.getCurrentPath());
+    }
+
+    @Override
+    protected Supplier<Scenario> getContentSupplier() {
+        return null;
     }
 
     private RemoteCallback<TestScenarioModelContent> getModelSuccessCallback() {
@@ -228,7 +234,7 @@ public class ScenarioEditorPresenter
                     .addCopy(versionRecordManager.getCurrentPath(),
                              assetUpdateValidator)
                     .addRename(versionRecordManager.getPathToLatest(),
-                               assetUpdateValidator)
+                               assetUpdateValidator, getContentSupplier(), isDirtySupplier())
                     .addDelete(versionRecordManager.getPathToLatest(),
                                assetUpdateValidator);
         }

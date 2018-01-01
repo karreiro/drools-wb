@@ -17,6 +17,7 @@
 package org.drools.workbench.screens.scorecardxls.client.editor;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
@@ -49,7 +50,7 @@ import org.uberfire.workbench.model.menu.Menus;
 @Dependent
 @WorkbenchEditor(identifier = "ScoreCardXLSEditor", supportedTypes = { ScoreCardXLSResourceType.class })
 public class ScoreCardXLSEditorPresenter
-        extends KieEditor
+        extends KieEditor<String>
         implements ScoreCardXLSEditorView.Presenter {
 
     @Inject
@@ -88,6 +89,11 @@ public class ScoreCardXLSEditorPresenter
     protected void loadContent() {
         scoreCardXLSService.call( getModelSuccessCallback(),
                                   getNoSuchFileExceptionErrorCallback() ).loadContent( versionRecordManager.getCurrentPath() );
+    }
+
+    @Override
+    protected Supplier<String> getContentSupplier() {
+        return null;
     }
 
     private RemoteCallback<ScoreCardXLSContent> getModelSuccessCallback() {

@@ -326,6 +326,11 @@ public class GuidedDecisionTableEditorServiceImpl
     }
 
     @Override
+    public Path saveAndRename(final Path context, final String newFileName, final Object content, final String comment) {
+        return null;
+    }
+
+    @Override
     public Path copy(final Path path,
                      final String newName,
                      final String comment) {

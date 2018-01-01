@@ -17,6 +17,7 @@
 package org.drools.workbench.screens.guided.template.client.editor;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
@@ -63,7 +64,7 @@ import org.uberfire.workbench.model.menu.Menus;
 @Dependent
 @WorkbenchEditor(identifier = "GuidedRuleTemplateEditor", supportedTypes = {GuidedRuleTemplateResourceType.class})
 public class GuidedRuleTemplateEditorPresenter
-        extends KieEditor {
+        extends KieEditor<TemplateModel> {
 
     private GuidedRuleTemplateEditorView view;
 
@@ -114,6 +115,11 @@ public class GuidedRuleTemplateEditorPresenter
         view.showLoading();
         getService().call(getModelSuccessCallback(),
                           getNoSuchFileExceptionErrorCallback()).loadContent(versionRecordManager.getCurrentPath());
+    }
+
+    @Override
+    protected Supplier<TemplateModel> getContentSupplier() {
+        return null;
     }
 
     private RemoteCallback<GuidedTemplateEditorContent> getModelSuccessCallback() {

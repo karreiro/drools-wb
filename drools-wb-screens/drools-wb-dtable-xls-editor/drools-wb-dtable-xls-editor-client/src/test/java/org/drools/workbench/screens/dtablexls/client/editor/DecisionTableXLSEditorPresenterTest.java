@@ -239,8 +239,8 @@ public class DecisionTableXLSEditorPresenterTest {
 
         verify(fileMenuBuilder).addCopy(any(Path.class),
                                         any(AssetUpdateValidator.class));
-        verify(fileMenuBuilder).addRename(any(Path.class),
-                                          any(AssetUpdateValidator.class));
+//        verify(fileMenuBuilder).addRename(any(Path.class),
+//                                          any(AssetUpdateValidator.class));
         verify(fileMenuBuilder).addDelete(any(Path.class),
                                           any(AssetUpdateValidator.class));
     }
@@ -255,9 +255,9 @@ public class DecisionTableXLSEditorPresenterTest {
         verify(fileMenuBuilder,
                never()).addCopy(any(Path.class),
                                 any(AssetUpdateValidator.class));
-        verify(fileMenuBuilder,
-               never()).addRename(any(Path.class),
-                                  any(AssetUpdateValidator.class));
+//        verify(fileMenuBuilder,
+//               never()).addRename(any(Path.class),
+//                                  any(AssetUpdateValidator.class));
         verify(fileMenuBuilder,
                never()).addDelete(any(Path.class),
                                   any(AssetUpdateValidator.class));
@@ -333,6 +333,11 @@ public class DecisionTableXLSEditorPresenterTest {
             public Path rename(Path path,
                                String newName,
                                String comment) {
+                return null;
+            }
+
+            @Override
+            public Path saveAndRename(final Path context, final String newFileName, final Object content, final String comment) {
                 return null;
             }
 

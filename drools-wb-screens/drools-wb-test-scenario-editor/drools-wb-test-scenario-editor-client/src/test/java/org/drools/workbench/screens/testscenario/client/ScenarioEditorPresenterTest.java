@@ -43,6 +43,7 @@ import org.kie.soup.project.datamodel.imports.HasImports;
 import org.kie.workbench.common.services.datamodel.model.PackageDataModelOracleBaselinePayload;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracleFactory;
+import org.kie.workbench.common.widgets.client.menu.FileMenuBuilder;
 import org.kie.workbench.common.widgets.client.menu.FileMenuBuilderImpl;
 import org.kie.workbench.common.widgets.configresource.client.widget.bound.ImportsWidgetPresenter;
 import org.kie.workbench.common.widgets.metadata.client.KieEditorWrapperView;
@@ -122,7 +123,7 @@ public class ScenarioEditorPresenterTest {
 
     @Spy
     @InjectMocks
-    private FileMenuBuilderImpl fileMenuBuilder;
+    private FileMenuBuilder<Scenario> fileMenuBuilder;
 
     @Mock
     private ProjectController projectController;
@@ -324,12 +325,12 @@ public class ScenarioEditorPresenterTest {
         editor.makeMenuBar();
 
         verify(fileMenuBuilder).addSave(any(Command.class));
-        verify(fileMenuBuilder).addCopy(any(Path.class),
-                                        any(AssetUpdateValidator.class));
-        verify(fileMenuBuilder).addRename(any(Path.class),
-                                          any(AssetUpdateValidator.class));
-        verify(fileMenuBuilder).addDelete(any(Path.class),
-                                          any(AssetUpdateValidator.class));
+//        verify(fileMenuBuilder).addCopy(any(Path.class),
+//                                        any(AssetUpdateValidator.class));
+////        verify(fileMenuBuilder).addRename(any(Path.class),
+////                                          any(AssetUpdateValidator.class));
+//        verify(fileMenuBuilder).addDelete(any(Path.class),
+//                                          any(AssetUpdateValidator.class));
     }
 
     @Test
@@ -341,15 +342,15 @@ public class ScenarioEditorPresenterTest {
 
         verify(fileMenuBuilder,
                never()).addSave(any(Command.class));
-        verify(fileMenuBuilder,
-               never()).addCopy(any(Path.class),
-                                any(AssetUpdateValidator.class));
-        verify(fileMenuBuilder,
-               never()).addRename(any(Path.class),
-                                  any(AssetUpdateValidator.class));
-        verify(fileMenuBuilder,
-               never()).addDelete(any(Path.class),
-                                  any(AssetUpdateValidator.class));
+//        verify(fileMenuBuilder,
+//               never()).addCopy(any(Path.class),
+//                                any(AssetUpdateValidator.class));
+////        verify(fileMenuBuilder,
+////               never()).addRename(any(Path.class),
+////                                  any(AssetUpdateValidator.class));
+//        verify(fileMenuBuilder,
+//               never()).addDelete(any(Path.class),
+//                                  any(AssetUpdateValidator.class));
     }
 
     private Event<NotificationEvent> makeNotificationEvent() {

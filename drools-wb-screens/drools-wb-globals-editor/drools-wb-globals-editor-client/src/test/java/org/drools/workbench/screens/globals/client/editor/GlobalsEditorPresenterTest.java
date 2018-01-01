@@ -230,8 +230,8 @@ public class GlobalsEditorPresenterTest {
         verify(fileMenuBuilder).addSave(any(MenuItem.class));
         verify(fileMenuBuilder).addCopy(any(Path.class),
                                         any(AssetUpdateValidator.class));
-        verify(fileMenuBuilder).addRename(any(Path.class),
-                                          any(AssetUpdateValidator.class));
+//        verify(fileMenuBuilder).addRename(any(Path.class),
+//                                          any(AssetUpdateValidator.class));
         verify(fileMenuBuilder).addDelete(any(Command.class));
     }
 
@@ -247,9 +247,9 @@ public class GlobalsEditorPresenterTest {
         verify(fileMenuBuilder,
                never()).addCopy(any(Path.class),
                                 any(AssetUpdateValidator.class));
-        verify(fileMenuBuilder,
-               never()).addRename(any(Path.class),
-                                  any(AssetUpdateValidator.class));
+//        verify(fileMenuBuilder,
+//               never()).addRename(any(Path.class),
+//                                  any(AssetUpdateValidator.class));
         verify(fileMenuBuilder,
                never()).addDelete(any(Command.class));
     }

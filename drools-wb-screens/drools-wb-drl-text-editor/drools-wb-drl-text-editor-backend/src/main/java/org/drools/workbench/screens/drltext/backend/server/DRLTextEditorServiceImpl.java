@@ -224,6 +224,40 @@ public class DRLTextEditorServiceImpl
     }
 
     @Override
+    public Path saveAndRename(final Path path,
+                              final String newName,
+                              final String content,
+                              final String comment) {
+        try {
+
+
+            return renameService.rename(path,
+                                        newName,
+                                        comment);
+        } catch (Exception e) {
+            throw ExceptionUtilities.handleException(e);
+        }
+    }
+
+    @Override
+    public Path saveAndRename(final Path path,
+                              final String newName,
+                              final Metadata metadata,
+                              final String content,
+                              final String comment) {
+        try {
+
+            save(path, content, metadata, comment);
+
+            return renameService.rename(path,
+                                        newName,
+                                        comment);
+        } catch (Exception e) {
+            throw ExceptionUtilities.handleException(e);
+        }
+    }
+
+    @Override
     public Path copy(final Path path,
                      final String newName,
                      final String comment) {

@@ -327,9 +327,9 @@ public class GuidedDecisionTableGraphEditorPresenterTest extends BaseGuidedDecis
         verify(fileMenuBuilder,
                times(1)).addCopy(any(BasicFileMenuBuilder.PathProvider.class),
                                  eq(assetUpdateValidator));
-        verify(fileMenuBuilder,
-               times(1)).addRename(any(BasicFileMenuBuilder.PathProvider.class),
-                                   eq(assetUpdateValidator));
+//        verify(fileMenuBuilder,
+//               times(1)).addRename(any(BasicFileMenuBuilder.PathProvider.class),
+//                                   eq(assetUpdateValidator));
         verify(fileMenuBuilder,
                times(1)).addDelete(any(BasicFileMenuBuilder.PathProvider.class),
                                    eq(assetUpdateValidator));
@@ -362,9 +362,9 @@ public class GuidedDecisionTableGraphEditorPresenterTest extends BaseGuidedDecis
         verify(fileMenuBuilder,
                never()).addCopy(any(BasicFileMenuBuilder.PathProvider.class),
                                 eq(assetUpdateValidator));
-        verify(fileMenuBuilder,
-               never()).addRename(any(BasicFileMenuBuilder.PathProvider.class),
-                                  eq(assetUpdateValidator));
+//        verify(fileMenuBuilder,
+//               never()).addRename(any(BasicFileMenuBuilder.PathProvider.class),
+//                                  eq(assetUpdateValidator));
         verify(fileMenuBuilder,
                never()).addDelete(any(BasicFileMenuBuilder.PathProvider.class),
                                   eq(assetUpdateValidator));

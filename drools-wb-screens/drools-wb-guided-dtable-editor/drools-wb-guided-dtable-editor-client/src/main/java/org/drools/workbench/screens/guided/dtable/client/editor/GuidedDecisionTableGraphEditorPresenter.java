@@ -379,8 +379,8 @@ public class GuidedDecisionTableGraphEditorPresenter extends BaseGuidedDecisionT
                     .addSave(getSaveMenuItem())
                     .addCopy(versionRecordManager::getCurrentPath,
                              assetUpdateValidator)
-                    .addRename(versionRecordManager::getPathToLatest,
-                               assetUpdateValidator)
+//                    .addRename(versionRecordManager::getPathToLatest,
+//                               assetUpdateValidator)
                     .addDelete(versionRecordManager::getPathToLatest,
                                assetUpdateValidator);
         }

@@ -129,8 +129,8 @@ public class EnumEditorPresenterTests {
         when(mockFileMenuBuilder.addSave(any(MenuItem.class))).thenReturn(mockFileMenuBuilder);
         when(mockFileMenuBuilder.addCopy(any(ObservablePath.class),
                                          eq(mockFileNameValidator))).thenReturn(mockFileMenuBuilder);
-        when(mockFileMenuBuilder.addRename(any(ObservablePath.class),
-                                           eq(mockFileNameValidator))).thenReturn(mockFileMenuBuilder);
+//        when(mockFileMenuBuilder.addRename(any(ObservablePath.class),
+//                                           eq(mockFileNameValidator))).thenReturn(mockFileMenuBuilder);
         when(mockFileMenuBuilder.addDelete(any(ObservablePath.class))).thenReturn(mockFileMenuBuilder);
         when(mockFileMenuBuilder.addValidate(any(Command.class))).thenReturn(mockFileMenuBuilder);
         when(mockFileMenuBuilder.addNewTopLevelMenu(any(MenuItem.class))).thenReturn(mockFileMenuBuilder);

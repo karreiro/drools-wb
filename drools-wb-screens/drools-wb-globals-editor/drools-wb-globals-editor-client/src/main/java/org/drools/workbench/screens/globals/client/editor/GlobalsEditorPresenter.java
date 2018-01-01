@@ -17,6 +17,7 @@
 package org.drools.workbench.screens.globals.client.editor;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
@@ -50,9 +51,9 @@ import org.uberfire.mvp.PlaceRequest;
 import org.uberfire.workbench.events.NotificationEvent;
 import org.uberfire.workbench.model.menu.Menus;
 
-@WorkbenchEditor(identifier = "org.kie.guvnor.globals", supportedTypes = {GlobalResourceType.class}, priority = 101)
+@WorkbenchEditor(identifier = "org.kie.guvnor.globals", supportedTypes = {GlobalResourceType.class})
 public class GlobalsEditorPresenter
-        extends KieEditor {
+        extends KieEditor<GlobalsModel> {
 
     @Inject
     protected Caller<GlobalsEditorService> globalsEditorService;
@@ -97,8 +98,8 @@ public class GlobalsEditorPresenter
                     .addSave(versionRecordManager.newSaveMenuItem(this::saveAction))
                     .addCopy(versionRecordManager.getCurrentPath(),
                              assetUpdateValidator)
-                    .addRename(versionRecordManager.getPathToLatest(),
-                               assetUpdateValidator)
+//                    .addRename(versionRecordManager.getPathToLatest(),
+//                               assetUpdateValidator)
                     .addDelete(this::onDelete);
         }
 
@@ -111,6 +112,11 @@ public class GlobalsEditorPresenter
         view.showLoading();
         globalsEditorService.call(getModelSuccessCallback(),
                                   getNoSuchFileExceptionErrorCallback()).loadContent(versionRecordManager.getCurrentPath());
+    }
+
+    @Override
+    protected Supplier<GlobalsModel> getContentSupplier() {
+        return null;
     }
 
     protected RemoteCallback<GlobalsEditorContent> getModelSuccessCallback() {

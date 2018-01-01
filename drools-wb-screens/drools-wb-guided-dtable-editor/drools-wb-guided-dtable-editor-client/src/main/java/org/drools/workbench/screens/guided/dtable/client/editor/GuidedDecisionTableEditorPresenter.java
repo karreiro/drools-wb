@@ -199,8 +199,8 @@ public class GuidedDecisionTableEditorPresenter extends BaseGuidedDecisionTableE
                     .addSave(getSaveMenuItem())
                     .addCopy(() -> getActiveDocument().getCurrentPath(),
                              assetUpdateValidator)
-                    .addRename(() -> getActiveDocument().getLatestPath(),
-                               assetUpdateValidator)
+//                    .addRename(() -> getActiveDocument().getLatestPath(),
+//                               assetUpdateValidator)
                     .addDelete(() -> getActiveDocument().getLatestPath(),
                                assetUpdateValidator);
         }

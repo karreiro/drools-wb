@@ -17,6 +17,7 @@
 package org.drools.workbench.screens.dsltext.client.editor;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
@@ -53,7 +54,7 @@ import org.uberfire.workbench.model.menu.Menus;
 @Dependent
 @WorkbenchEditor(identifier = "DSLEditor", supportedTypes = { DSLResourceType.class })
 public class DSLEditorPresenter
-        extends KieEditor {
+        extends KieEditor<String> {
 
     @Inject
     private Caller<DSLTextEditorService> dslTextEditorService;
@@ -87,6 +88,11 @@ public class DSLEditorPresenter
         view.showLoading();
         dslTextEditorService.call( getModelSuccessCallback(),
                                    getNoSuchFileExceptionErrorCallback() ).loadContent( versionRecordManager.getCurrentPath() );
+    }
+
+    @Override
+    protected Supplier<String> getContentSupplier() {
+        return null;
     }
 
     private RemoteCallback<DSLTextEditorContent> getModelSuccessCallback() {

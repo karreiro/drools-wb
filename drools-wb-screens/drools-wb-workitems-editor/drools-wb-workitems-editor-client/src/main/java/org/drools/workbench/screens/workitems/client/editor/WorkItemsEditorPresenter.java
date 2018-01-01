@@ -17,6 +17,7 @@
 package org.drools.workbench.screens.workitems.client.editor;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
@@ -57,7 +58,7 @@ import org.uberfire.workbench.model.menu.Menus;
 @Dependent
 @WorkbenchEditor(identifier = "WorkItemsEditor", supportedTypes = { WorkItemsResourceType.class })
 public class WorkItemsEditorPresenter
-        extends KieEditor {
+        extends KieEditor<String> {
 
     @Inject
     private Caller<WorkItemsEditorService> workItemsService;
@@ -101,6 +102,11 @@ public class WorkItemsEditorPresenter
         view.showLoading();
         workItemsService.call( getModelSuccessCallback(),
                                getNoSuchFileExceptionErrorCallback() ).loadContent( versionRecordManager.getCurrentPath() );
+    }
+
+    @Override
+    protected Supplier<String> getContentSupplier() {
+        return null;
     }
 
     private RemoteCallback<WorkItemsModelContent> getModelSuccessCallback() {

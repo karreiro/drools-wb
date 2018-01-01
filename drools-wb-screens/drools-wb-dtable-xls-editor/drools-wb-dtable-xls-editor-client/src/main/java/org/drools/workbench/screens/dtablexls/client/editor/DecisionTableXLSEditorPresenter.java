@@ -17,6 +17,7 @@
 package org.drools.workbench.screens.dtablexls.client.editor;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
@@ -65,7 +66,7 @@ import static org.uberfire.ext.widgets.common.client.common.ConcurrentChangePopu
 @Dependent
 @WorkbenchEditor(identifier = "DecisionTableXLSEditor", supportedTypes = {DecisionTableXLSResourceType.class, DecisionTableXLSXResourceType.class})
 public class DecisionTableXLSEditorPresenter
-        extends KieEditor
+        extends KieEditor<String>
         implements DecisionTableXLSEditorView.Presenter {
 
     private Caller<DecisionTableXLSService> decisionTableXLSService;
@@ -174,6 +175,11 @@ public class DecisionTableXLSEditorPresenter
                                      getNoSuchFileExceptionErrorCallback()).loadContent(versionRecordManager.getCurrentPath());
     }
 
+    @Override
+    protected Supplier<String> getContentSupplier() {
+        return null;
+    }
+
     private RemoteCallback<DecisionTableXLSContent> getModelSuccessCallback() {
         return new RemoteCallback<DecisionTableXLSContent>() {
             @Override
@@ -227,8 +233,8 @@ public class DecisionTableXLSEditorPresenter
             fileMenuBuilder
                     .addCopy(versionRecordManager.getCurrentPath(),
                              assetUpdateValidator)
-                    .addRename(versionRecordManager.getPathToLatest(),
-                               assetUpdateValidator)
+//                    .addRename(versionRecordManager.getPathToLatest(),
+//                               assetUpdateValidator)
                     .addDelete(versionRecordManager.getPathToLatest(),
                                assetUpdateValidator);
         }

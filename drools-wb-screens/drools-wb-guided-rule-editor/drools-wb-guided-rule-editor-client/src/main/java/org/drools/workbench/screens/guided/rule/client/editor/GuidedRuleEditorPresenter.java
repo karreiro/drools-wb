@@ -18,6 +18,7 @@ package org.drools.workbench.screens.guided.rule.client.editor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Observes;
@@ -67,9 +68,9 @@ import org.uberfire.workbench.events.NotificationEvent;
 import org.uberfire.workbench.model.menu.Menus;
 
 @Dependent
-@WorkbenchEditor(identifier = "GuidedRuleEditor", supportedTypes = {GuidedRuleDRLResourceType.class, GuidedRuleDSLRResourceType.class}, priority = 102)
+@WorkbenchEditor(identifier = "GuidedRuleEditor", supportedTypes = {GuidedRuleDRLResourceType.class, GuidedRuleDSLRResourceType.class})
 public class GuidedRuleEditorPresenter
-        extends KieEditor {
+        extends KieEditor<RuleModel> {
 
     @Inject
     private ImportsWidgetPresenter importsWidget;
@@ -125,6 +126,11 @@ public class GuidedRuleEditorPresenter
         view.showLoading();
         getService().call(getModelSuccessCallback(),
                           getNoSuchFileExceptionErrorCallback()).loadContent(getVersionRecordManager().getCurrentPath());
+    }
+
+    @Override
+    protected Supplier<RuleModel> getContentSupplier() {
+        return null;
     }
 
     @Override

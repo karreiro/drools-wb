@@ -16,6 +16,7 @@
 package org.drools.workbench.screens.guided.dtree.client.editor;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.event.Event;
@@ -69,9 +70,9 @@ import org.uberfire.workbench.model.menu.Menus;
 /**
  * Guided Decision Tree Editor Presenter
  */
-@WorkbenchEditor(identifier = "GuidedDecisionTreeEditorPresenter", supportedTypes = { GuidedDTreeResourceType.class }, priority = 101)
+@WorkbenchEditor(identifier = "GuidedDecisionTreeEditorPresenter", supportedTypes = { GuidedDTreeResourceType.class })
 public class GuidedDecisionTreeEditorPresenter
-        extends KieEditor {
+        extends KieEditor<GuidedDecisionTree> {
 
     @Inject
     private ImportsWidgetPresenter importsWidget;
@@ -125,6 +126,11 @@ public class GuidedDecisionTreeEditorPresenter
         view.showLoading();
         service.call( getModelSuccessCallback(),
                       getNoSuchFileExceptionErrorCallback() ).loadContent( versionRecordManager.getCurrentPath() );
+    }
+
+    @Override
+    protected Supplier<GuidedDecisionTree> getContentSupplier() {
+        return null;
     }
 
     private RemoteCallback<GuidedDecisionTreeEditorContent> getModelSuccessCallback() {

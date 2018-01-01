@@ -17,6 +17,7 @@
 package org.drools.workbench.screens.guided.scorecard.client.editor;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
@@ -58,7 +59,7 @@ import org.uberfire.workbench.model.menu.Menus;
 @Dependent
 @WorkbenchEditor(identifier = "GuidedScoreCardEditor", supportedTypes = { GuidedScoreCardResourceType.class })
 public class GuidedScoreCardEditorPresenter
-        extends KieEditor {
+        extends KieEditor<ScoreCardModel> {
 
     @Inject
     private Caller<GuidedScoreCardEditorService> scoreCardEditorService;
@@ -101,6 +102,11 @@ public class GuidedScoreCardEditorPresenter
         view.showLoading();
         scoreCardEditorService.call( getModelSuccessCallback(),
                                      getNoSuchFileExceptionErrorCallback() ).loadContent( versionRecordManager.getCurrentPath() );
+    }
+
+    @Override
+    protected Supplier<ScoreCardModel> getContentSupplier() {
+        return null;
     }
 
     private RemoteCallback<ScoreCardModelContent> getModelSuccessCallback() {

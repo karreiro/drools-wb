@@ -17,6 +17,7 @@
 package org.drools.workbench.screens.enums.client.editor;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
@@ -52,7 +53,7 @@ import org.uberfire.workbench.model.menu.Menus;
 @Dependent
 @WorkbenchEditor(identifier = "EnumEditor", supportedTypes = { EnumResourceType.class })
 public class EnumEditorPresenter
-        extends KieEditor {
+        extends KieEditor<Object> {
 
     private EnumEditorView view;
 
@@ -90,6 +91,11 @@ public class EnumEditorPresenter
         view.showLoading();
         enumService.call( getModelSuccessCallback(),
                           getNoSuchFileExceptionErrorCallback() ).loadContent( versionRecordManager.getCurrentPath() );
+    }
+
+    @Override
+    protected Supplier<Object> getContentSupplier() {
+        return null;
     }
 
     private RemoteCallback<EnumModelContent> getModelSuccessCallback() {
