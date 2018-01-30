@@ -18,13 +18,16 @@ package org.drools.workbench.screens.drltext.backend.server;
 
 import java.net.URISyntaxException;
 
+import org.guvnor.common.services.shared.metadata.model.Metadata;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.backend.vfs.PathFactory;
+import org.uberfire.ext.editor.commons.backend.service.SaveAndRenameServiceImpl;
 import org.uberfire.io.IOService;
 import org.uberfire.java.nio.file.FileAlreadyExistsException;
 import org.uberfire.java.nio.file.OpenOption;
@@ -37,12 +40,17 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 @RunWith(MockitoJUnitRunner.class)
 public class DRLTextEditorServiceImplTest {
 
-    private IOService ioService = mock(IOService.class);
-    private KieProjectService projectService = mock(KieProjectService.class);
+    @Mock
+    private IOService ioService;
+
+    @Mock
+    private KieProjectService projectService;
+
+    @Mock
+    private SaveAndRenameServiceImpl<String, Metadata> saveAndRenameService;
 
     @InjectMocks
     private DRLTextEditorServiceImpl drlService = new DRLTextEditorServiceImpl();
@@ -61,5 +69,27 @@ public class DRLTextEditorServiceImplTest {
             // this is correct behavior, anz other exception is a problem
         }
         verify(ioService, never()).write(any(org.uberfire.java.nio.file.Path.class), anyString(), any(OpenOption.class));
+    }
+
+    @Test
+    public void testInit() {
+
+        drlService.init();
+
+        verify(saveAndRenameService).init(drlService);
+    }
+
+    @Test
+    public void testSaveAndRename() {
+
+        final Path path = mock(Path.class);
+        final String newFileName = "";
+        final Metadata metadata = mock(Metadata.class);
+        final String content = "";
+        final String comment = "";
+
+        drlService.saveAndRename(path, newFileName, metadata, content, comment);
+
+        verify(saveAndRenameService).saveAndRename(path, newFileName, metadata, content, comment);
     }
 }

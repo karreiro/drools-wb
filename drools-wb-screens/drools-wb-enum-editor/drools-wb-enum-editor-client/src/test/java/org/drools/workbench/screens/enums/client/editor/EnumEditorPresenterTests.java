@@ -18,6 +18,7 @@ package org.drools.workbench.screens.enums.client.editor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import javax.enterprise.event.Event;
 
@@ -28,6 +29,7 @@ import org.drools.workbench.screens.enums.client.type.EnumResourceType;
 import org.drools.workbench.screens.enums.model.EnumModel;
 import org.drools.workbench.screens.enums.model.EnumModelContent;
 import org.drools.workbench.screens.enums.service.EnumService;
+import org.guvnor.common.services.project.context.ProjectContext;
 import org.guvnor.common.services.shared.metadata.model.Metadata;
 import org.guvnor.common.services.shared.metadata.model.Overview;
 import org.jboss.errai.common.client.api.Caller;
@@ -44,7 +46,9 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.ext.editor.commons.client.history.VersionRecordManager;
+import org.uberfire.ext.editor.commons.client.menu.common.SaveAndRenameCommandFactory;
 import org.uberfire.ext.editor.commons.client.validation.DefaultFileNameValidator;
+import org.uberfire.ext.editor.commons.service.support.SupportsSaveAndRename;
 import org.uberfire.mocks.CallerMock;
 import org.uberfire.mocks.EventSourceMock;
 import org.uberfire.mvp.Command;
@@ -55,6 +59,7 @@ import org.uberfire.workbench.model.menu.MenuItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -95,6 +100,12 @@ public class EnumEditorPresenterTests {
     private Overview overview;
 
     @Mock
+    private ProjectContext mockWorkbenchContext;
+
+    @Mock
+    private SaveAndRenameCommandFactory<String, Metadata> mockSaveAndRenameCommandFactory;
+
+    @Mock
     private ValidationPopup validationPopup;
 
     @GwtMock
@@ -127,10 +138,8 @@ public class EnumEditorPresenterTests {
 
         //Mock FileMenuBuilder usage since we cannot use FileMenuBuilderImpl either
         when(mockFileMenuBuilder.addSave(any(MenuItem.class))).thenReturn(mockFileMenuBuilder);
-        when(mockFileMenuBuilder.addCopy(any(ObservablePath.class),
-                                         eq(mockFileNameValidator))).thenReturn(mockFileMenuBuilder);
-        when(mockFileMenuBuilder.addRename(any(ObservablePath.class),
-                                           eq(mockFileNameValidator))).thenReturn(mockFileMenuBuilder);
+        when(mockFileMenuBuilder.addCopy(any(ObservablePath.class), any(DefaultFileNameValidator.class))).thenReturn(mockFileMenuBuilder);
+        when(mockFileMenuBuilder.addRename(any(Command.class))).thenReturn(mockFileMenuBuilder);
         when(mockFileMenuBuilder.addDelete(any(ObservablePath.class))).thenReturn(mockFileMenuBuilder);
         when(mockFileMenuBuilder.addValidate(any(Command.class))).thenReturn(mockFileMenuBuilder);
         when(mockFileMenuBuilder.addNewTopLevelMenu(any(MenuItem.class))).thenReturn(mockFileMenuBuilder);
@@ -164,6 +173,8 @@ public class EnumEditorPresenterTests {
                 this.fileNameValidator = mockFileNameValidator;
                 this.versionRecordManager = mockVersionRecordManager;
                 this.notification = mockNotification;
+                this.workbenchContext = mockWorkbenchContext;
+                this.saveAndRenameCommandFactory = mockSaveAndRenameCommandFactory;
             }
         };
     }
@@ -221,5 +232,25 @@ public class EnumEditorPresenterTests {
 
         verify(view,
                times(1)).getContent();
+    }
+
+    @Test
+    public void testGetContentSupplier() throws Exception {
+
+        final List<EnumRow> enumRows = new ArrayList<>();
+
+        doReturn(enumRows).when(view).getContent();
+
+        final Supplier<String> contentSupplier = presenter.getContentSupplier();
+
+        assertEquals("", contentSupplier.get());
+    }
+
+    @Test
+    public void testGetSaveAndRenameServiceCaller() throws Exception {
+
+        final Caller<? extends SupportsSaveAndRename<String, Metadata>> serviceCaller = presenter.getSaveAndRenameServiceCaller();
+
+        assertEquals(enumServiceCaller, serviceCaller);
     }
 }

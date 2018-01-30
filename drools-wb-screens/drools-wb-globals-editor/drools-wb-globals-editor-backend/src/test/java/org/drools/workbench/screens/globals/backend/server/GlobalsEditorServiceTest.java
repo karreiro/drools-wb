@@ -25,15 +25,16 @@ import org.guvnor.common.services.backend.metadata.MetadataServerSideService;
 import org.guvnor.common.services.backend.metadata.attribute.GeneratedAttributesView;
 import org.guvnor.common.services.backend.util.CommentedOptionFactory;
 import org.guvnor.common.services.shared.metadata.model.Metadata;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.kie.workbench.common.services.shared.project.KieProjectService;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.backend.vfs.PathFactory;
+import org.uberfire.ext.editor.commons.backend.service.SaveAndRenameServiceImpl;
 import org.uberfire.io.IOService;
 import org.uberfire.java.nio.base.options.CommentedOption;
 
@@ -63,76 +64,100 @@ public class GlobalsEditorServiceTest {
     @Mock
     private MetadataServerSideService metadataService;
 
-    private GlobalsEditorService globalsEditorService;
+    @Mock
+    private SaveAndRenameServiceImpl<GlobalsModel, Metadata> saveAndRenameService;
 
-    @Before
-    public void setUp() {
-        globalsEditorService = new GlobalsEditorServiceImpl() {
-            {
-                projectService = GlobalsEditorServiceTest.this.kieProjectService;
-                ioService = GlobalsEditorServiceTest.this.ioService;
-                commentedOptionFactory = GlobalsEditorServiceTest.this.commentedOptionFactory;
-                metadataService = GlobalsEditorServiceTest.this.metadataService;
-            }
-        };
-    }
+    @InjectMocks
+    private GlobalsEditorService globalsEditorService = new GlobalsEditorServiceImpl() {
+        {
+            projectService = GlobalsEditorServiceTest.this.kieProjectService;
+            ioService = GlobalsEditorServiceTest.this.ioService;
+            commentedOptionFactory = GlobalsEditorServiceTest.this.commentedOptionFactory;
+            metadataService = GlobalsEditorServiceTest.this.metadataService;
+        }
+    };
 
     @Test
     public void save() {
-        Path path = PathFactory.newPath( "test",
-                                         "file:///test" );
-        GlobalsModel globalsModel = mock( GlobalsModel.class );
+        Path path = PathFactory.newPath("test",
+                                        "file:///test");
+        GlobalsModel globalsModel = mock(GlobalsModel.class);
 
-        when( ioService.exists( any( org.uberfire.java.nio.file.Path.class ) ) ).thenReturn( false );
+        when(ioService.exists(any(org.uberfire.java.nio.file.Path.class))).thenReturn(false);
 
-        globalsEditorService.create( path,
-                                     "test",
-                                     globalsModel,
-                                     "comment" );
+        globalsEditorService.create(path,
+                                    "test",
+                                    globalsModel,
+                                    "comment");
 
-        verify( ioService,
-                times( 1 ) ).write( any( org.uberfire.java.nio.file.Path.class ),
-                                    anyString(),
-                                    any( CommentedOption.class ) );
+        verify(ioService,
+               times(1)).write(any(org.uberfire.java.nio.file.Path.class),
+                               anyString(),
+                               any(CommentedOption.class));
     }
 
     @Test
     public void generate() {
-        Path path = PathFactory.newPath( "test",
-                                         "file:///test" );
-        GlobalsModel globalsModel = mock( GlobalsModel.class );
+        Path path = PathFactory.newPath("test",
+                                        "file:///test");
+        GlobalsModel globalsModel = mock(GlobalsModel.class);
 
-        when( ioService.exists( any( org.uberfire.java.nio.file.Path.class ) ) ).thenReturn( false );
+        when(ioService.exists(any(org.uberfire.java.nio.file.Path.class))).thenReturn(false);
 
         Map<String, Object> metadataMap = new HashMap<String, Object>() {
             {
-                put( GeneratedAttributesView.GENERATED_ATTRIBUTE_NAME,
-                     true );
+                put(GeneratedAttributesView.GENERATED_ATTRIBUTE_NAME,
+                    true);
             }
         };
-        when( metadataService.configAttrs( anyMapOf( String.class,
-                                                     Object.class ),
-                                           any( Metadata.class ) ) ).thenReturn( metadataMap );
+        when(metadataService.configAttrs(anyMapOf(String.class,
+                                                  Object.class),
+                                         any(Metadata.class))).thenReturn(metadataMap);
 
-        globalsEditorService.generate( path,
-                                       "test",
-                                       globalsModel,
-                                       "comment" );
+        globalsEditorService.generate(path,
+                                      "test",
+                                      globalsModel,
+                                      "comment");
 
-        ArgumentCaptor<Map> mapArgumentCaptor = ArgumentCaptor.forClass( Map.class );
+        ArgumentCaptor<Map> mapArgumentCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify( ioService,
-                times( 1 ) ).write( any( org.uberfire.java.nio.file.Path.class ),
-                                    anyString(),
-                                    mapArgumentCaptor.capture(),
-                                    any( CommentedOption.class ) );
+        verify(ioService,
+               times(1)).write(any(org.uberfire.java.nio.file.Path.class),
+                               anyString(),
+                               mapArgumentCaptor.capture(),
+                               any(CommentedOption.class));
 
         Map capturedMap = mapArgumentCaptor.getValue();
-        assertEquals( metadataMap,
-                      capturedMap );
+        assertEquals(metadataMap,
+                     capturedMap);
 
-        Object generatedAttribute = capturedMap.get( GeneratedAttributesView.GENERATED_ATTRIBUTE_NAME );
-        assertNotNull( generatedAttribute );
-        assertTrue( Boolean.parseBoolean( generatedAttribute.toString() ) );
+        Object generatedAttribute = capturedMap.get(GeneratedAttributesView.GENERATED_ATTRIBUTE_NAME);
+        assertNotNull(generatedAttribute);
+        assertTrue(Boolean.parseBoolean(generatedAttribute.toString()));
+    }
+
+    @Test
+    public void testInit() throws Exception {
+
+        final GlobalsEditorServiceImpl service = (GlobalsEditorServiceImpl) globalsEditorService;
+
+        service.init();
+
+        verify(saveAndRenameService).init(service);
+    }
+
+    @Test
+    public void testSaveAndRename() throws Exception {
+
+        final GlobalsEditorServiceImpl service = (GlobalsEditorServiceImpl) globalsEditorService;
+        final Path path = mock(Path.class);
+        final String newFileName = "newFileName";
+        final Metadata metadata = mock(Metadata.class);
+        final GlobalsModel content = mock(GlobalsModel.class);
+        final String comment = "comment";
+
+        service.saveAndRename(path, newFileName, metadata, content, comment);
+
+        verify(saveAndRenameService).saveAndRename(path, newFileName, metadata, content, comment);
     }
 }

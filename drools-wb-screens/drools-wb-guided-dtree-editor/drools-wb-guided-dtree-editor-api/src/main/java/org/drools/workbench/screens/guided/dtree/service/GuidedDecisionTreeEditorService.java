@@ -18,6 +18,7 @@ package org.drools.workbench.screens.guided.dtree.service;
 import org.drools.workbench.models.guided.dtree.shared.model.GuidedDecisionTree;
 import org.drools.workbench.screens.guided.dtree.model.GuidedDecisionTreeEditorContent;
 import org.guvnor.common.services.shared.file.SupportsUpdate;
+import org.guvnor.common.services.shared.metadata.model.Metadata;
 import org.guvnor.common.services.shared.validation.ValidationService;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.kie.workbench.common.services.datamodel.model.PackageDataModelOracleBaselinePayload;
@@ -28,6 +29,7 @@ import org.uberfire.ext.editor.commons.service.support.SupportsCreate;
 import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
 import org.uberfire.ext.editor.commons.service.support.SupportsRead;
 import org.uberfire.ext.editor.commons.service.support.SupportsRename;
+import org.uberfire.ext.editor.commons.service.support.SupportsSaveAndRename;
 
 @Remote
 public interface GuidedDecisionTreeEditorService
@@ -37,12 +39,12 @@ public interface GuidedDecisionTreeEditorService
         SupportsCreate<GuidedDecisionTree>,
         SupportsRead<GuidedDecisionTree>,
         SupportsUpdate<GuidedDecisionTree>,
+        SupportsSaveAndRename<GuidedDecisionTree, Metadata>,
         SupportsDelete,
         SupportsCopy,
         SupportsRename {
 
-    GuidedDecisionTreeEditorContent loadContent( final Path path );
+    GuidedDecisionTreeEditorContent loadContent(final Path path);
 
-    PackageDataModelOracleBaselinePayload loadDataModel( final Path path );
-
+    PackageDataModelOracleBaselinePayload loadDataModel(final Path path);
 }

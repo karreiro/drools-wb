@@ -69,6 +69,7 @@ import org.uberfire.client.mvp.SaveInProgressEvent;
 import org.uberfire.client.mvp.UpdatedLockStatusEvent;
 import org.uberfire.client.workbench.events.ChangeTitleWidgetEvent;
 import org.uberfire.ext.editor.commons.client.menu.BasicFileMenuBuilder;
+import org.uberfire.ext.editor.commons.client.menu.common.SaveAndRenameCommandFactory;
 import org.uberfire.ext.editor.commons.client.resources.i18n.CommonConstants;
 import org.uberfire.ext.editor.commons.version.events.RestoreEvent;
 import org.uberfire.ext.editor.commons.version.impl.PortableVersionRecord;
@@ -204,7 +205,8 @@ public class GuidedDecisionTableGraphEditorPresenterTest extends BaseGuidedDecis
                                                            beanManager,
                                                            placeManager,
                                                            lockManager,
-                                                           columnsPage) {
+                                                           columnsPage,
+                                                           saveAndRenameCommandFactory) {
             {
                 workbenchContext = GuidedDecisionTableGraphEditorPresenterTest.this.workbenchContext;
                 projectController = GuidedDecisionTableGraphEditorPresenterTest.this.projectController;

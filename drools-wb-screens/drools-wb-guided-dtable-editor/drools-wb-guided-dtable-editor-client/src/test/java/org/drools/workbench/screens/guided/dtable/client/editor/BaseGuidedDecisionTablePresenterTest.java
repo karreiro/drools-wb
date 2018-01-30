@@ -70,6 +70,7 @@ import org.uberfire.ext.editor.commons.client.history.VersionRecordManager;
 import org.uberfire.ext.editor.commons.client.menu.BasicFileMenuBuilder;
 import org.uberfire.ext.editor.commons.client.menu.BasicFileMenuBuilderImpl;
 import org.uberfire.ext.editor.commons.client.menu.RestoreVersionCommandProvider;
+import org.uberfire.ext.editor.commons.client.menu.common.SaveAndRenameCommandFactory;
 import org.uberfire.ext.editor.commons.client.validation.DefaultFileNameValidator;
 import org.uberfire.ext.editor.commons.version.VersionService;
 import org.uberfire.ext.editor.commons.version.events.RestoreEvent;
@@ -226,6 +227,9 @@ public abstract class BaseGuidedDecisionTablePresenterTest<P extends BaseGuidedD
 
     @Mock
     protected ColumnsPage columnsPage;
+
+    @Mock
+    protected SaveAndRenameCommandFactory<GuidedDecisionTable52, Metadata> saveAndRenameCommandFactory;
 
     @Mock
     protected MultiPageEditor multiPageEditor;

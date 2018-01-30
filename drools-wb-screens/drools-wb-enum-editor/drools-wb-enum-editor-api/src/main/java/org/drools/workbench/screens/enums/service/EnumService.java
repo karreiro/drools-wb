@@ -19,6 +19,7 @@ package org.drools.workbench.screens.enums.service;
 import org.drools.workbench.screens.enums.model.EnumModelContent;
 import org.guvnor.common.services.project.builder.service.BuildValidationHelper;
 import org.guvnor.common.services.shared.file.SupportsUpdate;
+import org.guvnor.common.services.shared.metadata.model.Metadata;
 import org.guvnor.common.services.shared.validation.ValidationService;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.uberfire.backend.vfs.Path;
@@ -27,6 +28,7 @@ import org.uberfire.ext.editor.commons.service.support.SupportsCreate;
 import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
 import org.uberfire.ext.editor.commons.service.support.SupportsRead;
 import org.uberfire.ext.editor.commons.service.support.SupportsRename;
+import org.uberfire.ext.editor.commons.service.support.SupportsSaveAndRename;
 
 @Remote
 public interface EnumService
@@ -36,10 +38,10 @@ public interface EnumService
         SupportsCreate<String>,
         SupportsRead<String>,
         SupportsUpdate<String>,
+        SupportsSaveAndRename<String, Metadata>,
         SupportsDelete,
         SupportsCopy,
         SupportsRename {
 
-    EnumModelContent loadContent( final Path path );
-
+    EnumModelContent loadContent(final Path path);
 }

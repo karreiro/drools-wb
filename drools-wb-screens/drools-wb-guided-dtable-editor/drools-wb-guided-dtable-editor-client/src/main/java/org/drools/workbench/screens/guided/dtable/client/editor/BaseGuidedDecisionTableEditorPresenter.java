@@ -19,6 +19,7 @@ package org.drools.workbench.screens.guided.dtable.client.editor;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import javax.enterprise.event.Event;
 
@@ -39,6 +40,7 @@ import org.drools.workbench.screens.guided.dtable.model.GuidedDecisionTableEdito
 import org.drools.workbench.screens.guided.dtable.service.GuidedDecisionTableEditorService;
 import org.guvnor.common.services.project.context.ProjectContext;
 import org.guvnor.common.services.shared.metadata.model.Metadata;
+import org.guvnor.common.services.shared.metadata.model.Overview;
 import org.guvnor.common.services.shared.validation.model.ValidationMessage;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
@@ -54,6 +56,7 @@ import org.kie.workbench.common.widgets.metadata.client.menu.RegisteredDocuments
 import org.kie.workbench.common.widgets.metadata.client.validation.AssetUpdateValidator;
 import org.kie.workbench.common.widgets.metadata.client.widget.OverviewWidgetPresenter;
 import org.uberfire.backend.vfs.ObservablePath;
+import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.client.mvp.UpdatedLockStatusEvent;
 import org.uberfire.client.workbench.events.ChangeTitleWidgetEvent;
@@ -63,8 +66,12 @@ import org.uberfire.client.workbench.widgets.multipage.Page;
 import org.uberfire.ext.editor.commons.client.file.popups.SavePopUpPresenter;
 import org.uberfire.ext.editor.commons.client.history.VersionRecordManager;
 import org.uberfire.ext.editor.commons.client.menu.MenuItems;
+import org.uberfire.ext.editor.commons.client.menu.common.SaveAndRenameCommandFactory;
 import org.uberfire.ext.editor.commons.client.validation.DefaultFileNameValidator;
+import org.uberfire.ext.editor.commons.client.validation.Validator;
+import org.uberfire.ext.editor.commons.service.support.SupportsSaveAndRename;
 import org.uberfire.ext.widgets.common.client.callbacks.HasBusyIndicatorDefaultErrorCallback;
+import org.uberfire.mvp.Command;
 import org.uberfire.mvp.PlaceRequest;
 import org.uberfire.workbench.events.NotificationEvent;
 import org.uberfire.workbench.model.menu.MenuItem;
@@ -99,6 +106,7 @@ public abstract class BaseGuidedDecisionTableEditorPresenter extends KieMultiple
     protected PlaceManager placeManager;
 
     private ColumnsPage columnsPage;
+    private SaveAndRenameCommandFactory<GuidedDecisionTable52, Metadata> saveAndRenameCommandFactory;
 
     public BaseGuidedDecisionTableEditorPresenter(final View view,
                                                   final Caller<GuidedDecisionTableEditorService> service,
@@ -113,7 +121,8 @@ public abstract class BaseGuidedDecisionTableEditorPresenter extends KieMultiple
                                                   final GuidedDecisionTableModellerView.Presenter modeller,
                                                   final SyncBeanManager beanManager,
                                                   final PlaceManager placeManager,
-                                                  final ColumnsPage columnsPage) {
+                                                  final ColumnsPage columnsPage,
+                                                  final SaveAndRenameCommandFactory<GuidedDecisionTable52, Metadata> saveAndRenameCommandFactory) {
         super(view);
         this.view = view;
         this.service = service;
@@ -129,6 +138,7 @@ public abstract class BaseGuidedDecisionTableEditorPresenter extends KieMultiple
         this.beanManager = beanManager;
         this.placeManager = placeManager;
         this.columnsPage = columnsPage;
+        this.saveAndRenameCommandFactory = saveAndRenameCommandFactory;
     }
 
     @Override
@@ -294,6 +304,45 @@ public abstract class BaseGuidedDecisionTableEditorPresenter extends KieMultiple
         addColumnsTab();
 
         enableColumnsTab(dtPresenter);
+    }
+
+    protected Command getSaveAndRenameCommand() {
+
+        Supplier<Path> pathSupplier = () -> versionRecordManager.getPathToLatest();
+        Validator validator = assetUpdateValidator;
+        Caller<? extends SupportsSaveAndRename<GuidedDecisionTable52, Metadata>> renameCaller = service; //service;
+        Supplier<Metadata> metadataSupplier = this::metadata;
+        Supplier<GuidedDecisionTable52> contentSupplier = this::content;
+        Supplier<Boolean> isDirtySupplier = getIsDirtySupplier();
+
+        return saveAndRenameCommandFactory.create(pathSupplier,
+                                                  validator,
+                                                  renameCaller,
+                                                  metadataSupplier,
+                                                  contentSupplier,
+                                                  isDirtySupplier);
+    }
+
+    private GuidedDecisionTable52 content() {
+        return getActiveDocument().getModel();
+    }
+
+    private Metadata metadata() {
+
+        final Overview overview = getActiveDocument().getOverview();
+
+        return overview.getMetadata();
+    }
+
+    protected Supplier<Boolean> getIsDirtySupplier() {
+
+        return () -> modeller.getAvailableDecisionTables().stream().anyMatch(dtPresenter -> {
+
+            final Integer originalHashCode = dtPresenter.getOriginalHashCode();
+            final Integer currentHashCode = dtPresenter.getModel().hashCode();
+
+            return isDirty(originalHashCode, currentHashCode);
+        });
     }
 
     void enableColumnsTab(final GuidedDecisionTableView.Presenter decisionTablePresenter) {

@@ -23,6 +23,7 @@ import org.drools.workbench.screens.workitems.model.WorkItemDefinitionElements;
 import org.drools.workbench.screens.workitems.model.WorkItemsModelContent;
 import org.guvnor.common.services.project.builder.service.BuildValidationHelper;
 import org.guvnor.common.services.shared.file.SupportsUpdate;
+import org.guvnor.common.services.shared.metadata.model.Metadata;
 import org.guvnor.common.services.shared.validation.ValidationService;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.uberfire.backend.vfs.Path;
@@ -31,6 +32,7 @@ import org.uberfire.ext.editor.commons.service.support.SupportsCreate;
 import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
 import org.uberfire.ext.editor.commons.service.support.SupportsRead;
 import org.uberfire.ext.editor.commons.service.support.SupportsRename;
+import org.uberfire.ext.editor.commons.service.support.SupportsSaveAndRename;
 
 @Remote
 public interface WorkItemsEditorService
@@ -40,6 +42,7 @@ public interface WorkItemsEditorService
         SupportsCreate<String>,
         SupportsRead<String>,
         SupportsUpdate<String>,
+        SupportsSaveAndRename<String, Metadata>,
         SupportsDelete,
         SupportsCopy,
         SupportsRename {
@@ -60,10 +63,9 @@ public interface WorkItemsEditorService
 
     public static final String WORK_ITEMS_EDITOR_SETTINGS_PARAMETER_VALUES = "ParameterValues";
 
-    WorkItemsModelContent loadContent( final Path path );
+    WorkItemsModelContent loadContent(final Path path);
 
     WorkItemDefinitionElements loadDefinitionElements();
 
-    Set<PortableWorkDefinition> loadWorkItemDefinitions( final Path path );
-
+    Set<PortableWorkDefinition> loadWorkItemDefinitions(final Path path);
 }

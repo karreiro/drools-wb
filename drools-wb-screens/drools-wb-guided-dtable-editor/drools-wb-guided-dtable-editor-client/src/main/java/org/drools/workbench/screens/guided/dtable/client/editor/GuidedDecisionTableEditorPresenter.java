@@ -27,6 +27,7 @@ import javax.inject.Inject;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.IsWidget;
+import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.screens.guided.dtable.client.editor.menu.EditMenuBuilder;
 import org.drools.workbench.screens.guided.dtable.client.editor.menu.InsertMenuBuilder;
 import org.drools.workbench.screens.guided.dtable.client.editor.menu.RadarMenuBuilder;
@@ -38,9 +39,11 @@ import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDeci
 import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi.DecisionTableSelectedEvent;
 import org.drools.workbench.screens.guided.dtable.model.GuidedDecisionTableEditorContent;
 import org.drools.workbench.screens.guided.dtable.service.GuidedDecisionTableEditorService;
+import org.guvnor.common.services.shared.metadata.model.Metadata;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
+import org.kie.workbench.common.widgets.client.menu.FileMenuBuilder;
 import org.kie.workbench.common.widgets.client.popups.validation.ValidationPopup;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.backend.vfs.Path;
@@ -51,6 +54,7 @@ import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.callbacks.Callback;
 import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.client.mvp.UpdatedLockStatusEvent;
+import org.uberfire.ext.editor.commons.client.menu.common.SaveAndRenameCommandFactory;
 import org.uberfire.lifecycle.OnClose;
 import org.uberfire.lifecycle.OnFocus;
 import org.uberfire.lifecycle.OnMayClose;
@@ -82,7 +86,8 @@ public class GuidedDecisionTableEditorPresenter extends BaseGuidedDecisionTableE
                                               final GuidedDecisionTableModellerView.Presenter modeller,
                                               final SyncBeanManager beanManager,
                                               final PlaceManager placeManager,
-                                              final ColumnsPage columnsPage) {
+                                              final ColumnsPage columnsPage,
+                                              final SaveAndRenameCommandFactory<GuidedDecisionTable52, Metadata> saveAndRenameCommandFactory) {
         super(view,
               service,
               notification,
@@ -96,7 +101,8 @@ public class GuidedDecisionTableEditorPresenter extends BaseGuidedDecisionTableE
               modeller,
               beanManager,
               placeManager,
-              columnsPage);
+              columnsPage,
+              saveAndRenameCommandFactory);
     }
 
     @Override
@@ -195,17 +201,16 @@ public class GuidedDecisionTableEditorPresenter extends BaseGuidedDecisionTableE
     @Override
     public void makeMenuBar() {
         if (canUpdateProject()) {
-            fileMenuBuilder
+            getFileMenuBuilder()
                     .addSave(getSaveMenuItem())
                     .addCopy(() -> getActiveDocument().getCurrentPath(),
                              assetUpdateValidator)
-                    .addRename(() -> getActiveDocument().getLatestPath(),
-                               assetUpdateValidator)
+                    .addRename(getSaveAndRenameCommand())
                     .addDelete(() -> getActiveDocument().getLatestPath(),
                                assetUpdateValidator);
         }
 
-        this.menus = fileMenuBuilder
+        this.menus = getFileMenuBuilder()
                 .addValidate(() -> onValidate(getActiveDocument()))
                 .addNewTopLevelMenu(getEditMenuItem())
                 .addNewTopLevelMenu(getViewMenuItem())
@@ -215,6 +220,10 @@ public class GuidedDecisionTableEditorPresenter extends BaseGuidedDecisionTableE
                 .build();
     }
 
+    FileMenuBuilder getFileMenuBuilder() {
+        return fileMenuBuilder;
+    }
+
     @Override
     public void onOpenDocumentsInEditor(final List<Path> selectedDocumentPaths) {
         throw new UnsupportedOperationException();
@@ -222,7 +231,7 @@ public class GuidedDecisionTableEditorPresenter extends BaseGuidedDecisionTableE
 
     @Override
     public void getAvailableDocumentPaths(final Callback<List<Path>> callback) {
-        callback.callback(Collections.<Path>emptyList());
+        callback.callback(Collections.emptyList());
     }
 
     @Override

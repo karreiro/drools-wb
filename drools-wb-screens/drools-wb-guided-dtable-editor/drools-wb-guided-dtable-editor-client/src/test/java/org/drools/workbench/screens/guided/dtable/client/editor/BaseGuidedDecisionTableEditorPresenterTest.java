@@ -84,7 +84,8 @@ public class BaseGuidedDecisionTableEditorPresenterTest extends BaseGuidedDecisi
                                                       modeller,
                                                       beanManager,
                                                       placeManager,
-                                                      columnsPage);
+                                                      columnsPage,
+                                                      saveAndRenameCommandFactory);
     }
 
     @Test

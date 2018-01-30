@@ -19,6 +19,7 @@ package org.drools.workbench.screens.guided.rule.service;
 import org.drools.workbench.models.datamodel.rule.RuleModel;
 import org.drools.workbench.screens.guided.rule.model.GuidedEditorContent;
 import org.guvnor.common.services.shared.file.SupportsUpdate;
+import org.guvnor.common.services.shared.metadata.model.Metadata;
 import org.guvnor.common.services.shared.validation.ValidationService;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.kie.workbench.common.services.shared.source.ViewSourceService;
@@ -28,6 +29,7 @@ import org.uberfire.ext.editor.commons.service.support.SupportsCreate;
 import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
 import org.uberfire.ext.editor.commons.service.support.SupportsRead;
 import org.uberfire.ext.editor.commons.service.support.SupportsRename;
+import org.uberfire.ext.editor.commons.service.support.SupportsSaveAndRename;
 
 @Remote
 public interface GuidedRuleEditorService
@@ -37,10 +39,10 @@ public interface GuidedRuleEditorService
         SupportsCreate<RuleModel>,
         SupportsRead<RuleModel>,
         SupportsUpdate<RuleModel>,
+        SupportsSaveAndRename<RuleModel, Metadata>,
         SupportsDelete,
         SupportsCopy,
         SupportsRename {
 
-    GuidedEditorContent loadContent( final Path path );
-
+    GuidedEditorContent loadContent(final Path path);
 }

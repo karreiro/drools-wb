@@ -74,6 +74,7 @@ import org.uberfire.client.mvp.SaveInProgressEvent;
 import org.uberfire.client.mvp.UpdatedLockStatusEvent;
 import org.uberfire.client.workbench.events.ChangeTitleWidgetEvent;
 import org.uberfire.ext.editor.commons.client.menu.MenuItems;
+import org.uberfire.ext.editor.commons.client.menu.common.SaveAndRenameCommandFactory;
 import org.uberfire.ext.editor.commons.client.resources.i18n.CommonConstants;
 import org.uberfire.ext.editor.commons.version.events.RestoreEvent;
 import org.uberfire.ext.widgets.common.client.callbacks.DefaultErrorCallback;
@@ -135,7 +136,8 @@ public class GuidedDecisionTableGraphEditorPresenter extends BaseGuidedDecisionT
                                                    final SyncBeanManager beanManager,
                                                    final PlaceManager placeManager,
                                                    final LockManager lockManager,
-                                                   final ColumnsPage columnsPage) {
+                                                   final ColumnsPage columnsPage,
+                                                   final SaveAndRenameCommandFactory<GuidedDecisionTable52, Metadata> saveAndRenameCommandFactory) {
         super(view,
               service,
               notification,
@@ -149,7 +151,8 @@ public class GuidedDecisionTableGraphEditorPresenter extends BaseGuidedDecisionT
               modeller,
               beanManager,
               placeManager,
-              columnsPage);
+              columnsPage,
+              saveAndRenameCommandFactory);
         this.graphService = graphService;
         this.projectService = projectService;
         this.saveInProgressEvent = saveInProgressEvent;

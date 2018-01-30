@@ -19,6 +19,7 @@ package org.drools.workbench.screens.guided.scorecard.service;
 import org.drools.workbench.models.guided.scorecard.shared.ScoreCardModel;
 import org.drools.workbench.screens.guided.scorecard.model.ScoreCardModelContent;
 import org.guvnor.common.services.shared.file.SupportsUpdate;
+import org.guvnor.common.services.shared.metadata.model.Metadata;
 import org.guvnor.common.services.shared.validation.ValidationService;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.kie.workbench.common.services.shared.source.ViewSourceService;
@@ -28,6 +29,7 @@ import org.uberfire.ext.editor.commons.service.support.SupportsCreate;
 import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
 import org.uberfire.ext.editor.commons.service.support.SupportsRead;
 import org.uberfire.ext.editor.commons.service.support.SupportsRename;
+import org.uberfire.ext.editor.commons.service.support.SupportsSaveAndRename;
 
 @Remote
 public interface GuidedScoreCardEditorService
@@ -37,10 +39,10 @@ public interface GuidedScoreCardEditorService
         SupportsCreate<ScoreCardModel>,
         SupportsRead<ScoreCardModel>,
         SupportsUpdate<ScoreCardModel>,
+        SupportsSaveAndRename<ScoreCardModel, Metadata>,
         SupportsDelete,
         SupportsCopy,
         SupportsRename {
 
-    ScoreCardModelContent loadContent( final Path path );
-
+    ScoreCardModelContent loadContent(final Path path);
 }

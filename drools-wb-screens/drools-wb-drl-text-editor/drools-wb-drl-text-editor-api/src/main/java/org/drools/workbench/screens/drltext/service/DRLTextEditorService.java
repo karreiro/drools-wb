@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.drools.workbench.screens.drltext.model.DrlModelContent;
 import org.guvnor.common.services.shared.file.SupportsUpdate;
+import org.guvnor.common.services.shared.metadata.model.Metadata;
 import org.guvnor.common.services.shared.validation.ValidationService;
 import org.jboss.errai.bus.server.annotations.Remote;
 import org.uberfire.backend.vfs.Path;
@@ -28,6 +29,7 @@ import org.uberfire.ext.editor.commons.service.support.SupportsCreate;
 import org.uberfire.ext.editor.commons.service.support.SupportsDelete;
 import org.uberfire.ext.editor.commons.service.support.SupportsRead;
 import org.uberfire.ext.editor.commons.service.support.SupportsRename;
+import org.uberfire.ext.editor.commons.service.support.SupportsSaveAndRename;
 
 @Remote
 public interface DRLTextEditorService
@@ -36,16 +38,16 @@ public interface DRLTextEditorService
         SupportsCreate<String>,
         SupportsRead<String>,
         SupportsUpdate<String>,
+        SupportsSaveAndRename<String, Metadata>,
         SupportsDelete,
         SupportsCopy,
         SupportsRename {
 
-    DrlModelContent loadContent( final Path path );
+    DrlModelContent loadContent(final Path path);
 
-    List<String> loadClassFields( final Path path,
-                                  final String fullyQualifiedClassName );
+    List<String> loadClassFields(final Path path,
+                                 final String fullyQualifiedClassName);
 
-    String assertPackageName( final String drl,
-                              final Path resource );
-
+    String assertPackageName(final String drl,
+                             final Path resource);
 }

@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.gwtmockito.GwtMockitoTestRunner;
+import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.screens.guided.dtable.client.editor.clipboard.Clipboard;
 import org.drools.workbench.screens.guided.dtable.client.editor.menu.EditMenuBuilder;
 import org.drools.workbench.screens.guided.dtable.client.editor.menu.InsertMenuBuilder;
@@ -35,6 +36,7 @@ import org.drools.workbench.screens.guided.dtable.client.wizard.column.NewGuided
 import org.drools.workbench.screens.guided.dtable.client.wizard.column.pages.common.DecisionTablePopoverUtils;
 import org.drools.workbench.screens.guided.dtable.service.GuidedDecisionTableEditorService;
 import org.guvnor.common.services.project.context.ProjectContext;
+import org.guvnor.common.services.shared.metadata.model.Metadata;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.dom.HTMLElement;
 import org.jboss.errai.ioc.client.api.ManagedInstance;
@@ -64,6 +66,7 @@ import org.uberfire.ext.editor.commons.client.history.VersionRecordManager;
 import org.uberfire.ext.editor.commons.client.menu.BasicFileMenuBuilder;
 import org.uberfire.ext.editor.commons.client.menu.BasicFileMenuBuilderImpl;
 import org.uberfire.ext.editor.commons.client.menu.RestoreVersionCommandProvider;
+import org.uberfire.ext.editor.commons.client.menu.common.SaveAndRenameCommandFactory;
 import org.uberfire.ext.editor.commons.client.validation.DefaultFileNameValidator;
 import org.uberfire.ext.editor.commons.version.VersionService;
 import org.uberfire.ext.editor.commons.version.events.RestoreEvent;
@@ -233,6 +236,9 @@ public class GuidedDecisionTableEditorMenusTest {
     protected ColumnsPage columnsPage;
 
     @Mock
+    protected SaveAndRenameCommandFactory<GuidedDecisionTable52, Metadata> saveAndRenameCommandFactory;
+
+    @Mock
     protected MenuItemWithIconView menuItemWithIconView;
 
     @Mock
@@ -325,7 +331,8 @@ public class GuidedDecisionTableEditorMenusTest {
                                                                                                   modeller,
                                                                                                   beanManager,
                                                                                                   placeManager,
-                                                                                                  columnsPage);
+                                                                                                  columnsPage,
+                                                                                                  saveAndRenameCommandFactory);
 
         wrapped.setKieEditorWrapperView(kieEditorWrapperView);
         wrapped.setOverviewWidget(overviewWidget);

@@ -67,7 +67,8 @@ public class GuidedDecisionTableEditorPresenterTest extends BaseGuidedDecisionTa
                                                       modeller,
                                                       beanManager,
                                                       placeManager,
-                                                      columnsPage) {
+                                                      columnsPage,
+                                                      saveAndRenameCommandFactory) {
             {
                 workbenchContext = GuidedDecisionTableEditorPresenterTest.this.workbenchContext;
                 projectController = GuidedDecisionTableEditorPresenterTest.this.projectController;
