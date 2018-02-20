@@ -30,6 +30,7 @@ import javax.inject.Inject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.IsWidget;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
+import org.drools.workbench.screens.guided.dtable.client.editor.command.GDTCommandHistoryHandler;
 import org.drools.workbench.screens.guided.dtable.client.editor.menu.EditMenuBuilder;
 import org.drools.workbench.screens.guided.dtable.client.editor.menu.InsertMenuBuilder;
 import org.drools.workbench.screens.guided.dtable.client.editor.menu.RadarMenuBuilder;
@@ -65,6 +66,8 @@ import org.uberfire.lifecycle.OnStartup;
 import org.uberfire.mvp.Command;
 import org.uberfire.mvp.PlaceRequest;
 import org.uberfire.workbench.events.NotificationEvent;
+import org.uberfire.workbench.model.menu.MenuFactory;
+import org.uberfire.workbench.model.menu.MenuItem;
 import org.uberfire.workbench.model.menu.Menus;
 
 import static org.uberfire.client.annotations.WorkbenchEditor.LockingStrategy.EDITOR_PROVIDED;
@@ -77,6 +80,9 @@ import static org.uberfire.client.annotations.WorkbenchEditor.LockingStrategy.ED
 public class GuidedDecisionTableEditorPresenter extends BaseGuidedDecisionTableEditorPresenter {
 
     private final SaveAndRenameCommandBuilder<GuidedDecisionTable52, Metadata> saveAndRenameCommandBuilder;
+
+    @Inject
+    private GDTCommandHistoryHandler commandHistoryHandler;
 
     @Inject
     public GuidedDecisionTableEditorPresenter(final View view,
@@ -108,6 +114,8 @@ public class GuidedDecisionTableEditorPresenter extends BaseGuidedDecisionTableE
               beanManager,
               placeManager,
               columnsPage);
+
+        modeller.setCommandHistoryHandler(commandHistoryHandler);
 
         this.saveAndRenameCommandBuilder = saveAndRenameCommandBuilder;
     }
@@ -218,6 +226,8 @@ public class GuidedDecisionTableEditorPresenter extends BaseGuidedDecisionTableE
         }
 
         this.menus = getFileMenuBuilder()
+                .addNewTopLevelMenu(makeMenuItem("⟲ Undo", commandHistoryHandler::undo))
+                .addNewTopLevelMenu(makeMenuItem("Redo ⟳", commandHistoryHandler::redo))
                 .addValidate(() -> onValidate(getActiveDocument()))
                 .addNewTopLevelMenu(getEditMenuItem())
                 .addNewTopLevelMenu(getViewMenuItem())
@@ -225,6 +235,17 @@ public class GuidedDecisionTableEditorPresenter extends BaseGuidedDecisionTableE
                 .addNewTopLevelMenu(getRadarMenuItem())
                 .addNewTopLevelMenu(getVersionManagerMenuItem())
                 .build();
+    }
+
+    private MenuItem makeMenuItem(final String identifier,
+                                  final Command command) {
+
+        return MenuFactory.newTopLevelMenu(identifier)
+                .respondsWith(command)
+                .endMenu()
+                .build()
+                .getItems()
+                .get(0);
     }
 
     protected Command getSaveAndRenameCommand() {

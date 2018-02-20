@@ -33,6 +33,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.ConditionCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.models.guided.dtable.shared.model.MetadataCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
+import org.drools.workbench.screens.guided.dtable.client.editor.command.GDTCommandHistoryHandler;
 import org.drools.workbench.screens.guided.dtable.client.editor.menu.EditMenuBuilder;
 import org.drools.workbench.screens.guided.dtable.client.editor.menu.InsertMenuBuilder;
 import org.drools.workbench.screens.guided.dtable.client.editor.menu.ViewMenuBuilder;
@@ -183,5 +184,7 @@ public interface GuidedDecisionTableView extends GridWidget,
         void link(final Set<GuidedDecisionTableView.Presenter> dtPresenters);
 
         boolean hasEditableColumns();
+
+        void setCommandHistoryHandler(GDTCommandHistoryHandler commandHistoryHandler);
     }
 }

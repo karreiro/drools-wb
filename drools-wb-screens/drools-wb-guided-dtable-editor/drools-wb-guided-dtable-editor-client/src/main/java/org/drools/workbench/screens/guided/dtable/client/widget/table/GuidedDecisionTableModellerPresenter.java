@@ -28,6 +28,7 @@ import javax.inject.Inject;
 import com.ait.lienzo.client.core.types.Point2D;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Command;
+import org.drools.workbench.screens.guided.dtable.client.editor.command.GDTCommandHistoryHandler;
 import org.drools.workbench.screens.guided.dtable.client.editor.menu.RadarMenuBuilder;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi.DecisionTableColumnSelectedEvent;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.events.cdi.DecisionTablePinnedEvent;
@@ -83,6 +84,8 @@ public class GuidedDecisionTableModellerPresenter implements GuidedDecisionTable
     private Set<GuidedDecisionTableView.Presenter> availableDecisionTables = new HashSet<>();
 
     private Set<HandlerRegistration> handlerRegistrations = new HashSet<>();
+
+    private GDTCommandHistoryHandler commandHistoryHandler;
 
     @Inject
     public GuidedDecisionTableModellerPresenter(final GuidedDecisionTableModellerView view,
@@ -162,7 +165,7 @@ public class GuidedDecisionTableModellerPresenter implements GuidedDecisionTable
                                                               final Double x,
                                                               final Double y) {
         //Instantiate a Presenter for the Decision Table
-        final GuidedDecisionTableView.Presenter dtPresenter = dtPresenterProvider.get();
+        final GuidedDecisionTableView.Presenter dtPresenter = getPresenter();
 
         //Set content of new Presenter
         dtPresenter.setContent(path,
@@ -184,6 +187,12 @@ public class GuidedDecisionTableModellerPresenter implements GuidedDecisionTable
         view.addDecisionTable(dtPresenter.getView());
 
         return dtPresenter;
+    }
+
+    private GuidedDecisionTableView.Presenter getPresenter() {
+        GuidedDecisionTableView.Presenter presenter = dtPresenterProvider.get();
+        presenter.setCommandHistoryHandler(commandHistoryHandler);
+        return presenter;
     }
 
     private double getDecisionTableX(final GuidedDecisionTableView.Presenter dtPresenter) {
@@ -401,5 +410,10 @@ public class GuidedDecisionTableModellerPresenter implements GuidedDecisionTable
             dtPresenter.link(getAvailableDecisionTables());
         }
         getView().getGridLayerView().refreshGridWidgetConnectors();
+    }
+
+    @Override
+    public void setCommandHistoryHandler(final GDTCommandHistoryHandler commandHistoryHandler) {
+        this.commandHistoryHandler = commandHistoryHandler;
     }
 }

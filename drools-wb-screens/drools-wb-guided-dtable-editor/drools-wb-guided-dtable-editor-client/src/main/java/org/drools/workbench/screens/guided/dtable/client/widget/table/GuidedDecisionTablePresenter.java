@@ -54,6 +54,7 @@ import org.drools.workbench.models.guided.dtable.shared.model.Pattern52;
 import org.drools.workbench.models.guided.dtable.shared.model.RowNumberCol52;
 import org.drools.workbench.models.guided.dtable.shared.validation.HitPolicyValidation;
 import org.drools.workbench.screens.guided.dtable.client.GuidedDecisionTable;
+import org.drools.workbench.screens.guided.dtable.client.editor.command.GDTCommandHistoryHandler;
 import org.drools.workbench.screens.guided.dtable.client.editor.clipboard.Clipboard;
 import org.drools.workbench.screens.guided.dtable.client.editor.clipboard.impl.DefaultClipboard;
 import org.drools.workbench.screens.guided.dtable.client.type.GuidedDTableResourceType;
@@ -180,6 +181,7 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
     //This EventBus is local to the screen and should be used for local operations, set data, add rows etc
     private EventBus eventBus = new SimpleEventBus();
     private Set<PortableWorkDefinition> workItemDefinitions;
+    private GDTCommandHistoryHandler commandHistoryHandler;
 
     @Inject
     public GuidedDecisionTablePresenter(final User identity,
@@ -1028,6 +1030,9 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
     @Override
     public void updateColumn(final ActionCol52 originalColumn,
                              final ActionCol52 editedColumn) throws VetoException {
+
+        commandHistoryHandler.execute();
+
         doUpdateColumn(originalColumn,
                        editedColumn,
                        () -> synchronizer.updateColumn(originalColumn,
@@ -1440,6 +1445,11 @@ public class GuidedDecisionTablePresenter implements GuidedDecisionTableView.Pre
     @Override
     public boolean hasEditableColumns() {
         return getAccess().hasEditableColumns();
+    }
+
+    @Override
+    public void setCommandHistoryHandler(final GDTCommandHistoryHandler commandHistoryHandler) {
+        this.commandHistoryHandler = commandHistoryHandler;
     }
 
     @Override
