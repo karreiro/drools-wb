@@ -4,6 +4,18 @@
     <!-- These exclusions were added by Errai to avoid deploying client-side classes to the server -->
     <!-- End of Errai exclusions -->
 
+    <!-- Stunner. -->
+    <exclude name="org.kie.workbench.common.stunner.core.client.**"/>
+    <exclude name="org.kie.workbench.common.stunner.core.validation.canvas.**"/>
+    <exclude name="org.kie.workbench.common.stunner.client.**"/>
+    <exclude name="org.kie.workbench.common.stunner.lienzo.**"/>
+    <exclude name="org.kie.workbench.common.stunner.client.workbench.**"/>
+    <exclude name="org.kie.workbench.common.stunner.shapes.client.**"/>
+    <exclude name="org.kie.workbench.common.stunner.svg.client.**"/>
+    <exclude name="org.kie.workbench.common.stunner.basicset.client.**"/>
+    <exclude name="org.kie.workbench.common.dmn.client.**"/>
+    <exclude name="org.kie.workbench.common.dmn.showcase.client.**"/>
+
     <exclude name="org.drools.workbench.client.**"/>
     <exclude name="org.drools.workbench.screens.guided.dtable.client.**"/>
     <exclude name="org.drools.workbench.screens.guided.dtree.client.**"/>
