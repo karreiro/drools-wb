@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.enterprise.inject.Instance;
+import javax.enterprise.util.TypeLiteral;
 
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.user.client.ui.AbsolutePanel;
@@ -219,6 +220,11 @@ public abstract class BaseSynchronizerTest {
         @Override
         public <U extends DynamicValidator> Instance<U> select(final Class<U> aClass,
                                                                final Annotation... annotations) {
+            return null;
+        }
+
+        @Override
+        public <U extends DynamicValidator> Instance<U> select(final TypeLiteral<U> typeLiteral, final Annotation... annotations) {
             return null;
         }
 
