@@ -24,6 +24,7 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.event.Event;
 import javax.inject.Inject;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.IsWidget;
 import org.drools.workbench.models.datamodel.rule.DSLSentence;
 import org.drools.workbench.screens.drltext.client.type.DRLResourceType;
@@ -32,11 +33,14 @@ import org.drools.workbench.screens.drltext.model.DrlModelContent;
 import org.drools.workbench.screens.drltext.service.DRLTextEditorService;
 import org.guvnor.common.services.shared.metadata.model.Metadata;
 import org.guvnor.common.services.shared.validation.model.ValidationMessage;
+import org.gwtbootstrap3.client.ui.constants.IconType;
 import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.common.client.api.RemoteCallback;
 import org.kie.workbench.common.widgets.client.popups.validation.ValidationPopup;
 import org.kie.workbench.common.widgets.client.resources.i18n.CommonConstants;
 import org.kie.workbench.common.widgets.metadata.client.KieEditor;
+import org.kie.workbench.common.workbench.client.docks.AuthoringWorkbenchDocks;
+import org.kie.workbench.common.workbench.client.resources.i18n.DefaultWorkbenchConstants;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.backend.vfs.Path;
 import org.uberfire.client.annotations.WorkbenchEditor;
@@ -45,15 +49,22 @@ import org.uberfire.client.annotations.WorkbenchPartTitle;
 import org.uberfire.client.annotations.WorkbenchPartTitleDecoration;
 import org.uberfire.client.annotations.WorkbenchPartView;
 import org.uberfire.client.callbacks.Callback;
+import org.uberfire.client.workbench.docks.UberfireDock;
+import org.uberfire.client.workbench.docks.UberfireDockPosition;
+import org.uberfire.client.workbench.docks.UberfireDocks;
 import org.uberfire.client.workbench.type.ClientResourceType;
 import org.uberfire.ext.editor.commons.service.support.SupportsSaveAndRename;
+import org.uberfire.ext.layout.editor.client.LayoutComponentPaletteScreen;
 import org.uberfire.ext.widgets.common.client.callbacks.HasBusyIndicatorDefaultErrorCallback;
 import org.uberfire.lifecycle.OnClose;
 import org.uberfire.lifecycle.OnMayClose;
 import org.uberfire.lifecycle.OnStartup;
 import org.uberfire.mvp.Command;
 import org.uberfire.mvp.PlaceRequest;
+import org.uberfire.mvp.impl.DefaultPlaceRequest;
 import org.uberfire.workbench.events.NotificationEvent;
+import org.uberfire.workbench.model.menu.MenuFactory;
+import org.uberfire.workbench.model.menu.MenuItem;
 import org.uberfire.workbench.model.menu.Menus;
 
 /**
@@ -81,6 +92,9 @@ public class DRLEditorPresenter
     @Inject
     private DSLRResourceType resourceTypeDSLR;
 
+    @Inject
+    private AuthoringWorkbenchDocks authoringWorkbenchDocks;
+
     private boolean isDSLR;
 
     @Inject
@@ -92,6 +106,83 @@ public class DRLEditorPresenter
     @PostConstruct
     public void init() {
         view.init(this);
+
+        GWT.log("---");
+        authoringWorkbenchDocks.show();
+    }
+
+    @Inject
+    UberfireDocks uberfireDocks;
+
+    @Inject
+    AuthoringWorkbenchDocks docks;
+
+    @Override
+    protected void makeMenuBar() {
+
+        fileMenuBuilder
+                .addNewTopLevelMenu(makeMenuItem("Blahhh 2", () -> {
+                    GWT.log("====>> ");
+
+                    String authoringPerspectiveIdentifier = "LibraryPerspective";
+                    DefaultPlaceRequest defaultPlaceRequest = new DefaultPlaceRequest("org.kie.dmn.decision.navigator");
+
+                    UberfireDock uberfireDock = new UberfireDock(UberfireDockPosition.WEST,
+                                                                 IconType.MAP.toString(),
+                                                                 defaultPlaceRequest,
+                                                                 authoringPerspectiveIdentifier);
+                    uberfireDock.withSize(400).withLabel("Decision Navigator");
+
+
+
+
+                    uberfireDocks.add(uberfireDock);
+                    uberfireDocks.show(UberfireDockPosition.WEST, authoringPerspectiveIdentifier);
+                    uberfireDocks.open(uberfireDock);
+                    // ---------------------------------------
+//                    UberfireDock dock = new UberfireDock(UberfireDockPosition.WEST,
+//                                            "ADJUST",
+//                                            new DefaultPlaceRequest("Plugins Explorer"),
+//                                            "PlugInAuthoringPerspective").withSize(400)
+//                            .withLabel("Plugin Explorer");
+//                    uberfireDocks.add(dock);
+//                    uberfireDocks.show(UberfireDockPosition.WEST, "PlugInAuthoringPerspective");
+                    // ---------------------------------------
+//                    uberfireDocks.hide();
+
+//                    authoringWorkbenchDocks.expandProjectExplorer();
+//
+//                    UberfireDockPosition west = UberfireDockPosition.WEST;
+//                    String iconType = IconType.CUBES.toString();
+//                    DefaultPlaceRequest placeRequest = new DefaultPlaceRequest(LayoutComponentPaletteScreen.SCREEN_ID);
+//                    String perspective = "ContentManagerPerspective";
+//                    String label = DefaultWorkbenchConstants.INSTANCE.LayoutEditorComponentPalette();
+//
+//                    UberfireDock uberfireDock1 = new UberfireDock(west, iconType, placeRequest, perspective);
+//                    UberfireDock uberfireDock = uberfireDock1.withSize(800).withLabel(label);
+//
+//                    authoringWorkbenchDocks.getUberfireDocks().show(UberfireDockPosition.WEST, "ContentManagerPerspective");
+
+//
+//                    authoringWorkbenchDocks.expandProjectExplorer();
+//                    UberfireDocks uberfireDocks = authoringWorkbenchDocks.getUberfireDocks();
+//
+//                    uberfireDocks.add(uberfireDock);
+//                    uberfireDocks.open(uberfireDock);
+//
+//                    authoringWorkbenchDocks.show();
+                }));
+    }
+
+    private MenuItem makeMenuItem(final String identifier,
+                                  final Command command) {
+
+        return MenuFactory.newTopLevelMenu(identifier)
+                .respondsWith(command)
+                .endMenu()
+                .build()
+                .getItems()
+                .get(0);
     }
 
     @OnStartup
