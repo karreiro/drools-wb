@@ -32,6 +32,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.uberfire.backend.vfs.ObservablePath;
 import org.uberfire.backend.vfs.Path;
+import org.uberfire.backend.vfs.PathFactory;
 import org.uberfire.backend.vfs.impl.LockInfo;
 import org.uberfire.backend.vfs.impl.ObservablePathImpl;
 import org.uberfire.client.mvp.LockManagerImpl;
@@ -43,6 +44,7 @@ import org.uberfire.mocks.EventSourceMock;
 
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -62,7 +64,7 @@ public class GuidedDecisionTableLockManagerImplTest {
     @Mock
     private User user;
 
-    private Event<ChangeTitleWidgetEvent> changeTitleEvent = spy(new EventSourceMock<ChangeTitleWidgetEvent>() {
+    private EventSourceMock<ChangeTitleWidgetEvent> changeTitleEvent = spy(new EventSourceMock<ChangeTitleWidgetEvent>() {
         @Override
         public void fire(final ChangeTitleWidgetEvent event) {
             //Do nothing. Default implementation throws an exception.
@@ -72,13 +74,13 @@ public class GuidedDecisionTableLockManagerImplTest {
     @Mock
     private GuidedDecisionTableModellerView.Presenter modellerPresenter;
 
-    @Mock
-    private Path dtPath;
-
     private GuidedDecisionTableLockManagerImpl lockManager;
 
     @Before
     public void setup() throws NoSuchFieldException, IllegalAccessException {
+
+        final PathFactory.PathImpl filename = makePathImpl("filename");
+
         GwtMockito.useProviderForType(WorkbenchResources.class,
                                       (type) -> null);
 
@@ -93,7 +95,7 @@ public class GuidedDecisionTableLockManagerImplTest {
         setLockManagerField("user",
                             user);
 
-        when(lockInfo.getFile()).thenReturn(dtPath);
+        when(lockInfo.getFile()).thenReturn(filename);
         when(user.getIdentifier()).thenReturn("user");
     }
 
@@ -128,7 +130,11 @@ public class GuidedDecisionTableLockManagerImplTest {
                          modellerPresenter);
 
         final GuidedDecisionTableView.Presenter dtPresenter = mock(GuidedDecisionTableView.Presenter.class);
-        when(dtPresenter.getCurrentPath()).thenReturn(new ObservablePathImpl().wrap(dtPath));
+        final PathFactory.PathImpl lockInfoPath = makePathImpl("filename");
+        final ObservablePath presenterPath = makeObservablePath("filename");
+
+        when(lockInfo.getFile()).thenReturn(lockInfoPath);
+        when(dtPresenter.getCurrentPath()).thenReturn(presenterPath);
         when(modellerPresenter.getActiveDecisionTable()).thenReturn(Optional.of(dtPresenter));
 
         lockManager.fireChangeTitleEvent();
@@ -150,5 +156,38 @@ public class GuidedDecisionTableLockManagerImplTest {
 
         verify(changeTitleEvent,
                never()).fire(any(ChangeTitleWidgetEvent.class));
+    }
+
+    private PathFactory.PathImpl makePathImpl(final String name) {
+
+        final PathFactory.PathImpl path = spy(new PathFactory.PathImpl());
+
+        doReturn(name + ".txt").when(path).getFileName();
+        doReturn("/directory/" + name + ".txt").when(path).toURI();
+
+        return path;
+    }
+
+    private ObservablePath makeObservablePath(final String name) {
+        return new ObservablePathImpl().wrap(makePath(name));
+    }
+
+    private Path makePath(final String name) {
+        return new Path() {
+            @Override
+            public String getFileName() {
+                return name + ".txt";
+            }
+
+            @Override
+            public String toURI() {
+                return "/directory/" + name + ".txt";
+            }
+
+            @Override
+            public int compareTo(final Path o) {
+                return 0;
+            }
+        };
     }
 }
