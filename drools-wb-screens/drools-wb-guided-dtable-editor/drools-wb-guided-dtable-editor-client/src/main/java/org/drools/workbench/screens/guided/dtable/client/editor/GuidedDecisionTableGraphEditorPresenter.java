@@ -499,11 +499,14 @@ public class GuidedDecisionTableGraphEditorPresenter extends BaseGuidedDecisionT
         return (path) -> {
 
             final Set<GuidedDecisionTableView.Presenter> allDecisionTables = new HashSet<>(modeller.getAvailableDecisionTables());
-            final int size = allDecisionTables.size();
-            final SaveGraphLatch saveGraphLatch = new SaveGraphLatch(size, "Sava and Rename");
+            final SaveGraphLatch saveGraphLatch = makeSaveGraphLatch(allDecisionTables);
 
             saveGraphLatch.saveDocumentGraph(path);
         };
+    }
+
+    SaveGraphLatch makeSaveGraphLatch(Set<GuidedDecisionTableView.Presenter> allDecisionTables) {
+        return new SaveGraphLatch(allDecisionTables.size(), "Save and Rename");
     }
 
     @Override
@@ -840,7 +843,7 @@ public class GuidedDecisionTableGraphEditorPresenter extends BaseGuidedDecisionT
         }
     }
 
-    private class SaveGraphLatch {
+    class SaveGraphLatch {
 
         private final String commitMessage;
         private int dtGraphElementCount = 0;
@@ -857,6 +860,14 @@ public class GuidedDecisionTableGraphEditorPresenter extends BaseGuidedDecisionT
                 return;
             }
             saveDocumentGraph(editorPath);
+        }
+
+        String getCommitMessage() {
+            return commitMessage;
+        }
+
+        int getDtGraphElementCount() {
+            return dtGraphElementCount;
         }
 
         private void saveDocumentGraph(final Path editorPath) {

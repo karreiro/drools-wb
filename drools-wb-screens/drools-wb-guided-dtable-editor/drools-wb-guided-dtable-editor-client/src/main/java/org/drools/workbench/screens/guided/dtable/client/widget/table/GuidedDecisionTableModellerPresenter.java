@@ -26,6 +26,7 @@ import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import com.ait.lienzo.client.core.types.Point2D;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.Command;
 import org.drools.workbench.screens.guided.dtable.client.editor.menu.RadarMenuBuilder;
@@ -221,6 +222,8 @@ public class GuidedDecisionTableModellerPresenter implements GuidedDecisionTable
                                      //Add new view to Modeller and ensure selection
                                      dtPresenter.getView().setLocation(oldLocation);
                                      view.addDecisionTable(dtPresenter.getView());
+
+                                     doDecisionTableSelected(dtPresenter);
                                  });
 
         return dtPresenter;
@@ -344,10 +347,11 @@ public class GuidedDecisionTableModellerPresenter implements GuidedDecisionTable
         if (!isDecisionTableAvailable(presenter)) {
             return;
         }
+        com.google.gwt.core.client.GWT.log("Selecting... (1)");
         final Optional<GuidedDecisionTableView.Presenter> activeDecisionTable = getActiveDecisionTable();
         if (activeDecisionTable.isPresent()) {
             if (presenter.equals(activeDecisionTable.get())) {
-                return;
+//                return;
             }
         }
 
@@ -356,6 +360,7 @@ public class GuidedDecisionTableModellerPresenter implements GuidedDecisionTable
 
     void doDecisionTableSelected(final GuidedDecisionTableView.Presenter dtPresenter) {
         //Store selected decision table
+        com.google.gwt.core.client.GWT.log("Selecting... (2)");
         activeDecisionTable = dtPresenter;
 
         //Bootstrap Decision Table analysis
@@ -365,6 +370,7 @@ public class GuidedDecisionTableModellerPresenter implements GuidedDecisionTable
             }
         }
 
+        GWT.log("-------------> SELECTING IN VIEW");
         view.select(dtPresenter.getView());
 
         //If the Layer is "pinned" flip to the selected Decision Table

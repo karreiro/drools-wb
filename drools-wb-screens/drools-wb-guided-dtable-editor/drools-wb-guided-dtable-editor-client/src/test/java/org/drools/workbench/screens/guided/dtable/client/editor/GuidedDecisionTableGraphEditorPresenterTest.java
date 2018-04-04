@@ -17,6 +17,7 @@
 package org.drools.workbench.screens.guided.dtable.client.editor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -1611,9 +1612,22 @@ public class GuidedDecisionTableGraphEditorPresenterTest extends BaseGuidedDecis
         assertFalse(isDirtySupplier.get());
     }
 
-    private HashSet<GuidedDecisionTableView.Presenter> asSet(final GuidedDecisionTableView.Presenter presenter) {
+    @Test
+    public void testMakeSaveGraphLatch() {
+
+        final GuidedDecisionTableView.Presenter presenter1 = mock(GuidedDecisionTableView.Presenter.class);
+        final GuidedDecisionTableView.Presenter presenter2 = mock(GuidedDecisionTableView.Presenter.class);
+        final Set<GuidedDecisionTableView.Presenter> availableDecisionTables = asSet(presenter1, presenter2);
+
+        final GuidedDecisionTableGraphEditorPresenter.SaveGraphLatch saveGraphLatch = presenter.makeSaveGraphLatch(availableDecisionTables);
+
+        assertEquals(2, saveGraphLatch.getDtGraphElementCount());
+        assertEquals("Save and Rename", saveGraphLatch.getCommitMessage());
+    }
+
+    private HashSet<GuidedDecisionTableView.Presenter> asSet(final GuidedDecisionTableView.Presenter... presenters) {
         return new HashSet<GuidedDecisionTableView.Presenter>() {{
-            add(presenter);
+            addAll(Arrays.asList(presenters));
         }};
     }
 
