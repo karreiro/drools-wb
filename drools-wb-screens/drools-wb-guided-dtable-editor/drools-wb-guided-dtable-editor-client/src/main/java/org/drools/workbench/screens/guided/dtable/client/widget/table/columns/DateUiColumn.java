@@ -20,7 +20,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import com.ait.lienzo.client.core.shape.Text;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.TimeZone;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.GuidedDecisionTablePresenter;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.columns.dom.datepicker.DatePickerDOMElement;
 import org.drools.workbench.screens.guided.dtable.client.widget.table.columns.dom.datepicker.DatePickerSingletonDOMElementFactory;
@@ -47,7 +49,9 @@ public class DateUiColumn extends BaseSingletonDOMElementUiColumn<Date, DatePick
                    protected void doRenderCellContent( final Text t,
                                                        final Date value,
                                                        final GridBodyCellRenderContext context ) {
-                       t.setText( dateTimeFormat.format( value ) );
+
+                       String format = getString(value);
+                       t.setText(format);
                    }
                },
                width,
@@ -55,6 +59,19 @@ public class DateUiColumn extends BaseSingletonDOMElementUiColumn<Date, DatePick
                isVisible,
                access,
                factory );
+    }
+
+    private static String getString(final Date value) {
+        TimeZone timeZone = getTimeZone();
+        String format = dateTimeFormat.format(value, timeZone);
+        return format;
+    }
+
+    private static TimeZone getTimeZone() {
+        int milli = ApplicationPreferences.getKieTimezoneOffset();
+        int i = milli / 1000 / 60;
+        TimeZone timeZone = TimeZone.createTimeZone(i);
+        return timeZone;
     }
 
     @Override

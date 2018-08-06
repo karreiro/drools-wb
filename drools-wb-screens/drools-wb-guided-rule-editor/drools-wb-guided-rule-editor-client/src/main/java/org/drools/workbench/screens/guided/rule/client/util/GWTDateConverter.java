@@ -17,7 +17,9 @@ package org.drools.workbench.screens.guided.rule.client.util;
 
 import java.util.Date;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.TimeZone;
 import org.kie.soup.project.datamodel.oracle.DateConverter;
 import org.kie.workbench.common.services.shared.preferences.ApplicationPreferences;
 
@@ -46,10 +48,17 @@ public class GWTDateConverter
     }
 
     public String format(Date date) {
-        return FORMATTER.format(date);
+        return FORMATTER.format(date, getTimeZone());
     }
 
     public Date parse(String text) {
         return FORMATTER.parse(text);
+    }
+
+    private static TimeZone getTimeZone() {
+        int milli = ApplicationPreferences.getKieTimezoneOffset();
+        int i = milli / 1000 / 60;
+        TimeZone timeZone = TimeZone.createTimeZone(i);
+        return timeZone;
     }
 }
