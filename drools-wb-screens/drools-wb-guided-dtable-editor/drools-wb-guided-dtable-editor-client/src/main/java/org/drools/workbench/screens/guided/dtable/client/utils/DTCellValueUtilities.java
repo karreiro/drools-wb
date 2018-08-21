@@ -307,12 +307,14 @@ public class DTCellValueUtilities {
     //the DTCellValue's data type.
     private void convertDTCellValueFromString( DataType.DataTypes dataType,
                                                DTCellValue52 dcv ) {
+        com.google.gwt.user.client.Window.alert("===========> 8000 - 1");
         String text = dcv.getStringValue();
         switch ( dataType ) {
             case BOOLEAN:
                 dcv.setBooleanValue( ( text == null ? Boolean.FALSE : Boolean.valueOf( text ) ) );
                 break;
             case DATE:
+                com.google.gwt.user.client.Window.alert("===========> 8000 - 2");
                 Date d = null;
                 try {
                     if ( text != null ) {
@@ -323,7 +325,7 @@ public class DTCellValueUtilities {
                     }
                 } catch ( IllegalArgumentException e ) {
                 }
-                dcv.setDateValue( d );
+                dcv.setDateValue( org.drools.workbench.screens.guided.dtable.client.widget.Helper.toServerSideTimeZone(d) );
                 break;
             case NUMERIC:
                 BigDecimal numericValue = null;

@@ -128,7 +128,7 @@ public class TableBuilder<T> {
 
         private void addCell( final String item,
                               final String styleName ) {
-            htmlBuilder.appendHtmlConstant( "<td class='" + styleName + "'>" );
+            htmlBuilder.appendHtmlConstant( "<td data-huhu=\"true\" class='" + styleName + "'>" );
             htmlBuilder.appendEscaped( item );
             htmlBuilder.appendHtmlConstant( "</td>" );
         }

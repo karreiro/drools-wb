@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.i18n.client.DateTimeFormat;
 import org.drools.workbench.models.datamodel.oracle.DataType;
 import org.drools.workbench.models.guided.dtable.shared.model.AttributeCol52;
 import org.drools.workbench.models.guided.dtable.shared.model.BaseColumn;
@@ -30,7 +31,9 @@ import org.drools.workbench.models.guided.dtable.shared.model.LimitedEntryCol;
 import org.drools.workbench.models.guided.dtable.shared.model.RowNumberCol52;
 import org.drools.workbench.screens.guided.dtable.client.utils.DTCellValueUtilities;
 import org.drools.workbench.screens.guided.rule.client.editor.RuleAttributeWidget;
+import org.kie.workbench.common.services.shared.preferences.ApplicationPreferences;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
+import org.kie.workbench.common.widgets.client.util.TimeZoneUtils;
 import org.kie.workbench.common.widgets.decoratedgrid.client.widget.AbstractCellValueFactory;
 import org.kie.workbench.common.widgets.decoratedgrid.client.widget.CellValue;
 import org.kie.workbench.common.widgets.decoratedgrid.client.widget.CellValue.CellState;
@@ -79,6 +82,7 @@ public class DecisionTableCellValueFactory extends AbstractCellValueFactory<Base
      */
     @Override
     public DynamicDataRow makeUIRowData() {
+        com.google.gwt.user.client.Window.alert("===========> 90000 - ABC");
         DynamicDataRow data = new DynamicDataRow();
         List<BaseColumn> columns = model.getExpandedColumns();
         for ( BaseColumn column : columns ) {
@@ -164,7 +168,7 @@ public class DecisionTableCellValueFactory extends AbstractCellValueFactory<Base
                 cell = makeNewBooleanCellValue( dcv.getBooleanValue() );
                 break;
             case DATE:
-                cell = makeNewDateCellValue( dcv.getDateValue() );
+                cell = makeNewDateCellValue( org.drools.workbench.screens.guided.dtable.client.widget.Helper.toServerSideTimeZone(dcv.getDateValue()) );
                 break;
             case NUMERIC:
                 cell = makeNewNumericCellValue( (BigDecimal) dcv.getNumericValue() );
@@ -247,7 +251,7 @@ public class DecisionTableCellValueFactory extends AbstractCellValueFactory<Base
                 dtCell = new DTCellValue52( (Boolean) cell.getValue() );
                 break;
             case DATE:
-                dtCell = new DTCellValue52( (Date) cell.getValue() );
+                dtCell = new DTCellValue52( org.drools.workbench.screens.guided.dtable.client.widget.Helper.toServerSideTimeZone((Date) cell.getValue()) );
                 break;
             case NUMERIC:
                 dtCell = new DTCellValue52( (BigDecimal) cell.getValue() );

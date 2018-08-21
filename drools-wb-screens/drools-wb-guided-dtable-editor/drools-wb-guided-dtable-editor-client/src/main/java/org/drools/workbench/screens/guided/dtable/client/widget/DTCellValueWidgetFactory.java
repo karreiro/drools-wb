@@ -51,6 +51,7 @@ import org.gwtbootstrap3.client.ui.ListBox;
 import org.gwtbootstrap3.client.ui.TextBox;
 import org.kie.workbench.common.services.shared.preferences.ApplicationPreferences;
 import org.kie.workbench.common.widgets.client.datamodel.AsyncPackageDataModelOracle;
+import org.kie.workbench.common.widgets.client.util.TimeZoneUtils;
 import org.kie.workbench.common.widgets.client.widget.EnumDropDownUtilities;
 import org.uberfire.ext.widgets.common.client.common.AbstractRestrictedEntryTextBox;
 import org.uberfire.ext.widgets.common.client.common.DatePicker;
@@ -101,11 +102,11 @@ public class DTCellValueWidgetFactory {
         }
     }
 
-    private DTCellValueWidgetFactory( GuidedDecisionTable52 model,
-                                      AsyncPackageDataModelOracle oracle,
-                                      LimitedEntryDropDownManager dropDownManager,
-                                      boolean isReadOnly,
-                                      boolean allowEmptyValues ) {
+    DTCellValueWidgetFactory( GuidedDecisionTable52 model,
+                              AsyncPackageDataModelOracle oracle,
+                              LimitedEntryDropDownManager dropDownManager,
+                              boolean isReadOnly,
+                              boolean allowEmptyValues ) {
         this.model = model;
         this.oracle = oracle;
         this.utils = new GuidedDecisionTableUtils( model,
@@ -600,7 +601,7 @@ public class DTCellValueWidgetFactory {
         if ( !isReadOnly ) {
             tb.addValueChangeHandler( new ValueChangeHandler<String>() {
 
-                public void onValueChange( ValueChangeEvent<String> event ) {
+                public void onValueChange( ValueChangeEvent<String> event ) {com.google.gwt.user.client.Window.alert(" )))))))) 4");
                     try {
                         value.setNumericValue( new BigDecimal( event.getValue() ) );
                     } catch ( NumberFormatException nfe ) {
@@ -629,7 +630,7 @@ public class DTCellValueWidgetFactory {
         if ( !isReadOnly ) {
             tb.addValueChangeHandler( new ValueChangeHandler<String>() {
 
-                public void onValueChange( ValueChangeEvent<String> event ) {
+                public void onValueChange( ValueChangeEvent<String> event ) {com.google.gwt.user.client.Window.alert(" )))))))) 5");
                     try {
                         value.setNumericValue( new BigDecimal( event.getValue() ) );
                     } catch ( NumberFormatException nfe ) {
@@ -658,7 +659,7 @@ public class DTCellValueWidgetFactory {
         if ( !isReadOnly ) {
             tb.addValueChangeHandler( new ValueChangeHandler<String>() {
 
-                public void onValueChange( ValueChangeEvent<String> event ) {
+                public void onValueChange( ValueChangeEvent<String> event ) {com.google.gwt.user.client.Window.alert(" )))))))) 6");
                     try {
                         value.setNumericValue( new BigInteger( event.getValue() ) );
                     } catch ( NumberFormatException nfe ) {
@@ -687,7 +688,7 @@ public class DTCellValueWidgetFactory {
         if ( !isReadOnly ) {
             tb.addValueChangeHandler( new ValueChangeHandler<String>() {
 
-                public void onValueChange( ValueChangeEvent<String> event ) {
+                public void onValueChange( ValueChangeEvent<String> event ) {com.google.gwt.user.client.Window.alert(" )))))))) 7");
                     try {
                         value.setNumericValue( Byte.valueOf( event.getValue() ) );
                     } catch ( NumberFormatException nfe ) {
@@ -716,7 +717,7 @@ public class DTCellValueWidgetFactory {
         if ( !isReadOnly ) {
             tb.addValueChangeHandler( new ValueChangeHandler<String>() {
 
-                public void onValueChange( ValueChangeEvent<String> event ) {
+                public void onValueChange( ValueChangeEvent<String> event ) {com.google.gwt.user.client.Window.alert(" )))))))) 8");
                     try {
                         value.setNumericValue( new Double( event.getValue() ) );
                     } catch ( NumberFormatException nfe ) {
@@ -745,7 +746,7 @@ public class DTCellValueWidgetFactory {
         if ( !isReadOnly ) {
             tb.addValueChangeHandler( new ValueChangeHandler<String>() {
 
-                public void onValueChange( ValueChangeEvent<String> event ) {
+                public void onValueChange( ValueChangeEvent<String> event ) {com.google.gwt.user.client.Window.alert(" )))))))) 9");
                     try {
                         value.setNumericValue( new Float( event.getValue() ) );
                     } catch ( NumberFormatException nfe ) {
@@ -774,7 +775,7 @@ public class DTCellValueWidgetFactory {
         if ( !isReadOnly ) {
             tb.addValueChangeHandler( new ValueChangeHandler<String>() {
 
-                public void onValueChange( ValueChangeEvent<String> event ) {
+                public void onValueChange( ValueChangeEvent<String> event ) {com.google.gwt.user.client.Window.alert(" )))))))) 10");
                     try {
                         value.setNumericValue( Integer.valueOf( event.getValue() ) );
                     } catch ( NumberFormatException nfe ) {
@@ -803,7 +804,7 @@ public class DTCellValueWidgetFactory {
         if ( !isReadOnly ) {
             tb.addValueChangeHandler( new ValueChangeHandler<String>() {
 
-                public void onValueChange( ValueChangeEvent<String> event ) {
+                public void onValueChange( ValueChangeEvent<String> event ) {com.google.gwt.user.client.Window.alert(" )))))))) 11");
                     try {
                         value.setNumericValue( Long.valueOf( event.getValue() ) );
                     } catch ( NumberFormatException nfe ) {
@@ -832,7 +833,7 @@ public class DTCellValueWidgetFactory {
         if ( !isReadOnly ) {
             tb.addValueChangeHandler( new ValueChangeHandler<String>() {
 
-                public void onValueChange( ValueChangeEvent<String> event ) {
+                public void onValueChange( ValueChangeEvent<String> event ) {com.google.gwt.user.client.Window.alert(" )))))))) 12");
                     try {
                         value.setNumericValue( Short.valueOf( event.getValue() ) );
                     } catch ( NumberFormatException nfe ) {
@@ -860,7 +861,7 @@ public class DTCellValueWidgetFactory {
         if ( !isReadOnly ) {
             tb.addValueChangeHandler( new ValueChangeHandler<String>() {
 
-                public void onValueChange( ValueChangeEvent<String> event ) {
+                public void onValueChange( ValueChangeEvent<String> event ) {com.google.gwt.user.client.Window.alert(" )))))))) 13");
                     value.setStringValue( event.getValue() );
                 }
 
@@ -870,10 +871,11 @@ public class DTCellValueWidgetFactory {
     }
 
     private Widget makeDateSelector( final DTCellValue52 value ) {
+        com.google.gwt.user.client.Window.alert("===========> 70000 - 3");
         //If read-only return a label
         if ( isReadOnly ) {
             Label dateLabel = new Label();
-            dateLabel.setText( format.format( value.getDateValue() ) );
+//            dateLabel.setText(getFormat(value.getDateValue()));
             return dateLabel;
         }
 
@@ -883,15 +885,20 @@ public class DTCellValueWidgetFactory {
         datePicker.addValueChangeHandler( new ValueChangeHandler<Date>() {
             @Override
             public void onValueChange( final ValueChangeEvent<Date> event ) {
-                value.setDateValue( datePicker.getValue() );
+                com.google.gwt.user.client.Window.alert("===========> 70000 - 4");
+                value.setDateValue( org.drools.workbench.screens.guided.dtable.client.widget.Helper.toServerSideTimeZone(datePicker.getValue()) );
             }
         } );
 
         datePicker.setFormat( DATE_FORMAT );
-        datePicker.setValue( value.getDateValue() );
+//        datePicker.setValue(format.parse(getFormat(value.getDateValue())));
 
         return datePicker;
     }
+
+//    String getFormat(final Date dateValue) {
+//        return format.format(dateValue, TimeZoneUtils.getTimeZone());
+//    }
 
     /**
      * An editor for whether the column is hidden or not

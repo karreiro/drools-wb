@@ -20,6 +20,7 @@ import java.util.Date;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import org.drools.workbench.models.datamodel.oracle.DateConverter;
 import org.kie.workbench.common.services.shared.preferences.ApplicationPreferences;
+import org.kie.workbench.common.widgets.client.util.TimeZoneUtils;
 
 /**
  * Convenience class to handle date conversion when running under GWT.
@@ -33,9 +34,9 @@ public class GWTDateConverter
     private final static DateTimeFormat FORMATTER = DateTimeFormat.getFormat( DATE_FORMAT );
 
     //Singleton
-    private static DateConverter INSTANCE;
+    private static GWTDateConverter INSTANCE;
 
-    public static synchronized DateConverter getInstance() {
+    public static synchronized GWTDateConverter getInstance() {
         if ( INSTANCE == null ) {
             INSTANCE = new GWTDateConverter();
         }
@@ -46,7 +47,11 @@ public class GWTDateConverter
     }
 
     public String format( Date date ) {
-        return FORMATTER.format( date );
+        return FORMATTER.format( date, TimeZoneUtils.getTimeZone() );
+    }
+
+    public Date inTheCurrentTimeZone(Date date) {
+        return FORMATTER.parse(format(date));
     }
 
     public Date parse( String text ) {

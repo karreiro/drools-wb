@@ -298,7 +298,7 @@ public class ActionValueEditor
             // Wire up update handler
             datePicker.addValueChangeHandler( new ValueChangeHandler<Date>() {
                 @Override
-                public void onValueChange( ValueChangeEvent<Date> event ) {
+                public void onValueChange( ValueChangeEvent<Date> event ) {com.google.gwt.user.client.Window.alert(" )))))))) 0");
                     final Date date = datePicker.getValue();
                     final String sDate = ( date == null ? null : DATE_FORMATTER.format( datePicker.getValue() ) );
                     value.setValue( sDate );
@@ -316,7 +316,7 @@ public class ActionValueEditor
         box.setStyleName( "constraint-value-Editor" );
         box.addValueChangeHandler( new ValueChangeHandler<String>() {
 
-            public void onValueChange( final ValueChangeEvent<String> event ) {
+            public void onValueChange( final ValueChangeEvent<String> event ) {com.google.gwt.user.client.Window.alert(" )))))))) 1");
                 value.setValue( event.getValue() );
                 executeOnChangeCommand();
             }
@@ -338,7 +338,7 @@ public class ActionValueEditor
         box.addValueChangeHandler( new ValueChangeHandler<String>() {
 
             @Override
-            public void onValueChange( ValueChangeEvent<String> event ) {
+            public void onValueChange( ValueChangeEvent<String> event ) {com.google.gwt.user.client.Window.alert(" )))))))) 2");
                 value.setValue( event.getValue() );
                 executeOnChangeCommand();
             }
@@ -364,7 +364,7 @@ public class ActionValueEditor
         box.addValueChangeHandler( new ValueChangeHandler<String>() {
 
             @Override
-            public void onValueChange( ValueChangeEvent<String> event ) {
+            public void onValueChange( ValueChangeEvent<String> event ) {com.google.gwt.user.client.Window.alert(" )))))))) 3");
                 value.setValue( event.getValue() );
                 executeOnChangeCommand();
             }

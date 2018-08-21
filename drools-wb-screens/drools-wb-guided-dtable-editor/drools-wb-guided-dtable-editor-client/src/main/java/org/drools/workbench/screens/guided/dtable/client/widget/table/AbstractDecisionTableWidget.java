@@ -2125,7 +2125,7 @@ public abstract class AbstractDecisionTableWidget extends Composite
                         targetCell.setBooleanValue( sourceCell.getBooleanValue() );
                         break;
                     case DATE:
-                        targetCell.setDateValue( sourceCell.getDateValue() );
+                        targetCell.setDateValue( org.drools.workbench.screens.guided.dtable.client.widget.Helper.toServerSideTimeZone( sourceCell.getDateValue() ) );
                         break;
                     case NUMERIC:
                         targetCell.setNumericValue( sourceCell.getNumericValue() );

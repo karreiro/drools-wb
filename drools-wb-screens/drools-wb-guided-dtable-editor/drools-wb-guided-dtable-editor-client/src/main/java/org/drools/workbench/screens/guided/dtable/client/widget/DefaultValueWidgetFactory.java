@@ -85,6 +85,7 @@ public class DefaultValueWidgetFactory {
     public static Widget getDefaultValueWidget( final AttributeCol52 ac,
                                                 final boolean isReadOnly,
                                                 final DefaultValueChangedEventHandler defaultValueChangedEventHandler ) {
+        com.google.gwt.user.client.Window.alert("===========> 70000 - 1");
         Widget editor = null;
         final String attributeName = ac.getAttribute();
         if ( attributeName.equals( RuleAttributeWidget.RULEFLOW_GROUP_ATTR )
@@ -215,6 +216,7 @@ public class DefaultValueWidgetFactory {
                 tb.setValue( format.format( defaultValue.getDateValue() ) );
                 tb.setEnabled( false );
             } else {
+                com.google.gwt.user.client.Window.alert("===========> 70000 - 2");
                 final DatePicker datePicker = new DatePicker();
 
                 // Wire up update handler
@@ -222,7 +224,7 @@ public class DefaultValueWidgetFactory {
                     @Override
                     public void onValueChange( final ValueChangeEvent<Date> event ) {
                         DTCellValue52 clonedDefaultValue = defaultValue.cloneDefaultValueCell();
-                        defaultValue.setDateValue( datePicker.getValue() );
+                        defaultValue.setDateValue( org.drools.workbench.screens.guided.dtable.client.widget.Helper.toServerSideTimeZone( datePicker.getValue() ));
                         defaultValueChangedEventHandler.onDefaultValueChanged( new DefaultValueChangedEvent( defaultValue,
                                                                                                              clonedDefaultValue ) );
                     }
@@ -307,7 +309,7 @@ public class DefaultValueWidgetFactory {
     private static void assertDateDefaultValue( final DTCellValue52 dcv ) {
         if ( dcv.getDateValue() == null ) {
             try {
-                dcv.setDateValue( format.parse( dcv.getStringValue() ) );
+                dcv.setDateValue( org.drools.workbench.screens.guided.dtable.client.widget.Helper.toServerSideTimeZone(  format.parse( dcv.getStringValue() ) ) );
             } catch ( IllegalArgumentException eae ) {
                 dcv.setDateValue( new Date() );
             }
