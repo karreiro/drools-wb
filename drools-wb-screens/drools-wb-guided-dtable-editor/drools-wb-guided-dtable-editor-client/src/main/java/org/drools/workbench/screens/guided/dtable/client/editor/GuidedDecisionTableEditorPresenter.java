@@ -30,7 +30,9 @@ import javax.inject.Inject;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.IsWidget;
+import elemental2.dom.DomGlobal;
 import elemental2.promise.Promise;
+import org.drools.workbench.models.guided.dtable.shared.model.DTCellValue52;
 import org.drools.workbench.models.guided.dtable.shared.model.GuidedDecisionTable52;
 import org.drools.workbench.screens.guided.dtable.client.editor.menu.EditMenuBuilder;
 import org.drools.workbench.screens.guided.dtable.client.editor.menu.InsertMenuBuilder;
@@ -65,6 +67,7 @@ import org.uberfire.client.mvp.PlaceManager;
 import org.uberfire.client.mvp.UpdatedLockStatusEvent;
 import org.uberfire.ext.editor.commons.client.menu.DownloadMenuItem;
 import org.uberfire.ext.editor.commons.client.menu.common.SaveAndRenameCommandBuilder;
+import org.uberfire.ext.wires.core.grids.client.widget.grid.selections.impl.BaseCellSelectionManager;
 import org.uberfire.lifecycle.OnClose;
 import org.uberfire.lifecycle.OnFocus;
 import org.uberfire.lifecycle.OnMayClose;
@@ -131,6 +134,45 @@ public class GuidedDecisionTableEditorPresenter extends BaseGuidedDecisionTableE
     @PostConstruct
     public void init() {
         super.init();
+
+        DomGlobal.window.addEventListener("keydown", (e) -> {
+            DomGlobal.console.log("======================");
+
+            final GuidedDecisionTable52 model = getContentSupplier().get();
+            final List<List<DTCellValue52>> data = model.getData();
+
+            for (int i = 0, dataSize = data.size(); i < dataSize; i++) {
+                for (int j = 0; j < data.get(i).size(); j++) {
+                    try {
+
+                        final DTCellValue52 dcv = data.get(i).get(j);
+                        // Get cell text
+                        String s = convertDTCellValueToString(dcv);
+
+                        if (s.equals("Asset")) {
+                            // Select cell
+                            new BaseCellSelectionManager(modeller.getView().getGridWidgets().iterator().next()).selectCell(i, j, false, false);
+                        }
+
+                        DomGlobal.console.log("=> " + s);
+                    } catch (Exception ee) {
+                        DomGlobal.console.log("=> ERROR " + ee.getMessage());
+                    }
+                }
+            }
+        });
+    }
+
+    public String convertDTCellValueToString(DTCellValue52 dcv) {
+        switch (dcv.getDataType()) {
+            case BOOLEAN:
+                Boolean booleanValue = dcv.getBooleanValue();
+                return (booleanValue == null ? null : booleanValue.toString());
+            case STRING:
+                return dcv.getStringValue();
+            default:
+                return "";
+        }
     }
 
     @Override
