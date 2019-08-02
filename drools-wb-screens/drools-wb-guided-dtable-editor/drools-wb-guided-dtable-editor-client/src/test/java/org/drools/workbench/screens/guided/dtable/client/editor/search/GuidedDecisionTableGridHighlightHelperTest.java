@@ -120,7 +120,7 @@ public class GuidedDecisionTableGridHighlightHelperTest {
         final int row = 3;
         final int column = 1;
 
-        doReturn(highlightHelper).when(helper).highlightHelper(modeller);
+//        doReturn(highlightHelper).when(helper).highlightHelper(modeller, widget);
         when(gridWidget2.getModel()).thenReturn(model);
         when(model.getColumns()).thenReturn(asList(column1, column2));
         when(model.getRows()).thenReturn(asList(gridRow1, gridRow2, gridRow3, gridRow4));
@@ -135,7 +135,7 @@ public class GuidedDecisionTableGridHighlightHelperTest {
         when(highlightHelper.withPaddingX(310)).thenReturn(highlightHelper);
         when(highlightHelper.withPaddingY(406)).thenReturn(highlightHelper);
 
-        helper.highlight(row, column, modeller);
+//        helper.highlight(row, column, getWidget(), modeller);
 
         verify(highlightHelper).highlight(row, column);
     }

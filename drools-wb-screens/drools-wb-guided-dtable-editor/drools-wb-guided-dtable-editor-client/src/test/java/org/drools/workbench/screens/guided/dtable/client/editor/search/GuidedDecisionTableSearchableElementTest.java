@@ -71,6 +71,6 @@ public class GuidedDecisionTableSearchableElementTest {
 
         element.onFound().execute();
 
-        verify(highlightHelper).highlight(row, column, modeller);
+//        verify(highlightHelper).highlight(row, column, getWidget(), modeller);
     }
 }
