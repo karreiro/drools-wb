@@ -20,6 +20,52 @@
 
     <!-- The GWT js file generated at run time -->
     <script type="text/javascript" src='org.drools.workbench.DroolsWorkbench/org.drools.workbench.DroolsWorkbench.nocache.js'></script>
+
+    <script type="text/javascript" src="model/Jsonix-all.js"></script>
+    <script type="text/javascript" src="model/DC.js"></script>
+    <script type="text/javascript" src="model/DI.js"></script>
+    <script type="text/javascript" src="model/DMNDI12.js"></script>
+    <script type="text/javascript" src="model/DMN12.js"></script>
+    <script type="text/javascript" src="model/KIE.js"></script>
+    <script type="text/javascript" src="model/MainJs.js"></script>
+    <script type="text/javascript">
+
+        FormatterJs = {
+
+            cachedXsltProcessor: null,
+
+            format: function (xmlDocument) {
+                if (this.cachedXsltProcessor === null) {
+                    this.cachedXsltProcessor = this.newXsltProcessor();
+                }
+                var resultDocument = this.cachedXsltProcessor.transformToDocument(xmlDocument);
+                return new XMLSerializer().serializeToString(resultDocument);
+            },
+
+            newXsltProcessor: function newXsltProcessor() {
+                var xsltDoc = new DOMParser().parseFromString(
+                        [
+                            '<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="3.0">',
+                            '  <xsl:strip-space elements="*"/>',
+                            '  <xsl:template match="para[content-style][not(text())]">',
+                            '    <xsl:value-of select="normalize-space(.)"/>',
+                            "  </xsl:template>",
+                            '  <xsl:template match="node()|@*">',
+                            '    <xsl:copy><xsl:apply-templates select="node()|@*"/></xsl:copy>',
+                            "  </xsl:template>",
+                            '  <xsl:output indent="yes"/>',
+                            "</xsl:stylesheet>"
+                        ].join("\n"),
+                        "application/xml"
+                );
+
+                var xsltProcessor = new XSLTProcessor();
+                xsltProcessor.importStylesheet(xsltDoc);
+                return xsltProcessor;
+            }
+
+        }
+    </script>
 </head>
 
 <body>
